@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 使用指南</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto}
+        
+        /* 顶部 */
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2rem;margin-bottom:10px}
+        header p{font-size:1rem;opacity:0.9}
+        header .role-hint{background:rgba(255,255,255,0.2);padding:12px 20px;border-radius:12px;margin-top:15px;display:inline-block}
+        header .role-hint p{font-size:0.9rem;margin:5px 0}
+        
+        /* 场景卡片 */
+        .scenario{background:white;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2);border-left:6px solid}
+        .scenario-header{display:flex;align-items:center;gap:15px;margin-bottom:20px}
+        .scenario-header .icon{font-size:2.5rem}
+        .scenario-header h2{font-size:1.4rem;color:#333;font-weight:600}
+        .scenario-header .desc{font-size:0.85rem;color:#999;margin-left:auto;text-align:right}
+        
+        /* 时间线 */
+        .timeline{position:relative;margin-left:10px}
+        .timeline::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:2px;background:#e0e0e0}
+        
+        /* 步骤 */
+        .step{display:flex;gap:15px;margin-bottom:25px;position:relative}
+        .step:last-child{margin-bottom:0}
+        .step-marker{width:40px;height:40px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem;flex-shrink:0;z-index:1}
+        .step-content{flex:1;background:#f9f9f9;border-radius:12px;padding:16px}
+        .step-content h3{font-size:1rem;color:#333;margin-bottom:8px}
+        .step-content p{font-size:0.85rem;color:#666;line-height:1.6;margin-bottom:12px}
+        .step-content .action-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;font-size:0.9rem;font-weight:600;transition:all 0.3s}
+        .step-content .action-btn:hover{transform:translateX(5px);box-shadow:0 4px 12px rgba(249,181,114,0.3)}
+        .step-content .tip{background:#fffbe6;border-left:3px solid #faad14;padding:10px 12px;border-radius:4px;font-size:0.8rem;color:#b77b5c;margin-top:10px}
+        
+        /* 颜色主题 */
+        .scenario.user{border-color:#667eea}
+        .scenario.judge{border-color:#52c41a}
+        .scenario.merchant{border-color:#faad14}
+        .scenario.developer{border-color:#f5222d}
+        
+        /* 底部提示 */
+        .footer-note{text-align:center;color:rgba(255,255,255,0.8);font-size:0.85rem;margin-top:30px;padding:20px;background:rgba(0,0,0,0.2);border-radius:12px}
+        
+        @media(max-width:768px){.scenario-header{flex-direction:column;align-items:flex-start}.timeline::before{left:19px}}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎯 心情地图 - 使用指南</h1>
+        <p>根据你的身份和需求，快速找到需要的功能</p>
+        <div class="role-hint">
+            <p><strong>我是普通用户</strong> → 看第 1 部分</p>
+            <p><strong>我是评委</strong> → 看第 2 部分</p>
+            <p><strong>我是商户</strong> → 看第 3 部分</p>
+            <p><strong>我是开发者</strong> → 看第 4 部分</p>
+        </div>
+    </header>
+
+    <!-- 📱 场景 1：普通用户 -->
+    <div class="scenario user">
+        <div class="scenario-header">
+            <span class="icon">📱</span>
+            <h2>我是普通用户</h2>
+            <span class="desc">我想出去玩，不知道去哪里</span>
+        </div>
+        
+        <div class="timeline">
+            <!-- 步骤 1 -->
+            <div class="step">
+                <div class="step-marker">1</div>
+                <div class="step-content">
+                    <h3>🌅 早上起床，决定今天出去玩</h3>
+                    <p><strong>时间：</strong>上午 9:00-10:00<br><strong>场景：</strong>在家，用手机<br><strong>需求：</strong>找个好玩的地方</p>
+                    <a href="心情地图 - 统一导航.html" class="action-btn" target="_blank">👉 打开统一导航</a>
+                    <div class="tip">💡 提示：这是总入口，所有功能都能从这里访问</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 2 -->
+            <div class="step">
+                <div class="step-marker">2</div>
+                <div class="step-content">
+                    <h3>💭 问问自己：今天是什么心情？</h3>
+                    <p><strong>时间：</strong>选择心情<br><strong>场景：</strong>12 种情绪按钮<br><strong>需求：</strong>根据心情推荐路线</p>
+                    <a href="business-pro-rich-routes.html" class="action-btn" target="_blank">👉 选择心情生成路线</a>
+                    <div class="tip">💡 推荐：EMO 选"治愈疗愈"，想拍照选"出片打卡"，带家人选"亲子家庭"</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 3 -->
+            <div class="step">
+                <div class="step-marker">3</div>
+                <div class="step-content">
+                    <h3>🎫 提前买好门票（可选）</h3>
+                    <p><strong>时间：</strong>出发前<br><strong>场景：</strong>门票预订页面<br><strong>需求：</strong>龙华寺/龙华塔门票</p>
+                    <a href="门票预订 - 完整版.html" class="action-btn" target="_blank">👉 预订门票</a>
+                    <div class="tip">💡 推荐：买套票（¥25）比单买便宜¥5，包含寺庙 + 登塔</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 4 -->
+            <div class="step">
+                <div class="step-marker">4</div>
+                <div class="step-content">
+                    <h3>🚗 出发游玩，按照路线打卡</h3>
+                    <p><strong>时间：</strong>上午 10:00-下午 5:00<br><strong>场景：</strong>在景点，跟着导航走<br><strong>需求：</strong>导航 + 打卡 + 拍照</p>
+                    <a href="business-pro-rich-routes.html" class="action-btn" target="_blank">👉 开始游玩</a>
+                    <div class="tip">💡 提示：每个景点都有故事讲解、拍照攻略、隐藏彩蛋</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 5 -->
+            <div class="step">
+                <div class="step-marker">5</div>
+                <div class="step-content">
+                    <h3>🅿️ 找停车场（开车的话）</h3>
+                    <p><strong>时间：</strong>到达景区<br><strong>场景：</strong>找停车场<br><strong>需求：</strong>最近的停车场</p>
+                    <a href="停车引导 - 极简版.html" class="action-btn" target="_blank">👉 查看停车场</a>
+                    <div class="tip">💡 推荐：龙华烈士陵园停车场（320 米，免费，62 个车位）</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 6 -->
+            <div class="step">
+                <div class="step-marker">6</div>
+                <div class="step-content">
+                    <h3>🎁 打卡赚积分，兑换奖励</h3>
+                    <p><strong>时间：</strong>游玩结束<br><strong>场景：</strong>回家路上<br><strong>需求：</strong>查看积分，兑换礼品</p>
+                    <a href="points-mall-app-fixed.html" class="action-btn" target="_blank">👉 进入积分商城</a>
+                    <div class="tip">💡 推荐：兑换福来毛绒公仔（200 分）或龙华寺纪念徽章（300 分）</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 7 -->
+            <div class="step">
+                <div class="step-marker">7</div>
+                <div class="step-content">
+                    <h3>🌊 许个愿（可选）</h3>
+                    <p><strong>时间：</strong>晚上<br><strong>场景：</strong>在家，安静的环境<br><strong>需求：</strong>写下愿望，时间胶囊</p>
+                    <a href="wishing-pool.html" class="action-btn" target="_blank">👉 进入许愿池</a>
+                    <div class="tip">💡 提示：可以设置未来某天开启，会发邮件提醒你</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎭 场景 2：评委 -->
+    <div class="scenario judge">
+        <div class="scenario-header">
+            <span class="icon">🎭</span>
+            <h2>我是评委</h2>
+            <span class="desc">我要评审这个黑客松项目</span>
+        </div>
+        
+        <div class="timeline">
+            <!-- 步骤 1 -->
+            <div class="step">
+                <div class="step-marker">1</div>
+                <div class="step-content">
+                    <h3>🎯 打开评委演示版</h3>
+                    <p><strong>时间：</strong>评审时间<br><strong>场景：</strong>电脑端<br><strong>需求：</strong>查看完整功能</p>
+                    <a href="demo-judge-fixed.html" class="action-btn" target="_blank">👉 打开评委演示</a>
+                    <div class="tip">💡 功能：12 情绪按钮 + AI 对话 + 路线生成 + 二维码扫码</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 2 -->
+            <div class="step">
+                <div class="step-marker">2</div>
+                <div class="step-content">
+                    <h3>🎨 点击任意情绪按钮</h3>
+                    <p><strong>时间：</strong>演示中<br><strong>场景：</strong>左侧 12 个情绪按钮<br><strong>需求：</strong>查看 AI 生成的路线</p>
+                    <a href="demo-judge-fixed.html" class="action-btn" target="_blank">👉 选择情绪</a>
+                    <div class="tip">💡 推荐：点击"EMO 求治愈"或"约会谈恋爱"，效果明显</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 3 -->
+            <div class="step">
+                <div class="step-marker">3</div>
+                <div class="step-content">
+                    <h3>💬 与福来猫 AI 对话</h3>
+                    <p><strong>时间：</strong>演示中<br><strong>场景：</strong>右侧聊天框<br><strong>需求：</strong>测试 AI 能力</p>
+                    <a href="demo-judge-fixed.html" class="action-btn" target="_blank">👉 开始对话</a>
+                    <div class="tip">💡 试试问："推荐一个适合约会的地方"或"龙华寺有什么历史"</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 4 -->
+            <div class="step">
+                <div class="step-marker">4</div>
+                <div class="step-content">
+                    <h3>📱 扫码在手机端体验</h3>
+                    <p><strong>时间：</strong>演示结束前<br><strong>场景：</strong>拿出手机扫码<br><strong>需求：</strong>查看移动端体验</p>
+                    <a href="心情地图 - 统一导航.html" class="action-btn" target="_blank">👉 手机体验</a>
+                    <div class="tip">💡 提示：手机和电脑需在同一局域网，将 localhost 替换为电脑 IP</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 5 -->
+            <div class="step">
+                <div class="step-marker">5</div>
+                <div class="step-content">
+                    <h3>📊 查看产品架构（可选）</h3>
+                    <p><strong>时间：</strong>深入了解<br><strong>场景：</strong>架构展示<br><strong>需求：</strong>了解完整架构</p>
+                    <a href="产品架构总览.html" class="action-btn" target="_blank">👉 查看架构</a>
+                    <div class="tip">💡 内容：4 种用户角色 + 7 大功能模块 + 完整用户旅程</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏪 场景 3：商户 -->
+    <div class="scenario merchant">
+        <div class="scenario-header">
+            <span class="icon">🏪</span>
+            <h2>我是商户</h2>
+            <span class="desc">我想入驻平台，卖优惠券</span>
+        </div>
+        
+        <div class="timeline">
+            <!-- 步骤 1 -->
+            <div class="step">
+                <div class="step-marker">1</div>
+                <div class="step-content">
+                    <h3>📝 填写入驻申请</h3>
+                    <p><strong>时间：</strong>工作时间<br><strong>场景：</strong>电脑或手机<br><strong>需求：</strong>提交入驻资料</p>
+                    <a href="merchant-partnership.html" class="action-btn" target="_blank">👉 商户入驻申请</a>
+                    <div class="tip">💡 需要准备：商户名称、联系人、电话、地址、营业执照</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 2 -->
+            <div class="step">
+                <div class="step-marker">2</div>
+                <div class="step-content">
+                    <h3>⏳ 等待审核（1-3 工作日）</h3>
+                    <p><strong>时间：</strong>提交后<br><strong>场景：</strong>等待通知<br><strong>需求：</strong>审核通过</p>
+                    <div class="tip">💡 提示：审核结果会通过短信/电话通知</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 3 -->
+            <div class="step">
+                <div class="step-marker">3</div>
+                <div class="step-content">
+                    <h3>🎫 发布优惠券</h3>
+                    <p><strong>时间：</strong>审核通过后<br><strong>场景：</strong>商户后台<br><strong>需求：</strong>设置优惠券</p>
+                    <a href="merchant-partnership.html" class="action-btn" target="_blank">👉 进入商户后台</a>
+                    <div class="tip">💡 推荐：设置 5-10 元小额券吸引用户，核销后获得佣金</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 4 -->
+            <div class="step">
+                <div class="step-marker">4</div>
+                <div class="step-content">
+                    <h3>💰 查看收益，提现</h3>
+                    <p><strong>时间：</strong>定期<br><strong>场景：</strong>商户后台<br><strong>需求：</strong>查看核销数据</p>
+                    <a href="merchant-partnership.html" class="action-btn" target="_blank">👉 查看收益看板</a>
+                    <div class="tip">💡 提示：核销率越高，平台推荐权重越高</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔧 场景 4：开发者 -->
+    <div class="scenario developer">
+        <div class="scenario-header">
+            <span class="icon">🔧</span>
+            <h2>我是开发者</h2>
+            <span class="desc">我要调试功能，查看日志</span>
+        </div>
+        
+        <div class="timeline">
+            <!-- 步骤 1 -->
+            <div class="step">
+                <div class="step-marker">1</div>
+                <div class="step-content">
+                    <h3>🔒 进入隐藏入口</h3>
+                    <p><strong>时间：</strong>开发调试<br><strong>场景：</strong>统一导航 → 我的 → 底部<br><strong>需求：</strong>进入开发者工具</p>
+                    <a href="心情地图 - 统一导航.html" class="action-btn" target="_blank">👉 打开统一导航</a>
+                    <div class="tip">💡 方法：连续点击"🔒 关于本软件"3 次</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 2 -->
+            <div class="step">
+                <div class="step-marker">2</div>
+                <div class="step-content">
+                    <h3>📡 查看 API 日志</h3>
+                    <p><strong>时间：</strong>调试中<br><strong>场景：</strong>开发者工具<br><strong>需求：</strong>查看 API 调用</p>
+                    <a href="开发者工具 - 隐藏入口.html" class="action-btn" target="_blank">👉 查看日志</a>
+                    <div class="tip">💡 功能：实时 API 调用记录、状态码、请求/响应</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 3 -->
+            <div class="step">
+                <div class="step-marker">3</div>
+                <div class="step-content">
+                    <h3>📊 查看数据看板</h3>
+                    <p><strong>时间：</strong>数据分析<br><strong>场景：</strong>开发者工具<br><strong>需求：</strong>查看运营数据</p>
+                    <a href="开发者工具 - 隐藏入口.html" class="action-btn" target="_blank">👉 数据看板</a>
+                    <div class="tip">💡 数据：订单数、门票销量、积分发放、许愿数量</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 4 -->
+            <div class="step">
+                <div class="step-marker">4</div>
+                <div class="step-content">
+                    <h3>⚙️ 系统设置</h3>
+                    <p><strong>时间：</strong>配置调试<br><strong>场景：</strong>开发者工具<br><strong>需求：</strong>开启调试模式</p>
+                    <a href="开发者工具 - 隐藏入口.html" class="action-btn" target="_blank">👉 系统设置</a>
+                    <div class="tip">💡 选项：调试模式、API 日志、性能监控</div>
+                </div>
+            </div>
+            
+            <!-- 步骤 5 -->
+            <div class="step">
+                <div class="step-marker">5</div>
+                <div class="step-content">
+                    <h3>📋 查看功能检查报告</h3>
+                    <p><strong>时间：</strong>功能验证<br><strong>场景：</strong>文档<br><strong>需求：</strong>完整性检查</p>
+                    <a href="功能检查报告.md" class="action-btn" target="_blank">👉 查看报告</a>
+                    <div class="tip">💡 内容：25 个文件、功能状态、入口出口检查</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部提示 -->
+    <div class="footer-note">
+        <p><strong>📅 重要时间节点</strong></p>
+        <p>黑客松提交截止：2026-04-25 20:00（明天）</p>
+        <p>路演演示：2026-04-26 10:30（后天）</p>
+        <p style="margin-top:15px;font-size:0.8rem">💡 推荐使用"心情地图 - 统一导航.html"获得最佳体验</p>
+    </div>
+</div>
+
+</body>
+</html>

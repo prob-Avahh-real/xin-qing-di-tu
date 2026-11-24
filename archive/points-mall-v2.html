@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分商城 | 福来的心愿清单</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(180deg,#FFF5F0,#FFE8E0);min-height:100vh;padding-bottom:40px}
+        
+        /* 顶部故事区 */
+        .story-header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:30px 20px;text-align:center;position:relative;overflow:hidden}
+        .story-header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 70%);animation:rotate 30s linear infinite}
+        @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .story-header .mascot{font-size:4rem;margin-bottom:10px;display:block;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .story-header h1{font-size:1.8rem;margin-bottom:8px}
+        .story-header .story{font-size:0.9rem;opacity:0.95;max-width:500px;margin:0 auto;line-height:1.6}
+        .story-header .deadline{background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:20px;display:inline-block;margin-top:16px;font-size:0.85rem}
+        
+        /* 功德值说明 */
+        .merit-notice{background:linear-gradient(135deg,#FFF9F0,#FEF3E2);padding:20px;text-align:center;border-bottom:2px solid rgba(249,181,114,0.3)}
+        .merit-notice .title{font-size:1rem;color:#B3704B;margin-bottom:8px;font-weight:600}
+        .merit-notice .desc{font-size:0.85rem;color:#7a5a48;line-height:1.6}
+        .merit-notice .highlight{color:#E87A5D;font-weight:600}
+        
+        /* 倒计时 */
+        .countdown-banner{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);color:white;padding:20px;text-align:center}
+        .countdown-banner .title{font-size:0.9rem;margin-bottom:12px;opacity:0.9}
+        .countdown-timer{display:flex;justify-content:center;gap:16px}
+        .countdown-item{text-align:center}
+        .countdown-item .number{font-size:2rem;font-weight:700;color:#F9B572}
+        .countdown-item .label{font-size:0.75rem;opacity:0.8;margin-top:4px}
+        
+        /* 进度条 */
+        .progress-section{padding:20px;background:white;margin:16px auto;max-width:900px;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+        .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .progress-header .title{font-size:1rem;color:#5a4a42;font-weight:600}
+        .progress-header .current{color:#E87A5D;font-weight:700;font-size:1.1rem}
+        .progress-bar{height:12px;background:#f0e6de;border-radius:10px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#F9B572,#E87A5D);width:47%;transition:width 0.5s}
+        .progress-desc{font-size:0.8rem;color:#7a5a48;margin-top:8px;text-align:center}
+        
+        /* 内容区 */
+        .container{max-width:900px;margin:0 auto;padding:20px}
+        .section-title{font-size:1.2rem;color:#E87A5D;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .section-title .icon{font-size:1.5rem}
+        
+        /* 我的积分 */
+        .my-points{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:24px;border-radius:24px;margin-bottom:24px;box-shadow:0 8px 24px rgba(249,181,114,0.3)}
+        .my-points .points-number{font-size:3rem;font-weight:700;margin-bottom:8px}
+        .my-points .points-label{opacity:0.9;font-size:0.95rem}
+        
+        /* 奖励分类 */
+        .reward-tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:8px}
+        .reward-tab{background:white;border:2px solid #ffe0d0;padding:12px 20px;border-radius:20px;font-size:0.9rem;font-weight:600;color:#7a5a48;cursor:pointer;white-space:nowrap;transition:all 0.2s}
+        .reward-tab:hover{border-color:#F9B572;background:#fef7f2}
+        .reward-tab.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-color:transparent}
+        
+        /* 奖励卡片 */
+        .reward-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:30px}
+        .reward-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.06);transition:all 0.3s;cursor:pointer}
+        .reward-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+        .reward-card .image{height:180px;background:linear-gradient(135deg,#fef3e4,#fee6d6);display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative}
+        .reward-card .badge{position:absolute;top:12px;right:12px;background:#F9B572;color:white;padding:4px 10px;border-radius:12px;font-size:0.7rem;font-weight:600}
+        .reward-card .badge.hot{background:#ef4444}
+        .reward-card .badge.new{background:#10b981}
+        .reward-card .content{padding:20px}
+        .reward-card .title{font-weight:600;font-size:1.05rem;color:#5a4a42;margin-bottom:8px}
+        .reward-card .desc{font-size:0.85rem;color:#7a5a48;line-height:1.6;margin-bottom:12px}
+        .reward-card .footer{display:flex;justify-content:space-between;align-items:center}
+        .reward-card .points{color:#E87A5D;font-weight:700;font-size:1.1rem}
+        .reward-card .exchange-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:8px 16px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .reward-card .exchange-btn:hover{transform:scale(1.05)}
+        .reward-card .exchange-btn:disabled{background:#d1d5db;cursor:not-allowed;transform:none}
+        
+        /* 任务列表 */
+        .task-list{background:white;border-radius:20px;padding:20px;margin-bottom:30px}
+        .task-item{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #f0e6de}
+        .task-item:last-child{border-bottom:none}
+        .task-item .task-info{flex:1}
+        .task-item .task-title{font-weight:600;color:#5a4a42;margin-bottom:4px}
+        .task-item .task-desc{font-size:0.85rem;color:#7a5a48}
+        .task-item .task-points{color:#E87A5D;font-weight:700;margin:0 16px}
+        .task-item .task-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .task-item .task-btn.completed{background:#10b981}
+        .task-item .task-btn:disabled{background:#d1d5db;cursor:not-allowed}
+        
+        /* 功德箱 */
+        .merit-box{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);color:white;padding:24px;border-radius:24px;margin-bottom:24px;text-align:center}
+        .merit-box .icon{font-size:3rem;margin-bottom:12px;display:block}
+        .merit-box .title{font-size:1.2rem;margin-bottom:8px}
+        .merit-box .desc{font-size:0.9rem;opacity:0.8;margin-bottom:16px}
+        .merit-box .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+        .merit-box .donate-btn{background:rgba(249,181,114,0.2);border:2px solid #F9B572;color:white;padding:12px 24px;border-radius:20px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .merit-box .donate-btn:hover{background:rgba(249,181,114,0.3)}
+        
+        /* 提示框 */
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:14px 28px;border-radius:12px;font-size:0.9rem;display:none;z-index:1000;animation:slideUp 0.3s}
+        @keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+        
+        /* 底部说明 */
+        .footer-notice{background:white;padding:20px;border-radius:20px;margin-top:24px}
+        .footer-notice .title{font-size:0.95rem;color:#5a4a42;margin-bottom:8px;font-weight:600}
+        .footer-notice .desc{font-size:0.85rem;color:#7a5a48;line-height:1.6}
+        .footer-notice ul{padding-left:20px;margin-top:8px}
+        .footer-notice li{margin-bottom:4px;font-size:0.85rem;color:#7a5a48}
+    </style>
+</head>
+<body>
+
+<!-- 顶部故事区 -->
+<div class="story-header">
+    <span class="mascot">🐱</span>
+    <h1>福来的心愿清单</h1>
+    <p class="story">
+        我是福来，龙华寺的守护猫。<br>
+        听说农历三月初三（5 月 1 日）龙华庙会要到了！<br>
+        我想在庙会前攒够功德，实现一个心愿...<br>
+        你愿意帮我一起完成吗？
+    </p>
+    <div class="deadline">⏰ 庙会日开始兑换：2026 年 5 月 1 日</div>
+</div>
+
+<!-- 功德值说明 -->
+<div class="merit-notice">
+    <div class="title">💡 什么是功德值？</div>
+    <div class="desc">
+        功德值是通过打卡龙华景点、参与文化活动获得的积分。<br>
+        <span class="highlight">不是商业优惠券</span>，而是支持文化传承的方式。<br>
+        可用于兑换文创周边、深度体验，或捐赠支持古建维护。
+    </div>
+</div>
+
+<!-- 倒计时 -->
+<div class="countdown-banner">
+    <div class="title">🎊 距离龙华庙会场开启还有</div>
+    <div class="countdown-timer" id="countdownTimer">
+        <div class="countdown-item">
+            <div class="number" id="days">7</div>
+            <div class="label">天</div>
+        </div>
+        <div class="countdown-item">
+            <div class="number" id="hours">0</div>
+            <div class="label">时</div>
+        </div>
+        <div class="countdown-item">
+            <div class="number" id="minutes">0</div>
+            <div class="label">分</div>
+        </div>
+        <div class="countdown-item">
+            <div class="number" id="seconds">0</div>
+            <div class="label">秒</div>
+        </div>
+    </div>
+</div>
+
+<!-- 进度条 -->
+<div class="progress-section">
+    <div class="progress-header">
+        <span class="title">🎯 庙会心愿进度</span>
+        <span class="current" id="progressCurrent">470 / 1000 功德</span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 47%"></div>
+    </div>
+    <div class="progress-desc">再攒 530 功德，就能帮福来实现心愿啦！</div>
+</div>
+
+<div class="container">
+    <!-- 我的功德值 -->
+    <div class="my-points">
+        <div class="points-number" id="myPoints">470</div>
+        <div class="points-label">我的功德值</div>
+    </div>
+    
+    <!-- 功德箱（捐赠） -->
+    <div class="merit-box">
+        <span class="icon">🙏</span>
+        <div class="title">功德箱</div>
+        <div class="desc">
+            自愿捐赠，支持龙华古建维护和文化传承<br>
+            所有善款使用情况将定期公示
+        </div>
+        <div class="actions">
+            <button class="donate-btn" onclick="donateMerit(10)">捐 10 功德</button>
+            <button class="donate-btn" onclick="donateMerit(50)">捐 50 功德</button>
+            <button class="donate-btn" onclick="donateMerit(100)">捐 100 功德</button>
+            <button class="donate-btn" onclick="donateMerit('all')">全部捐赠</button>
+        </div>
+    </div>
+    
+    <!-- 奖励分类 -->
+    <div class="section-title">
+        <span class="icon">🎁</span>
+        <span>功德兑换</span>
+    </div>
+    
+    <div class="reward-tabs" id="rewardTabs">
+        <div class="reward-tab active" data-category="all">全部</div>
+        <div class="reward-tab" data-category="cultural">🏮 文创周边</div>
+        <div class="reward-tab" data-category="experience">🧘 深度体验</div>
+        <div class="reward-tab" data-category="digital">✨ 数字藏品</div>
+        <div class="reward-tab" data-category="merit">🙏 功德捐赠</div>
+    </div>
+    
+    <!-- 奖励列表 -->
+    <div class="reward-grid" id="rewardGrid">
+        <!-- 由 JavaScript 动态生成 -->
+    </div>
+    
+    <!-- 任务列表 -->
+    <div class="section-title">
+        <span class="icon">📋</span>
+        <span>赚功德 - 福来的任务清单</span>
+    </div>
+    
+    <div class="task-list" id="taskList">
+        <!-- 由 JavaScript 动态生成 -->
+    </div>
+    
+    <!-- 底部说明 -->
+    <div class="footer-notice">
+        <div class="title">💡 使用说明</div>
+        <div class="desc">
+            功德值不是商业优惠券，而是支持龙华文化传承的方式。<br>
+            所有收益将用于：
+        </div>
+        <ul>
+            <li>龙华古建维护（龙华寺、龙华塔）</li>
+            <li>文化遗产保护（非遗传承、文化研究）</li>
+            <li>公益活动支持（素斋施舍、慈善捐赠）</li>
+            <li>平台运营维护（语音导览、AR 互动）</li>
+        </ul>
+        <div class="desc" style="margin-top:12px">
+            善款使用情况将每月公示，接受社会监督。
+        </div>
+    </div>
+</div>
+
+<!-- 提示框 -->
+<div class="toast" id="toast">✅ 兑换成功！</div>
+
+<script>
+// 功德值数据
+let userPoints = parseInt(localStorage.getItem('pathjoy_merit_points')) || 470;
+let userTasks = JSON.parse(localStorage.getItem('pathjoy_merit_tasks')) || [];
+
+// 奖励数据（去除优惠券，改为文化价值导向）
+const REWARDS = [
+    {
+        id: 1,
+        title: '福来守护猫·毛绒公仔',
+        desc: '把福来带回家，守护你的每一天。高 20cm，柔软舒适。',
+        points: 200,
+        category: 'cultural',
+        image: '🐱',
+        badge: 'hot',
+        badgeText: '热门'
+    },
+    {
+        id: 2,
+        title: '龙华塔祈福手串',
+        desc: '开光加持，保佑平安。玛瑙材质，精美礼盒包装。',
+        points: 300,
+        category: 'cultural',
+        image: '📿',
+        badge: 'hot',
+        badgeText: '热门'
+    },
+    {
+        id: 3,
+        title: '素斋制作体验课',
+        desc: '跟龙华寺法师学习素斋烹饪，体验寺庙生活。2 小时课程，含午餐。',
+        points: 500,
+        category: 'experience',
+        image: '🍚',
+        badge: 'new',
+        badgeText: '新品'
+    },
+    {
+        id: 4,
+        title: '禅修体验营',
+        desc: '半日禅修，冥想指导，素斋午餐。让心灵得到净化。',
+        points: 800,
+        category: 'experience',
+        image: '🧘',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 5,
+        title: '龙华文化深度游',
+        desc: '专业讲解员带队，AR 互动体验，文创纪念品。3 小时深度游。',
+        points: 400,
+        category: 'experience',
+        image: '🗺️',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 6,
+        title: '电子祈福牌（高级版）',
+        desc: '可定制祝福语，永久保存在龙华数字祈福墙。可分享朋友圈。',
+        points: 99,
+        category: 'digital',
+        image: '🏮',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 7,
+        title: '龙华寺明信片套装',
+        desc: '12 张精美明信片，记录龙华四季美景。可邮寄给朋友。',
+        points: 150,
+        category: 'cultural',
+        image: '📮',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 8,
+        title: '龙华庙会纪念章',
+        desc: '2026 年龙华庙会限定纪念章，纯铜材质，限量 1000 枚。',
+        points: 250,
+        category: 'cultural',
+        image: '🏅',
+        badge: 'new',
+        badgeText: '限定'
+    },
+    {
+        id: 9,
+        title: '功德箱捐赠',
+        desc: '自愿捐赠，支持龙华古建维护和文化传承。功德无量！',
+        points: 10,
+        category: 'merit',
+        image: '🙏',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 10,
+        title: '古塔维护捐赠',
+        desc: '专项用于龙华塔维护修缮。功德碑留名，世代流传。',
+        points: 100,
+        category: 'merit',
+        image: '🏯',
+        badge: '',
+        badgeText: ''
+    },
+    {
+        id: 11,
+        title: '福来盲盒',
+        desc: '随机获得一款福来守护猫盲盒，共 6 款，集齐召唤神龙！',
+        points: 180,
+        category: 'cultural',
+        image: '🎁',
+        badge: 'hot',
+        badgeText: '热门'
+    },
+    {
+        id: 12,
+        title: '亲子非遗课',
+        desc: '学习传统手工艺，制作纪念品，亲子互动。2 小时课程。',
+        points: 350,
+        category: 'experience',
+        image: '👨‍👩‍👧',
+        badge: '',
+        badgeText: ''
+    }
+];
+
+// 任务数据
+const TASKS = [
+    {
+        id: 1,
+        title: '🗺️ 完成一次情感路线打卡',
+        desc: '选择任意情感路线（如 EMO 治愈），完成全部景点打卡',
+        points: 100,
+        icon: '🗺️'
+    },
+    {
+        id: 2,
+        title: '📸 拍照打卡一个景点',
+        desc: '在任意景点拍照并上传（可分享到朋友圈）',
+        points: 50,
+        icon: '📸'
+    },
+    {
+        id: 3,
+        title: '📚 阅读知识库文章',
+        desc: '阅读龙华历史文化文章（历史/人文/美食/拍照/彩蛋/活动）',
+        points: 30,
+        icon: '📚'
+    },
+    {
+        id: 4,
+        title: '🎭 体验语音导览',
+        desc: '在任意景点播放语音讲解（龙龙讲故事）',
+        points: 40,
+        icon: '🎭'
+    },
+    {
+        id: 5,
+        title: '🔍 发现隐藏彩蛋',
+        desc: '找到一个隐藏彩蛋景点并打卡',
+        points: 80,
+        icon: '🔍'
+    },
+    {
+        id: 6,
+        title: '📤 分享活动到朋友圈',
+        desc: '使用分享生成器生成图片并分享到朋友圈',
+        points: 60,
+        icon: '📤'
+    },
+    {
+        id: 7,
+        title: '🙏 参与公益活动',
+        desc: '参与龙华公益活动（素斋/祭扫/文化讲座）',
+        points: 100,
+        icon: '🙏'
+    },
+    {
+        id: 8,
+        title: '👥 邀请好友加入',
+        desc: '邀请好友注册并使用 PathJoy',
+        points: 150,
+        icon: '👥'
+    }
+];
+
+// 初始化
+function init() {
+    updatePointsDisplay();
+    renderRewards('all');
+    renderTasks();
+    startCountdown();
+    setupTabs();
+}
+
+// 更新功德值显示
+function updatePointsDisplay() {
+    document.getElementById('myPoints').textContent = userPoints;
+    localStorage.setItem('pathjoy_merit_points', userPoints.toString());
+    
+    // 更新进度条
+    const progress = Math.min((userPoints / 1000) * 100, 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressCurrent').textContent = userPoints + ' / 1000 功德';
+}
+
+// 渲染奖励列表
+function renderRewards(category) {
+    const grid = document.getElementById('rewardGrid');
+    const filtered = category === 'all' 
+        ? REWARDS 
+        : REWARDS.filter(r => r.category === category);
+    
+    grid.innerHTML = filtered.map(reward => `
+        <div class="reward-card" onclick="exchangeReward(${reward.id})">
+            <div class="image">
+                ${reward.image}
+                ${reward.badge ? `<span class="badge ${reward.badge}">${reward.badgeText}</span>` : ''}
+            </div>
+            <div class="content">
+                <div class="title">${reward.title}</div>
+                <div class="desc">${reward.desc}</div>
+                <div class="footer">
+                    <span class="points">🙏 ${reward.points} 功德</span>
+                    <button class="exchange-btn" ${userPoints < reward.points ? 'disabled' : ''}>
+                        ${userPoints < reward.points ? '功德不足' : '立即兑换'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染任务列表
+function renderTasks() {
+    const list = document.getElementById('taskList');
+    
+    list.innerHTML = TASKS.map(task => {
+        const completed = userTasks.includes(task.id);
+        return `
+            <div class="task-item">
+                <div class="task-info">
+                    <div class="task-title">${task.icon} ${task.title}</div>
+                    <div class="task-desc">${task.desc}</div>
+                </div>
+                <div class="task-points">+${task.points}</div>
+                <button class="task-btn ${completed ? 'completed' : ''}" 
+                    onclick="completeTask(${task.id})"
+                    ${completed ? 'disabled' : ''}>
+                    ${completed ? '✅ 已完成' : '去完成'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+// 完成任务
+function completeTask(taskId) {
+    const task = TASKS.find(t => t.id === taskId);
+    if (!task) return;
+    
+    userTasks.push(taskId);
+    userPoints += task.points;
+    
+    localStorage.setItem('pathjoy_merit_tasks', JSON.stringify(userTasks));
+    updatePointsDisplay();
+    renderTasks();
+    renderRewards(document.querySelector('.reward-tab.active')?.dataset.category || 'all');
+    
+    showToast(`✅ 任务完成！获得${task.points}功德`);
+}
+
+// 兑换奖励
+function exchangeReward(rewardId) {
+    const reward = REWARDS.find(r => r.id === rewardId);
+    if (!reward) return;
+    
+    if (userPoints < reward.points) {
+        showToast('❌ 功德值不足');
+        return;
+    }
+    
+    if (confirm(`确认兑换「${reward.title}」？\n\n需要消耗${reward.points}功德值`)) {
+        userPoints -= reward.points;
+        updatePointsDisplay();
+        renderRewards(document.querySelector('.reward-tab.active')?.dataset.category || 'all');
+        showToast(`✅ 兑换成功！请在「我的订单」查看`);
+        
+        // 保存到兑换记录
+        const orders = JSON.parse(localStorage.getItem('pathjoy_merit_orders') || '[]');
+        orders.push({
+            rewardId: reward.id,
+            rewardTitle: reward.title,
+            points: reward.points,
+            date: new Date().toISOString()
+        });
+        localStorage.setItem('pathjoy_merit_orders', JSON.stringify(orders));
+    }
+}
+
+// 捐赠功德
+function donateMerit(amount) {
+    if (amount === 'all') {
+        amount = userPoints;
+    }
+    
+    if (amount <= 0) {
+        showToast('❌ 功德值不足');
+        return;
+    }
+    
+    if (confirm(`确认捐赠${amount}功德？\n\n您的善心将用于龙华古建维护和文化传承`)) {
+        userPoints -= amount;
+        updatePointsDisplay();
+        
+        // 保存捐赠记录
+        const donations = JSON.parse(localStorage.getItem('pathjoy_merit_donations') || '[]');
+        donations.push({
+            amount: amount,
+            date: new Date().toISOString()
+        });
+        localStorage.setItem('pathjoy_merit_donations', JSON.stringify(donations));
+        
+        showToast(`🙏 随喜赞叹！捐赠${amount}功德`);
+    }
+}
+
+// 切换分类
+function setupTabs() {
+    const tabs = document.querySelectorAll('.reward-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const category = this.dataset.category;
+            renderRewards(category);
+        });
+    });
+}
+
+// 倒计时
+function startCountdown() {
+    const targetDate = new Date('2026-05-01T00:00:00');
+    
+    function update() {
+        const now = new Date();
+        const diff = targetDate - now;
+        
+        if (diff <= 0) {
+            document.getElementById('countdownTimer').innerHTML = '<div style="font-size:1.5rem;color:#F9B572">🎊 庙会已开始！</div>';
+            return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('days').textContent = days;
+        document.getElementById('hours').textContent = hours;
+        document.getElementById('minutes').textContent = minutes;
+        document.getElementById('seconds').textContent = seconds;
+    }
+    
+    update();
+    setInterval(update, 1000);
+}
+
+// 提示框
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>

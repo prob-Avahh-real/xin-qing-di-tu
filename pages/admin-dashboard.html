@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>榫欏崕路鐏靛鍚戝 | 绠＄悊鍚庡彴</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:#f5f0eb;color:#3a2c2a}.sidebar{position:fixed;left:0;top:0;width:260px;height:100vh;background:linear-gradient(180deg,#E87A5D,#D46A4A);color:white;padding:20px;overflow-y:auto}.sidebar .logo{font-size:1.4rem;font-weight:700;margin-bottom:30px;text-align:center}.sidebar .logo .icon{font-size:2rem;display:block;margin-bottom:8px}.nav-item{padding:14px 16px;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;font-size:0.9rem;display:flex;align-items:center;gap:10px}.nav-item:hover{background:rgba(255,255,255,0.1)}.nav-item.active{background:rgba(255,255,255,0.2);font-weight:600}.nav-item .icon{font-size:1.2rem}.main-content{margin-left:260px;padding:30px}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.page-header h1{font-size:1.6rem;color:#5a4a42}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}.stat-card{background:white;border-radius:20px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.04)}.stat-card .number{font-size:2rem;font-weight:700;color:#E87A5D;margin-bottom:4px}.stat-card .label{font-size:0.85rem;color:#7a5a48}.stat-card.trend-up{border-left:4px solid #10b981}.stat-card.trend-down{border-left:4px solid #ef4444}.section{background:white;border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.04)}.section-title{font-size:1.1rem;color:#b3704b;margin-bottom:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}.review-list{display:flex;flex-direction:column;gap:12px}.review-item{background:#fef7f2;border-radius:16px;padding:16px;border-left:4px solid #F9B572;transition:all 0.2s}.review-item:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08)}.review-item .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.review-item .name{font-weight:600;color:#5a4a42;font-size:1rem}.review-item .status{padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600}.review-item .status.pending{background:#fef3c7;color:#92400e}.review-item .status.approved{background:#d1fae5;color:#059669}.review-item .status.rejected{background:#fee2e2;color:#dc2626}.review-item .info{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}.review-item .info-item{font-size:0.85rem;color:#7a5a48}.review-item .info-item strong{color:#5a4a42}.review-item .emotions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.review-item .emotion-tag{background:#fee6d6;color:#E87A5D;padding:4px 10px;border-radius:20px;font-size:0.75rem}.review-item .actions{display:flex;gap:8px}.review-item button{padding:10px 20px;border:none;border-radius:12px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s}.review-item .btn-approve{background:#10b981;color:white}.review-item .btn-approve:hover{background:#059669}.review-item .btn-reject{background:#ef4444;color:white}.review-item .btn-reject:hover{background:#dc2626}.review-item .btn-view{background:#F9B572;color:white}.review-item .btn-view:hover{background:#E87A5D}.filter-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}.filter-bar select,.filter-bar input{padding:10px 16px;border:2px solid #ffe0d0;border-radius:12px;font-size:0.85rem;background:white}.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:#F9B572}.filter-bar button{background:#F9B572;color:white;border:none;padding:10px 20px;border-radius:12px;font-weight:600;cursor:pointer}.data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{padding:14px;text-align:left;border-bottom:1px solid #f0e6de}.data-table th{color:#7a5a48;font-weight:600;font-size:0.85rem}.data-table td{font-size:0.9rem}.data-table tr:hover{background:#fef7f2}.badge{padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:600}.badge-success{background:#d1fae5;color:#059669}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#dc2626}.badge-info{background:#dbeafe;color:#2563eb}.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}.modal-content{background:white;width:90%;max-width:600px;border-radius:24px;padding:24px;max-height:80vh;overflow-y:auto}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-header h3{color:#5a4a42}.modal-close{font-size:1.5rem;cursor:pointer;color:#a28c7c}.detail-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.detail-item{background:#fef7f2;padding:14px;border-radius:12px}.detail-item label{font-size:0.75rem;color:#7a5a48;margin-bottom:4px}.detail-item .value{font-size:0.95rem;color:#5a4a42;font-weight:500}.toast{position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:14px 28px;border-radius:12px;font-size:0.9rem;display:none;z-index:1001}.empty-state{text-align:center;padding:60px 20px;color:#a28c7c}.empty-state .icon{font-size:4rem;margin-bottom:16px}
+    </style>
+</head>
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+
+<!-- 渚ц竟鏍?-->
+<div class="sidebar">
+    <div class="logo">
+        <span class="icon">馃悏</span>
+        鐏靛鍚戝
+    </div>
+    <div class="nav-item active" data-page="dashboard">
+        <span class="icon">馃搳</span> 鏁版嵁姒傝
+    </div>
+    <div class="nav-item" data-page="merchant-review">
+        <span class="icon">馃彧</span> 鍟嗘埛瀹℃牳 <span class="badge badge-warning" id="merchantBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="route-review">
+        <span class="icon">馃椇锔?/span> 璺嚎瀹℃牳 <span class="badge badge-warning" id="routeBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="activity-review">
+        <span class="icon">馃帀</span> 娲诲姩瀹℃牳 <span class="badge badge-warning" id="activityBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="merchants">
+        <span class="icon">馃搵</span> 鍟嗘埛绠＄悊
+    </div>
+    <div class="nav-item" data-page="routes">
+        <span class="icon">馃搷</span> 璺嚎绠＄悊
+    </div>
+    <div class="nav-item" data-page="users">
+        <span class="icon">馃懃</span> 鐢ㄦ埛绠＄悊
+    </div>
+</div>
+
+<!-- 涓诲唴瀹瑰尯 -->
+<div class="main-content">
+    <!-- 鏁版嵁姒傝 -->
+    <div id="dashboardPage" class="page">
+        <div class="page-header">
+            <h1>馃搳 鏁版嵁姒傝</h1>
+            <p style="color:#7a5a48">鏈€鍚庢洿鏂帮細<span id="lastUpdate">--</span></p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card trend-up">
+                <div class="number" id="totalMerchants">0</div>
+                <div class="label">鍚堜綔鍟嗘埛</div>
+            </div>
+            <div class="stat-card trend-up">
+                <div class="number" id="totalRoutes">0</div>
+                <div class="label">涓婄嚎璺嚎</div>
+            </div>
+            <div class="stat-card trend-up">
+                <div class="number" id="pendingReviews">0</div>
+                <div class="label">寰呭鏍?/div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="todayUsers">0</div>
+                <div class="label">浠婃棩鐢ㄦ埛</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <span>鈴?寰呭鏍镐簨椤?/span>
+                <button onclick="refreshData()" style="background:#F9B572;color:white;border:none;padding:8px 16px;border-radius:12px;font-size:0.85rem;cursor:pointer">馃攧 鍒锋柊</button>
+            </div>
+            <div class="review-list">
+                <div class="review-item">
+                    <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                        <span class="name">馃彧 榫欏崕瀵虹礌鏂嬮 - 鍟嗘埛鍏ラ┗</span>
+                        <span class="status pending">寰呭鏍?/span>
+                    </div>
+                    <div class="info">
+                        <div class="info-item"><strong>绫诲瀷:</strong> 椁愰ギ搴?/div>
+                        <div class="info-item"><strong>鎻愪氦鏃堕棿:</strong> 2026-04-22 14:30</div>
+                    </div>
+                    <div class="emotions">
+                        <span class="emotion-tag">馃様 EMO 娌绘剤</span>
+                        <span class="emotion-tag">馃崪 缇庨瀵诲懗</span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-view" onclick="viewDetail('merchant')">馃搫 鏌ョ湅璇︽儏</button>
+                        <button class="btn-approve" onclick="approveItem('merchant', 'APP001')">鉁?閫氳繃</button>
+                        <button class="btn-reject" onclick="rejectItem('merchant', 'APP001')">鉂?鎷掔粷</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 鍟嗘埛瀹℃牳 -->
+    <div id="merchantReviewPage" class="page" style="display:none">
+        <div class="page-header">
+            <h1>馃彧 鍟嗘埛鍏ラ┗瀹℃牳</h1>
+        </div>
+        <div class="filter-bar">
+            <select id="merchantTypeFilter">
+                <option value="">鍏ㄩ儴绫诲瀷</option>
+                <option value="restaurant">椁愰ギ搴?/option>
+                <option value="cafe">鍜栧暋鍘?鑼堕</option>
+                <option value="attraction">鏅偣/鍦洪</option>
+                <option value="shop">闆跺敭搴?/option>
+                <option value="experience">浣撻獙宸ュ潑</option>
+            </select>
+            <select id="merchantStatusFilter">
+                <option value="pending">寰呭鏍?/option>
+                <option value="approved">宸查€氳繃</option>
+                <option value="rejected">宸叉嫆缁?/option>
+            </select>
+            <input type="text" placeholder="鎼滅储鍟嗘埛鍚嶇О..." id="merchantSearch">
+            <button onclick="filterMerchants()">馃攳 绛涢€?/button>
+        </div>
+        <div class="section">
+            <div class="section-title">寰呭鏍稿晢鎴峰垪琛?/div>
+            <div class="review-list" id="merchantReviewList">
+                <!-- 鍔ㄦ€佸姞杞?-->
+            </div>
+        </div>
+    </div>
+
+    <!-- 璺嚎瀹℃牳 -->
+    <div id="routeReviewPage" class="page" style="display:none">
+        <div class="page-header">
+            <h1>馃椇锔?璺嚎瀹℃牳</h1>
+        </div>
+        <div class="filter-bar">
+            <select id="routeEmotionFilter">
+                <option value="">鍏ㄩ儴鎯呯华</option>
+                <option value="sad">EMO 娌绘剤</option>
+                <option value="relax">鏁ｅ績</option>
+                <option value="photo">鎷嶇収</option>
+                <option value="food">缇庨</option>
+            </select>
+            <select id="routeStatusFilter">
+                <option value="pending">寰呭鏍?/option>
+                <option value="approved">宸蹭笂绾?/option>
+                <option value="rejected">宸蹭笅鏋?/option>
+            </select>
+            <button onclick="filterRoutes()">馃攳 绛涢€?/button>
+        </div>
+        <div class="section">
+            <div class="section-title">寰呭鏍歌矾绾?/div>
+            <div class="review-list" id="routeReviewList">
+                <!-- 鍔ㄦ€佸姞杞?-->
+            </div>
+        </div>
+    </div>
+
+    <!-- 娲诲姩瀹℃牳 -->
+    <div id="activityReviewPage" class="page" style="display:none">
+        <div class="page-header">
+            <h1>馃帀 娲诲姩瀹℃牳</h1>
+        </div>
+        <div class="section">
+            <div class="section-title">寰呭鏍告椿鍔?/div>
+            <div class="review-list" id="activityReviewList">
+                <!-- 鍔ㄦ€佸姞杞?-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 璇︽儏寮圭獥 -->
+<div id="detailModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>馃搫 鍟嗘埛璇︽儏</h3>
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+        </div>
+        <div id="modalBody">
+            <!-- 鍔ㄦ€佸～鍏?-->
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 椤甸潰鍒囨崲
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        item.classList.add('active');
+        const pageId = item.dataset.page + 'Page';
+        document.getElementById(pageId).style.display = 'block';
+        
+        // 鍔犺浇瀵瑰簲鏁版嵁
+        if (item.dataset.page === 'merchant-review') loadMerchantReviews();
+        if (item.dataset.page === 'route-review') loadRouteReviews();
+        if (item.dataset.page === 'activity-review') loadActivityReviews();
+    });
+});
+
+// 鍔犺浇鏁版嵁
+function loadDashboard() {
+    const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+    const pendingCount = applications.filter(a => a.status === 'pending').length;
+    
+    document.getElementById('totalMerchants').textContent = applications.filter(a => a.status === 'approved').length;
+    document.getElementById('totalRoutes').textContent = '12';
+    document.getElementById('pendingReviews').textContent = pendingCount;
+    document.getElementById('todayUsers').textContent = Math.floor(Math.random() * 100) + 50;
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+    document.getElementById('merchantBadge').textContent = pendingCount;
+}
+
+// 鍔犺浇鍟嗘埛瀹℃牳鍒楄〃
+function loadMerchantReviews() {
+    const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+    const pendingApps = applications.filter(a => a.status === 'pending');
+    
+    const container = document.getElementById('merchantReviewList');
+    
+    if (pendingApps.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">鉁?/div><p>鏆傛棤寰呭鏍哥敵璇?/p></div>';
+        return;
+    }
+    
+    container.innerHTML = pendingApps.map(app => `
+        <div class="review-item">
+            <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                <span class="name">馃彧 ${app.businessName}</span>
+                <span class="status pending">寰呭鏍?/span>
+            </div>
+            <div class="info">
+                <div class="info-item"><strong>绫诲瀷:</strong> ${getTypeName(app.businessType)}</div>
+                <div class="info-item"><strong>鑱旂郴浜?</strong> ${app.contactName}</div>
+                <div class="info-item"><strong>鐢佃瘽:</strong> ${app.contactPhone}</div>
+                <div class="info-item"><strong>鎻愪氦鏃堕棿:</strong> ${new Date(app.submitTime).toLocaleString('zh-CN')}</div>
+            </div>
+            <div class="emotions">
+                ${(app.emotions || []).map(e => `<span class="emotion-tag">${getEmotionName(e)}</span>`).join('')}
+            </div>
+            <div class="actions">
+                <button class="btn-view" onclick='viewMerchantDetail(${JSON.stringify(app).replace(/'/g, "&#39;")})'>馃搫 鏌ョ湅璇︽儏</button>
+                <button class="btn-approve" onclick="approveApplication('${app.id}')">鉁?閫氳繃</button>
+                <button class="btn-reject" onclick="rejectApplication('${app.id}')">鉂?鎷掔粷</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getTypeName(type) {
+    const map = { restaurant: '馃崪 椁愰ギ搴?, cafe: '鈽?鍜栧暋鍘?, attraction: '馃幆 鏅偣', shop: '馃泹锔?闆跺敭搴?, experience: '馃帹 浣撻獙宸ュ潑', hotel: '馃彣 浣忓', other: '鍏朵粬' };
+    return map[type] || type;
+}
+
+function getEmotionName(emotion) {
+    const map = { sad: '馃様 EMO 娌绘剤', relax: '馃槍 鏁ｅ績', photo: '馃摳 鎷嶇収', social: '馃懌 鑱氫細', art: '馃帹 鏂囪壓', date: '馃挄 绾︿細', family: '馃懆鈥嶐煈┾€嶐煈?浜插瓙', food: '馃崪 缇庨', lucky: '馃檹 绁堢', fitness: '馃毚 杩愬姩', chill: '馃寘 韬哄钩', explore: '馃椇锔?鎺㈢储' };
+    return map[emotion] || emotion;
+}
+
+// 鏌ョ湅璇︽儏
+function viewMerchantDetail(app) {
+    const modalBody = document.getElementById('modalBody');
+    modalBody.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-item">
+                <label>鍟嗘埛鍚嶇О</label>
+                <div class="value">${app.businessName}</div>
+            </div>
+            <div class="detail-item">
+                <label>鍝佺墝鍚嶇О</label>
+                <div class="value">${app.brandName || '-'}</div>
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-item">
+                <label>鍟嗘埛绫诲瀷</label>
+                <div class="value">${getTypeName(app.businessType)}</div>
+            </div>
+            <div class="detail-item">
+                <label>浜哄潎娑堣垂</label>
+                <div class="value">${app.avgPrice ? app.avgPrice + '鍏? : '-'}</div>
+            </div>
+        </div>
+        <div class="detail-item" style="margin-bottom:16px">
+            <label>璇︾粏鍦板潃</label>
+            <div class="value">${app.address}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-item">
+                <label>鑱旂郴浜?/label>
+                <div class="value">${app.contactName}</div>
+            </div>
+            <div class="detail-item">
+                <label>鑱旂郴鐢佃瘽</label>
+                <div class="value">${app.contactPhone}</div>
+            </div>
+        </div>
+        <div class="detail-item" style="margin-bottom:16px">
+            <label>鍟嗘埛绠€浠?/label>
+            <div class="value">${app.description}</div>
+        </div>
+        <div class="detail-item" style="margin-bottom:16px">
+            <label>鐗硅壊鏈嶅姟</label>
+            <div class="value">${app.features || '-'}</div>
+        </div>
+        <div class="detail-item" style="margin-bottom:16px">
+            <label>浼樻儬鍒?娲诲姩</label>
+            <div class="value">${app.coupon || '-'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-item">
+                <label>鎯冲姞鍏ヨ矾绾?/label>
+                <div class="value">${(app.emotions || []).map(e => getEmotionName(e)).join(', ') || '-'}</div>
+            </div>
+            <div class="detail-item">
+                <label>鎻愪氦鏃堕棿</label>
+                <div class="value">${new Date(app.submitTime).toLocaleString('zh-CN')}</div>
+            </div>
+        </div>
+    `;
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('detailModal').style.display = 'none';
+}
+
+// 瀹℃牳鎿嶄綔
+function approveApplication(id) {
+    const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+    const index = applications.findIndex(a => a.id === id);
+    if (index !== -1) {
+        applications[index].status = 'approved';
+        applications[index].reviewTime = new Date().toISOString();
+        localStorage.setItem('pathjoy_applications', JSON.stringify(applications));
+        showToast('鉁?瀹℃牳閫氳繃锛?);
+        loadMerchantReviews();
+        loadDashboard();
+    }
+}
+
+function rejectApplication(id) {
+    const reason = prompt('璇疯緭鍏ユ嫆缁濈悊鐢憋細');
+    if (reason) {
+        const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+        const index = applications.findIndex(a => a.id === id);
+        if (index !== -1) {
+            applications[index].status = 'rejected';
+            applications[index].rejectReason = reason;
+            applications[index].reviewTime = new Date().toISOString();
+            localStorage.setItem('pathjoy_applications', JSON.stringify(applications));
+            showToast('鉂?宸叉嫆缁?);
+            loadMerchantReviews();
+            loadDashboard();
+        }
+    }
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 3000);
+}
+
+function refreshData() {
+    loadDashboard();
+    showToast('馃攧 鏁版嵁宸插埛鏂?);
+}
+
+function filterMerchants() {
+    loadMerchantReviews();
+}
+
+function filterRoutes() {
+    showToast('绛涢€夊姛鑳藉紑鍙戜腑...');
+}
+
+function loadRouteReviews() {
+    document.getElementById('routeReviewList').innerHTML = '<div class="empty-state"><div class="icon">鉁?/div><p>鏆傛棤寰呭鏍歌矾绾?/p></div>';
+}
+
+function loadActivityReviews() {
+    document.getElementById('activityReviewList').innerHTML = '<div class="empty-state"><div class="icon">鉁?/div><p>鏆傛棤寰呭鏍告椿鍔?/p></div>';
+}
+
+// 鍒濆鍖?loadDashboard();
+</script>
+</body>
+</html>
+

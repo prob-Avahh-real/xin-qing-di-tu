@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>榫欓緳璁叉晠浜?- 蹇冩儏鍦板浘</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        
+        /* 椤堕儴瀵艰埅 */
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px;text-align:center}
+        .header h1{font-size:1.3rem;font-weight:600}
+        
+        /* 搴曢儴鏍囩鏍?*/
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e0e0e0;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+        .tabs-inner{display:flex;gap:8px;max-width:600px;margin:0 auto;overflow-x:auto;padding:0 8px}
+        .tab-btn{flex-shrink:0;background:#f5f5f5;border:none;padding:8px 16px;border-radius:20px;font-size:0.85rem;color:#666;cursor:pointer;transition:all 0.3s;white-space:nowrap}
+        .tab-btn.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        
+        /* 鍐呭鍖哄煙 */
+        main{max-width:600px;margin:0 auto;padding:16px}
+        .section{display:none}
+        .section.active{display:block}
+        
+        /* 鍗＄墖 */
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .card h3{font-size:1.1rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .card h3 .icon{font-size:1.5rem}
+        
+        /* 鏁呬簨鍗＄墖 */
+        .story-card{text-align:center}
+        .longlong-avatar{font-size:4rem;margin-bottom:16px}
+        .story-text{background:#f9f5f0;border-radius:12px;padding:20px;font-size:0.95rem;line-height:1.8;color:#333;margin-bottom:16px;text-align:left}
+        .voice-btn{background:#f5eee9;border:none;padding:10px 24px;border-radius:36px;font-size:0.9rem;color:#E87A5D;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-weight:600;transition:all 0.3s}
+        .voice-btn:hover{background:#E87A5D;color:white}
+        .voice-btn:active{transform:scale(0.95)}
+        
+        /* Toast */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:24px;font-size:0.9rem;display:none;z-index:1000;white-space:nowrap}
+    </style>
+</head>
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+
+
+<header class="header">
+    <h1>馃椇锔?蹇冩儏鍦板浘 - POI 璇︽儏</h1>
+</header>
+
+<!-- 搴曢儴鏍囩鏍?-->
+<nav class="tabs">
+    <div class="tabs-inner">
+        <button class="tab-btn active" onclick="switchTab('story')"><span class="icon">馃摉</span> 榫欓緳璁叉晠浜?/button>
+        <button class="tab-btn" onclick="switchTab('photo')"><span class="icon">馃摳</span> 鎷嶇収鐐?/button>
+        <button class="tab-btn" onclick="switchTab('danmu')"><span class="icon">馃挰</span> 寮瑰箷</button>
+        <button class="tab-btn" onclick="switchTab('play')"><span class="icon">馃幃</span> 鎸戞垬</button>
+        <button class="tab-btn" onclick="switchTab('egg')"><span class="icon">馃巵</span> 褰╄泲</button>
+    </div>
+</nav>
+
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+    <!-- 榫欓緳璁叉晠浜?-->
+    <section id="story" class="section active">
+        <div class="card">
+            <h3><span class="icon">馃摉</span> 榫欓緳璁叉晠浜?/h3>
+            <div class="story-card">
+                <div class="longlong-avatar">馃悏</div>
+                <div class="story-text" id="storyText">鍔犺浇涓?..</div>
+                <button class="voice-btn" onclick="playStory()"><span>馃攰</span> 鍚緳榫欒</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 鎷嶇収鐐?-->
+    <section id="photo" class="section">
+        <div class="card">
+            <h3><span class="icon">馃摳</span> 鏈€浣虫媿鐓х偣</h3>
+            <div id="photoGrid"></div>
+        </div>
+    </section>
+    
+    <!-- 寮瑰箷 -->
+    <section id="danmu" class="section">
+        <div class="card">
+            <h3><span class="icon">馃挰</span> 骞磋交浜洪兘鍦ㄨ浠€涔?/h3>
+            <div id="danmuContainer"></div>
+        </div>
+    </section>
+    
+    <!-- 鎸戞垬 -->
+    <section id="play" class="section">
+        <div class="card">
+            <h3><span class="icon">馃幃</span> 浜掑姩鎸戞垬</h3>
+            <div id="challengeGrid"></div>
+        </div>
+    </section>
+    
+    <!-- 褰╄泲 -->
+    <section id="egg" class="section">
+        <div class="card">
+            <h3><span class="icon">馃巵</span> 闅愯棌褰╄泲</h3>
+            <div id="eggContainer"></div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 瀹屾暣鐨?POI 鏁版嵁
+const POI_DATA = {
+    longhua_temple: {
+        name: '榫欏崕瀵?,
+        story: `馃悏 榫欓緳鏉ュ暒锛佽鎴戠粰浣犺璁查緳鍗庡鐨勬晠浜嬶綖
+
+榫欏崕瀵烘槸涓婃捣鏈€鍙よ€佺殑瀵哄簷锛岃窛浠婂凡缁忔湁 1700 澶氬勾鍘嗗彶鍟︼紒
+
+馃摐 **鍘嗗彶浼犺**
+鐩镐紶鍦ㄤ笁鍥芥椂鏈燂紝瀛欐潈涓哄瓭鏁粬鐨勬瘝浜诧紝鐗瑰湴寤洪€犱簡杩欏骇瀵哄簷銆傚鍚?榫欏崕"鏉ユ簮浜庝經缁忎腑鐨?寮ュ嫆涓嬬敓锛岄緳鍗庝笁浼?銆?
+馃彲 **寤虹瓚鐗硅壊**
+榫欏崕瀵虹殑寤虹瓚甯冨眬闈炲父璁茬┒锛屾部涓酱绾夸緷娆℃槸灞遍棬銆佸讥鍕掓銆佸ぉ鐜嬫銆佸ぇ闆勫疂娈裤€佷笁鍦ｆ鍜屾柟涓堝銆傛瘡涓€搴у缓绛戦兘浣撶幇浜嗕腑鍥藉彜浠ｅ缓绛戠殑绮鹃珦銆?
+馃敂 **榫欏崕鏅氶挓**
+"榫欏崕鏅氶挓"鏄勃涓婂叓鏅箣涓€銆傛瘡褰撻櫎澶曚箣澶滐紝瀵洪噷鐨勯挓澹颁細鏁插搷 108 涓嬶紝瀵撴剰娑堥櫎 108 绉嶇儲鎭笺€?
+馃惐 **瀵哄簷鐚挭**
+鐜板湪鐨勯緳鍗庡閲屼綇鐫€濂藉嚑鍙彲鐖辩殑鐚挭锛屽畠浠彲鏄搴欑殑"瀹堟姢绁?鍝︼紒鍏朵腑浠ユ鐚?绂忔潵"鏈€涓哄嚭鍚嶃€?
+馃尭 **榫欏崕妗冭姳**
+姣忓勾鏄ュぉ锛岄緳鍗庡鐨勬鑺辩洓寮€锛岀矇绾㈣壊鐨勮姳鏈典笌鍙ゅ鐩告槧鎴愯叮锛屾槸涓婃捣鏈€缇庣殑鏄ユ櫙涔嬩竴銆?
+鉁?**绁堢璁告効**
+榫欏崕瀵洪鐏椇鐩涳紝鎹鍦ㄨ繖閲岃鎰跨壒鍒伒楠屻€傝寰楄蹇冭瘹鍝︼紒`,
+        photos: [
+            {url: 'https://example.com/photo1.jpg', desc: '榫欏崕瀵哄叏鏅?},
+            {url: 'https://example.com/photo2.jpg', desc: '澶ч泟瀹濇'},
+            {url: 'https://example.com/photo3.jpg', desc: '榫欏崕濉?}
+        ],
+        tips: [
+            '鍏嶈垂棰嗛锛屼笉闇€瑕佽嚜宸变拱',
+            '涓嬪崍 3 鐐瑰悗浜烘瘮杈冨皯锛岄€傚悎闈欏績鍙傝',
+            '瀵洪噷鏈夊彧澶ф鐚彨绂忔潵锛屽甫鐚潯鍙互璺熷畠浜掑姩'
+        ]
+    },
+    longhua_pagoda: {
+        name: '榫欏崕濉?,
+        story: `馃悏 榫欓緳甯︿綘鐧婚緳鍗庡锛?
+榫欏崕濉旀槸涓婃捣鍦板尯淇濆瓨鏈€瀹屽ソ鐨勫畫浠ｅ彜濉旓紝璺濅粖宸叉湁杩戝崈骞村巻鍙诧紒
+
+馃彲 **濉旂殑鍘嗗彶**
+榫欏崕濉斿寤轰簬鍖楀畫澶钩鍏村浗浜屽勾锛堝叕鍏?977 骞达級锛屾槸鍚磋秺鐜嬮挶淇朵负渚涘浣涜垗鍒╄€屽缓銆?
+馃搻 **寤虹瓚鐗硅壊**
+- 濉旈珮 40.64 绫筹紝涓冨眰鍏
+- 鐮栨湪缁撴瀯锛岄妾愮繕瑙?- 姣忓眰閮芥湁骞冲骇锛屽彲浠ュ嚟鏍忚繙鐪?
+馃専 **鐧诲浣撻獙**
+鐧讳笂榫欏崕濉旓紝鍙互淇灠鏁翠釜榫欏崕鍦板尯鐨勭編鏅細
+- 鍚戝寳鐪嬶細榫欏崕瀵哄叏鏅敖鏀剁溂搴?- 鍚戝崡鐪嬶細榛勬郸姹熻溈铚掓祦杩?- 鍚戜笢鐪嬶細鐜颁唬鍖栭珮妤兼灄绔?- 鍚戣タ鐪嬶細鍙ら晣椋庤矊涓€瑙堟棤浣?
+馃幆 **鐧诲灏忚创澹?*
+- 闇€瑕佸崟鐙喘绁紙20 鍏冿級
+- 濉斿唴妤兼杈冮櫋锛屾敞鎰忓畨鍏?- 姣忓眰閮芥湁瑙傛櫙骞冲彴锛屽彲浠ヤ紤鎭媿鐓?- 寤鸿鏃╀笂鍘伙紝鍏夌嚎濂斤紝浜哄皯
+
+鉁?**浼犺鏁呬簨**
+鐩镐紶榫欏崕濉旀槸闀囧帇娴风溂鐨勶紝濉斾笅鏈変釜閫氬線涓滄捣鐨勬捣鐪笺€傚彜鏃跺€欒繖閲岀粡甯搁椆姘寸伨锛屽缓濉斿悗姘存偅灏卞钩鎭簡銆俙,
+        photos: [
+            {url: 'https://example.com/pagoda1.jpg', desc: '榫欏崕濉斿叏鏅?},
+            {url: 'https://example.com/pagoda2.jpg', desc: '濉斿唴妤兼'},
+            {url: 'https://example.com/pagoda3.jpg', desc: '濉旈《椋庡厜'}
+        ],
+        tips: [
+            '闂ㄧエ 20 鍏冿紝鏃╀笂 9 鐐瑰墠浜哄皯',
+            '濉斿唴妤兼杈冮櫋锛岀┛鑸掗€傜殑闉嬪瓙',
+            '姣忓眰閮藉彲浠ユ媿鐓э紝椋庢櫙涓嶅悓'
+        ]
+    }
+};
+
+// 鍒囨崲鏍囩
+function switchTab(tabId) {
+    // 闅愯棌鎵€鏈?section
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    // 鏄剧ず閫変腑鐨?section
+    document.getElementById(tabId).classList.add('active');
+    
+    // 楂樹寒鎸夐挳
+    event.currentTarget.classList.add('active');
+}
+
+// 鎾斁榫欓緳璁叉晠浜?function playStory() {
+    const storyText = document.getElementById('storyText').textContent;
+    
+    console.log('馃攰 鍑嗗鎾斁鏁呬簨...');
+    console.log('鏁呬簨鍐呭闀垮害:', storyText.length);
+    
+    if (!storyText || storyText === '鍔犺浇涓?..' || storyText.trim().length < 10) {
+        showToast('鉂?鏁呬簨鍐呭灏氭湭鍔犺浇锛岃绋嶅悗鍐嶈瘯');
+        console.error('鉂?鏁呬簨鍐呭涓虹┖鎴栧お鐭?);
+        return;
+    }
+    
+    // 浣跨敤娴忚鍣ㄨ闊冲悎鎴?    if ('speechSynthesis' in window) {
+        // 鍋滄褰撳墠鎾斁
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(storyText);
+        
+        // 璁剧疆榫欓緳鐨勫０闊筹紙鍙埍绔ュ０锛?        utterance.rate = 1.4;  // 绋嶅揩锛屽儚瀛╁瓙璇磋瘽
+        utterance.pitch = 1.8; // 楂橀煶璋冿紝鍙埍
+        utterance.volume = 1.0;
+        utterance.lang = 'zh-CN';
+        
+        // 灏濊瘯鏌ユ壘涓枃濂冲０/绔ュ０
+        try {
+            const voices = speechSynthesis.getVoices();
+            console.log('馃帳 鍙敤璇煶:', voices.length);
+            
+            if (voices.length > 0) {
+                const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+                if (zhVoice) {
+                    utterance.voice = zhVoice;
+                    console.log('鉁?浣跨敤涓枃璇煶:', zhVoice.name);
+                } else {
+                    console.log('鈿狅笍 鏈壘鍒颁腑鏂囪闊筹紝浣跨敤榛樿璇煶');
+                }
+            } else {
+                console.log('鈿狅笍 璇煶鍒楄〃涓虹┖锛屾煇浜涙祻瑙堝櫒闇€瑕佺敤鎴蜂氦浜掑悗鎵嶈兘鍔犺浇璇煶');
+            }
+        } catch (e) {
+            console.error('鉂?鑾峰彇璇煶鍒楄〃澶辫触:', e);
+        }
+        
+        // 鎾斁鐘舵€?        utterance.onstart = () => {
+            console.log('鉁?寮€濮嬫挱鏀?);
+            showToast('馃攰 榫欓緳姝ｅ湪璁叉晠浜?..');
+        };
+        
+        utterance.onend = () => {
+            console.log('鉁?鎾斁瀹屾垚');
+            showToast('鉁?鏁呬簨璁插畬鍟?);
+        };
+        
+        utterance.onerror = (event) => {
+            console.error('鉂?璇煶鎾斁澶辫触:', event);
+            showToast('鉂?鎾斁澶辫触锛岃妫€鏌ラ煶閲?);
+        };
+        
+        console.log('馃殌 寮€濮嬫挱鏀?..');
+        window.speechSynthesis.speak(utterance);
+        
+        // 楠岃瘉鏄惁鐪熺殑寮€濮嬫挱鏀?        setTimeout(() => {
+            if (window.speechSynthesis.speaking) {
+                console.log('鉁?纭姝ｅ湪鎾斁');
+            } else {
+                console.warn('鈿狅笍 鎾斁鍙兘鏈紑濮?);
+                showToast('鈿狅笍 鎾斁鏈紑濮嬶紝璇风偣鍑婚噸璇?);
+            }
+        }, 500);
+        
+    } else {
+        console.error('鉂?娴忚鍣ㄤ笉鏀寔璇煶鍚堟垚');
+        showToast('鉂?鎮ㄧ殑娴忚鍣ㄤ笉鏀寔璇煶鎾斁');
+    }
+}
+
+// 鏄剧ず Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// 鍔犺浇 POI 鏁版嵁
+function loadPOIData(poiId) {
+    console.log('馃摉 鍔犺浇 POI 鏁版嵁:', poiId);
+    
+    const data = POI_DATA[poiId] || POI_DATA.longhua_temple;
+    
+    if (data) {
+        // 濉厖鏁呬簨鍐呭
+        const storyElement = document.getElementById('storyText');
+        storyElement.textContent = data.story;
+        console.log('鉁?鏁呬簨鍐呭宸插姞杞斤紝闀垮害:', data.story.length);
+        
+        // 濉厖鐓х墖锛堝鏋滄湁锛?        if (data.photos && data.photos.length > 0) {
+            const photoGrid = document.getElementById('photoGrid');
+            photoGrid.innerHTML = data.photos.map(p => 
+                `<div style="margin-bottom:12px"><div style="background:#f0f0f0;height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999">${p.desc}</div></div>`
+            ).join('');
+        }
+        
+        // 鏇存柊鏍囬
+        document.querySelector('.header h1').textContent = '馃椇锔?' + data.name + ' - 璇︽儏';
+    } else {
+        console.error('鉂?鏈壘鍒?POI 鏁版嵁:', poiId);
+        document.getElementById('storyText').textContent = '鏆傛棤鏁呬簨鍐呭';
+    }
+}
+
+// 鑾峰彇褰撳墠 POI
+function getCurrentPOI() {
+    const params = new URLSearchParams(window.location.search);
+    const poi = params.get('poi');
+    console.log('馃彿锔?褰撳墠 POI:', poi || 'longhua_temple (榛樿)');
+    return poi || 'longhua_temple';
+}
+
+// 椤甸潰鍔犺浇瀹屾垚
+window.addEventListener('load', () => {
+    console.log('鉁?椤甸潰鍔犺浇瀹屾垚');
+    
+    // 棰勫姞杞借闊冲垪琛紙鏌愪簺娴忚鍣ㄩ渶瑕侊級
+    if ('speechSynthesis' in window) {
+        try {
+            const voices = speechSynthesis.getVoices();
+            console.log('馃帳 棰勫姞杞借闊冲垪琛?', voices.length, '涓闊?);
+        } catch (e) {
+            console.log('鈿狅笍 璇煶棰勫姞杞藉彲鑳介渶瑕佺敤鎴蜂氦浜?);
+        }
+    }
+    
+    // 鍔犺浇 POI 鏁版嵁
+    const poiId = getCurrentPOI();
+    loadPOIData(poiId);
+});
+
+// 璇煶鍔犺浇瀹屾垚浜嬩欢锛堟煇浜涙祻瑙堝櫒闇€瑕侊級
+if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = () => {
+        console.log('馃帳 璇煶鍒楄〃宸叉洿鏂?);
+        const voices = speechSynthesis.getVoices();
+        console.log('馃搳 鍙敤璇煶鏁伴噺:', voices.length);
+    };
+}
+</script>
+
+</body>
+</html>
+

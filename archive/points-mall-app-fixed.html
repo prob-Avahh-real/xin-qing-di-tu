@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>积分商城 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+        .status-bar{height:44px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;position:relative;flex-shrink:0}
+        .status-bar .mascot{font-size:1.2rem;margin-right:8px}
+        .pages-container{flex:1;position:relative;overflow:hidden}
+        .page{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;background:#f5f5f5;display:none}
+        .page.active{display:block}
+        .page-content{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .points-card{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;margin:12px 16px;padding:16px;border-radius:16px;box-shadow:0 4px 12px rgba(249,181,114,0.3)}
+        .points-card .label{font-size:0.8rem;opacity:0.9;margin-bottom:4px}
+        .points-card .number{font-size:2.5rem;font-weight:700;line-height:1}
+        .countdown{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);color:white;margin:12px 16px;padding:12px;border-radius:16px;text-align:center}
+        .countdown .title{font-size:0.75rem;margin-bottom:8px;opacity:0.9}
+        .countdown-timer{display:flex;justify-content:center;gap:12px}
+        .countdown-item{text-align:center}
+        .countdown-item .number{font-size:1.5rem;font-weight:700;color:#F9B572}
+        .countdown-item .label{font-size:0.65rem;opacity:0.8}
+        .progress{background:white;margin:12px 16px;padding:12px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .progress-header{display:flex;justify-content:space-between;margin-bottom:8px}
+        .progress-header .title{font-size:0.8rem;color:#5a4a42;font-weight:600}
+        .progress-header .current{font-size:0.8rem;color:#E87A5D;font-weight:700}
+        .progress-bar{height:8px;background:#f0e6de;border-radius:4px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#F9B572,#E87A5D);border-radius:4px;transition:width 0.5s}
+        .section-title{font-size:0.85rem;font-weight:600;color:#5a4a42;padding:12px 16px 8px}
+        .tabs{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .tab{background:white;border:1px solid #ffe0d0;padding:6px 14px;border-radius:16px;font-size:0.7rem;font-weight:600;color:#7a5a48;white-space:nowrap;flex-shrink:0}
+        .tab.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-color:transparent}
+        .rewards{padding:0 16px 16px}
+        .reward-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+        .reward-card{background:white;border-radius:12px;overflow-hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer}
+        .reward-card:active{transform:scale(0.98)}
+        .reward-card .image{height:100px;background:linear-gradient(135deg,#fef3e4,#fee6d6);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative}
+        .reward-card .badge{position:absolute;top:6px;right:6px;background:#F9B572;color:white;padding:2px 6px;border-radius:8px;font-size:0.6rem;font-weight:600}
+        .reward-card .badge.hot{background:#ef4444}
+        .reward-card .content{padding:10px}
+        .reward-card .title{font-size:0.8rem;font-weight:600;color:#5a4a42;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .reward-card .desc{font-size:0.65rem;color:#7a5a48;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .reward-card .footer{display:flex;justify-content:space-between;align-items:center}
+        .reward-card .points{color:#E87A5D;font-weight:700;font-size:0.8rem}
+        .reward-card .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:4px 10px;border-radius:12px;font-size:0.65rem;font-weight:600}
+        .reward-card .btn:disabled{background:#d1d5db}
+        .tasks{padding:0 16px 16px}
+        .task-item{background:white;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+        .task-item .icon{font-size:1.5rem}
+        .task-item .info{flex:1;min-width:0}
+        .task-item .title{font-size:0.8rem;font-weight:600;color:#5a4a42;margin-bottom:2px}
+        .task-item .desc{font-size:0.65rem;color:#7a5a48;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .task-item .points{color:#E87A5D;font-weight:700;font-size:0.75rem;margin:0 8px}
+        .task-item .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:6px 12px;border-radius:12px;font-size:0.65rem;font-weight:600;flex-shrink:0}
+        .task-item .btn.completed{background:#10b981}
+        .task-header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:20px 16px;text-align:center}
+        .task-header h2{font-size:1.2rem;margin-bottom:4px}
+        .task-header p{font-size:0.75rem;opacity:0.9}
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh}
+        .empty-state .icon{font-size:4rem;margin-bottom:16px;opacity:0.5}
+        .empty-state .text{font-size:0.9rem;color:#999}
+        .profile-header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:30px 16px;text-align:center}
+        .profile-header .avatar{font-size:4rem;margin-bottom:12px;display:block}
+        .profile-header .name{font-size:1.2rem;font-weight:600;margin-bottom:4px}
+        .profile-header .desc{font-size:0.8rem;opacity:0.9}
+        .menu-list{background:white;margin:12px 16px;border-radius:16px;overflow:hidden}
+        .menu-item{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+        .menu-item:last-child{border-bottom:none}
+        .menu-item:active{background:#f5f5f5}
+        .menu-item .icon{font-size:1.5rem}
+        .menu-item .title{flex:1;font-size:0.9rem;color:#333}
+        .menu-item .arrow{color:#999}
+        .tab-bar{height:60px;background:white;border-top:1px solid #e0e0e0;display:flex;justify-content:space-around;align-items:center;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+        .tab-item{flex:1;text-align:center;color:#999;font-size:0.7rem;transition:all 0.2s;cursor:pointer}
+        .tab-item.active{color:#E87A5D}
+        .tab-item .icon{font-size:1.5rem;display:block;margin-bottom:4px}
+        .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 20px;border-radius:12px;font-size:0.8rem;z-index:1000;display:none}
+        .page{transition:transform 0.3s ease-in-out}
+        .page.entering{transform:translateX(100%);display:block}
+        .page.entering.active{transform:translateX(0)}
+        .page.leaving{transform:translateX(-100%)}
+    </style>
+</head>
+<body>
+<div class="status-bar">
+    <span class="mascot">🐱</span>
+    <span id="pageTitle">积分商城</span>
+</div>
+<div class="pages-container">
+    <div class="page active" id="page-home">
+        <div class="page-content">
+            <div class="points-card">
+                <div class="label">我的积分</div>
+                <div class="number" id="myPoints">470</div>
+            </div>
+            <div class="countdown">
+                <div class="title">🎋 距离龙华庙会开启</div>
+                <div class="countdown-timer">
+                    <div class="countdown-item">
+                        <div class="number" id="days">7</div>
+                        <div class="label">天</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="number" id="hours">0</div>
+                        <div class="label">时</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="number" id="minutes">0</div>
+                        <div class="label">分</div>
+                    </div>
+                </div>
+            </div>
+            <div class="progress">
+                <div class="progress-header">
+                    <span class="title">🎯 许愿池进度</span>
+                    <span class="current" id="progressCurrent">470/1000</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width:47%"></div>
+                </div>
+            </div>
+            <div class="tabs" id="rewardTabs">
+                <div class="tab active" data-category="all">全部</div>
+                <div class="tab" data-category="cultural">文创</div>
+                <div class="tab" data-category="experience">体验</div>
+                <div class="tab" data-category="digital">数字</div>
+                <div class="tab" data-category="merit">公益</div>
+            </div>
+            <div class="section-title">🎁 新货上架</div>
+            <div class="rewards">
+                <div class="reward-grid" id="rewardGrid"></div>
+            </div>
+            <div class="section-title">📋 快速任务</div>
+            <div class="tasks" id="homeTaskList"></div>
+        </div>
+    </div>
+    <div class="page" id="page-tasks">
+        <div class="page-content">
+            <div class="task-header">
+                <h2>💰 赚取积分</h2>
+                <p>完成任务获得积分奖励</p>
+            </div>
+            <div class="tasks" id="taskList"></div>
+        </div>
+    </div>
+    <div class="page" id="page-orders">
+        <div class="page-content">
+            <div class="empty-state">
+                <span class="icon">📦</span>
+                <span class="text">暂无订单</span>
+            </div>
+        </div>
+    </div>
+    <div class="page" id="page-profile">
+        <div class="page-content">
+            <div class="profile-header">
+                <span class="avatar">🐱</span>
+                <div class="name">福来守护者</div>
+                <div class="desc">已积累 470 积分</div>
+            </div>
+            <div class="menu-list">
+                <div class="menu-item" onclick="showToast('📦 我的订单')">
+                    <span class="icon">📦</span>
+                    <span class="title">我的订单</span>
+                    <span class="arrow">›</span>
+                </div>
+                <div class="menu-item" onclick="showToast('📊 统计')">
+                    <span class="icon">📊</span>
+                    <span class="title">积分统计</span>
+                    <span class="arrow">›</span>
+                </div>
+                <div class="menu-item" onclick="showToast('⚙️ 设置')">
+                    <span class="icon">⚙️</span>
+                    <span class="title">设置</span>
+                    <span class="arrow">›</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-bar">
+    <div class="tab-item active" onclick="switchPage('home', this)">
+        <span class="icon">🏠</span>
+        <span>首页</span>
+    </div>
+    <div class="tab-item" onclick="switchPage('tasks', this)">
+        <span class="icon">💰</span>
+        <span>任务</span>
+    </div>
+    <div class="tab-item" onclick="switchPage('orders', this)">
+        <span class="icon">📦</span>
+        <span>订单</span>
+    </div>
+    <div class="tab-item" onclick="switchPage('profile', this)">
+        <span class="icon">👤</span>
+        <span>我的</span>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let userPoints = parseInt(localStorage.getItem('pathjoy_points')) || 470;
+let userTasks = JSON.parse(localStorage.getItem('pathjoy_tasks')) || [];
+const REWARDS = [
+    {id:1,title:'福来毛绒公仔',desc:'20cm 超萌玩偶',points:200,category:'cultural',image:'🧸',badge:'hot'},
+    {id:2,title:'龙华寺纪念徽章',desc:'纯铜打造，限量款',points:300,category:'cultural',image:'🎖️',badge:'hot'},
+    {id:3,title:'庙会体验券',desc:'免费参加庙会活动',points:500,category:'experience',image:'🎪',badge:'new'},
+    {id:4,title:'素斋体验券',desc:'龙华素斋，禅意美食',points:800,category:'experience',image:'🍜',badge:''},
+    {id:5,title:'电子祝福卡',desc:'发送好友，传递祝福',points:99,category:'digital',image:'💌',badge:''},
+    {id:6,title:'明信片套装',desc:'12 张龙华风景明信片',points:150,category:'cultural',image:'📮',badge:''},
+    {id:7,title:'幸运御守',desc:'保佑平安，限量 1000 个',points:250,category:'cultural',image:'🎐',badge:'new'},
+    {id:8,title:'公益捐赠',desc:'支持古建维护',points:10,category:'merit',image:'🙏',badge:''},
+    {id:9,title:'文创盲盒',desc:'随机一款，惊喜满满',points:180,category:'cultural',image:'🎁',badge:'hot'},
+    {id:10,title:'传统手工艺体验',desc:'学习传统工艺制作',points:350,category:'experience',image:'🎨',badge:''}
+];
+const TASKS = [
+    {id:1,title:'完整路线打卡',desc:'走完全部景点',points:100,icon:'✅'},
+    {id:2,title:'分享打卡',desc:'分享到社交平台',points:50,icon:'📤'},
+    {id:3,title:'阅读知识库',desc:'阅读历史文化文章',points:30,icon:'📖'},
+    {id:4,title:'发布动态',desc:'分享游玩体验',points:40,icon:'📝'},
+    {id:5,title:'寻找隐藏彩蛋',desc:'找到 3 个隐藏彩蛋',points:80,icon:'🥚'},
+    {id:6,title:'邀请好友',desc:'邀请好友注册使用',points:60,icon:'👥'},
+    {id:7,title:'参加公益活动',desc:'参与庙会/公益打扫',points:100,icon:'❤️'},
+    {id:8,title:'连续签到',desc:'连续签到使用 7 天',points:150,icon:'📅'}
+];
+function switchPage(pageName, tabElement) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    tabElement.classList.add('active');
+    const titles = {'home':'积分商城','tasks':'任务中心','orders':'我的订单','profile':'个人中心'};
+    document.getElementById('pageTitle').textContent = titles[pageName];
+    document.querySelectorAll('.page').forEach(p => {p.classList.remove('active','entering','leaving');});
+    const targetPage = document.getElementById('page-' + pageName);
+    targetPage.classList.add('entering');
+    setTimeout(() => {targetPage.classList.add('active');targetPage.classList.remove('entering');}, 300);
+    targetPage.querySelector('.page-content').scrollTop = 0;
+}
+function init() {updatePoints();renderRewards('all');renderTasks();setupTabs();startCountdown();}
+function updatePoints() {
+    document.getElementById('myPoints').textContent = userPoints;
+    localStorage.setItem('pathjoy_points', userPoints.toString());
+    const progress = Math.min((userPoints / 1000) * 100, 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressCurrent').textContent = userPoints + '/1000';
+    document.querySelectorAll('.task-btn').forEach(btn => {
+        const taskId = parseInt(btn.getAttribute('data-task-id'));
+        if (userTasks.includes(taskId)) {btn.classList.add('completed');btn.textContent='✔';btn.disabled=true;}
+    });
+}
+function renderRewards(category) {
+    const grid = document.getElementById('rewardGrid');
+    const filtered = category === 'all' ? REWARDS : REWARDS.filter(r => r.category === category);
+    grid.innerHTML = filtered.map(r => `
+        <div class="reward-card" onclick="exchange(${r.id})">
+            <div class="image">${r.image}${r.badge ? `<span class="badge ${r.badge}">${r.badge==='hot'?'热门':'新品'}</span>` : ''}</div>
+            <div class="content">
+                <div class="title">${r.title}</div>
+                <div class="desc">${r.desc}</div>
+                <div class="footer">
+                    <span class="points">${r.points}积分</span>
+                    <button class="btn" ${userPoints < r.points ? 'disabled' : ''}>${userPoints < r.points ? '积分不足':'兑换'}</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+function renderTasks() {
+    const homeList = document.getElementById('homeTaskList');
+    const taskList = document.getElementById('taskList');
+    const html = TASKS.map(t => {
+        const completed = userTasks.includes(t.id);
+        return `<div class="task-item">
+            <span class="icon">${t.icon}</span>
+            <div class="info"><div class="title">${t.title}</div><div class="desc">${t.desc}</div></div>
+            <span class="points">+${t.points}</span>
+            <button class="btn ${completed ? 'completed' : ''}" data-task-id="${t.id}" onclick="completeTask(${t.id})" ${completed ? 'disabled' : ''}>${completed ? '✔' :'去完成'}</button>
+        </div>`;
+    }).join('');
+    if (homeList) homeList.innerHTML = html.slice(0, 3);
+    if (taskList) taskList.innerHTML = html;
+}
+function completeTask(id) {
+    const task = TASKS.find(t => t.id === id);
+    userTasks.push(id);
+    userPoints += task.points;
+    localStorage.setItem('pathjoy_tasks', JSON.stringify(userTasks));
+    updatePoints();
+    renderTasks();
+    renderRewards(document.querySelector('.tab.active')?.dataset.category || 'all');
+    showToast(`✔ +${task.points}积分`);
+}
+function exchange(id) {
+    const reward = REWARDS.find(r => r.id === id);
+    if (userPoints < reward.points) {showToast('❌ 积分不足');return;}
+    if (confirm(`兑换 ${reward.title}？\n需要${reward.points}积分`)) {
+        userPoints -= reward.points;
+        updatePoints();
+        renderRewards(document.querySelector('.tab.active')?.dataset.category || 'all');
+        showToast('✔ 兑换成功');
+        const orders = JSON.parse(localStorage.getItem('pathjoy_orders') || '[]');
+        orders.push({rewardId:reward.id,title:reward.title,points:reward.points,date:new Date().toISOString()});
+        localStorage.setItem('pathjoy_orders', JSON.stringify(orders));
+        renderOrders();
+    }
+}
+function renderOrders() {
+    const orders = JSON.parse(localStorage.getItem('pathjoy_orders') || '[]');
+    const ordersPage = document.getElementById('page-orders');
+    if (orders.length === 0) {
+        ordersPage.innerHTML = `<div class="page-content"><div class="empty-state"><span class="icon">📦</span><span class="text">暂无订单</span></div></div>`;
+    } else {
+        ordersPage.innerHTML = `<div class="page-content"><div style="padding:16px">
+            ${orders.map(o => `<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                    <span style="font-size:0.8rem;font-weight:600;color:#333">${o.title}</span>
+                    <span style="font-size:0.75rem;color:#999">${new Date(o.date).toLocaleDateString('zh-CN')}</span>
+                </div>
+                <div style="font-size:0.75rem;color:#E87A5D">-${o.points} 积分</div>
+            </div>`).join('')}
+        </div></div>`;
+    }
+}
+function setupTabs() {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            renderRewards(this.dataset.category);
+        });
+    });
+}
+function startCountdown() {
+    const target = new Date('2026-05-01T00:00:00');
+    function update() {
+        const now = new Date();
+        const diff = target - now;
+        if (diff <= 0) {document.getElementById('countdown-timer').innerHTML = '<div style="font-size:1.2rem;color:#F9B572">🎉 庙会已开始！</div>';return;}
+        document.getElementById('days').textContent = Math.floor(diff/(1000*60*60*24));
+        document.getElementById('hours').textContent = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        document.getElementById('minutes').textContent = Math.floor((diff%(1000*60*60))/(1000*60));
+    }
+    update();
+    setInterval(update, 60000);
+}
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 2000);
+}
+init();
+</script>
+</body>
+</html>

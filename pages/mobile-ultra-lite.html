@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华·灵境向导</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:16px}
+        .container{max-width:480px;margin:0 auto}
+        .header{text-align:center;color:#fff;margin-bottom:20px}
+        .header h1{font-size:20px;margin-bottom:4px}
+        .header p{font-size:12px;opacity:.9}
+        .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+        .emotion-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+        .emotion-btn{padding:12px;border:2px solid #e5e7eb;border-radius:8px;background:#fff;font-size:24px;cursor:pointer}
+        .emotion-btn.active{border-color:#667eea;background:#f3f4f6}
+        .input-group{margin-bottom:12px}
+        .input-group input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;outline:0}
+        .input-group input:focus{border-color:#667eea}
+        .action-btn{width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px}
+        .secondary-btn{background:#f3f4f6;color:#374151}
+        .result-card{display:none}
+        .route-title{font-size:18px;font-weight:600;color:#1f2937;margin-bottom:10px}
+        .route-stats{display:flex;gap:8px;margin-bottom:12px}
+        .stat{flex:1;text-align:center;padding:8px;background:#f9fafb;border-radius:6px}
+        .stat-value{font-size:16px;font-weight:600;color:#667eea}
+        .stat-label{font-size:10px;color:#6b7280;margin-top:2px}
+        .point-list{list-style:none}
+        .point-item{padding:8px;border-left:3px solid #667eea;margin-bottom:6px;background:#f9fafb;border-radius:0 6px 6px 0}
+        .point-name{font-weight:600;color:#1f2937;font-size:13px}
+        .point-desc{font-size:11px;color:#6b7280;margin-top:2px}
+        .feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+        .feature-btn{padding:12px;background:#f9fafb;border:none;border-radius:8px;font-size:12px;color:#374151;cursor:pointer;text-align:center}
+        .feature-btn .icon{font-size:20px;display:block;margin-bottom:4px}
+        .loading{text-align:center;padding:30px;display:none}
+        .spinner{width:30px;height:30px;border:3px solid #f3f4f6;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:6px;font-size:12px;display:none;z-index:1000}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+        .modal-content{background:#fff;border-radius:12px;padding:20px;max-width:360px;width:100%}
+        .modal-title{font-size:16px;font-weight:600;margin-bottom:8px}
+        .modal-text{color:#6b7280;line-height:1.5;font-size:13px;margin-bottom:16px}
+        .modal-btn{width:100%;padding:12px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐉 龙华·灵境向导</h1>
+            <p>情绪出行规划师</p>
+        </div>
+        <div class="card">
+            <h2 style="font-size:16px;margin-bottom:12px;color:#1f2937">选择情绪</h2>
+            <div class="emotion-grid">
+                <button class="emotion-btn" data-emotion="relax">😌 放松</button>
+                <button class="emotion-btn" data-emotion="heal">😢 疗愈</button>
+                <button class="emotion-btn" data-emotion="photo">📸 拍照</button>
+                <button class="emotion-btn" data-emotion="social">👫 社交</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="customInput" placeholder="告诉我你的心情...">
+            </div>
+            <button class="action-btn" onclick="generateRoute()">✨ 生成路线</button>
+            <button class="action-btn secondary-btn" onclick="showToast('AI 推荐开发中...')">🤖 AI 推荐</button>
+        </div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color:#fff;font-size:13px">正在生成...</p>
+        </div>
+        <div class="card result-card" id="resultCard">
+            <h2 class="route-title" id="routeTitle">治愈放松之旅</h2>
+            <div class="route-stats">
+                <div class="stat">
+                    <div class="stat-value" id="scoreValue">8.5</div>
+                    <div class="stat-label">体验分</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="photoValue">5</div>
+                    <div class="stat-label">出片点</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="saveValue">50</div>
+                    <div class="stat-label">预估省¥</div>
+                </div>
+            </div>
+            <h3 style="font-size:14px;margin-bottom:8px;color:#1f2937">路线包括：</h3>
+            <ul class="point-list" id="pointList"></ul>
+        </div>
+        <div class="card">
+            <h2 style="font-size:16px;margin-bottom:12px;color:#1f2937">🎮 更多</h2>
+            <div class="feature-grid">
+                <button class="feature-btn" onclick="window.open('knowledge-base.html','_blank')"><span class="icon">📚</span>知识库</button>
+                <button class="feature-btn" onclick="showToast('AR 开发中...')"><span class="icon">🔍</span>AR 印章</button>
+                <button class="feature-btn" onclick="shareRoute()"><span class="icon">📤</span>分享</button>
+                <button class="feature-btn" onclick="showToast('PK 开发中...')"><span class="icon">👥</span>PK 挑战</button>
+                <button class="feature-btn" onclick="showEgg()"><span class="icon">🐱</span>福来猫</button>
+                <button class="feature-btn" onclick="showToast('音乐开发中...')"><span class="icon">🎵</span>音乐</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="eggModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🐱 龙华寺猫彩蛋</h3>
+            <p class="modal-text">寺里有只大橘猫叫"福来"，摸它耳朵会有好运。<br><br>摸左耳招桃花，摸右耳招财运。<br><br>📍 位置：龙华寺天王殿右侧石阶<br>🏆 奖励：+30 积分</p>
+            <button class="modal-btn" onclick="closeEgg()">知道了</button>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        const routes={relax:{title:'治愈放松之旅',score:8.5,photos:5,save:50,points:[{name:'龙华寺',desc:'千年古刹，静心祈福'},{name:'塔影空间',desc:'网红打卡，文艺咖啡'},{name:'西岸滨江',desc:'江风拂面，日落晚霞'}]},heal:{title:'心灵疗愈之路',score:9,photos:4,save:30,points:[{name:'龙华烈士陵园',desc:'缅怀先烈，铭记历史'},{name:'龙华寺',desc:'听钟声，品素面'},{name:'西岸美术馆',desc:'艺术治愈心灵'}]},photo:{title:'网红打卡专线',score:9.2,photos:10,save:80,points:[{name:'塔影空间',desc:'最佳机位：3 楼露台'},{name:'龙美术馆',desc:'工业风拍照圣地'},{name:'西岸大剧院',desc:'现代建筑美学'}]},social:{title:'社交聚会路线',score:8.8,photos:6,save:100,points:[{name:'龙华老街',desc:'小吃聚集地'},{name:'塔影空间',desc:'下午茶聊天'},{name:'西岸营地',desc:'户外活动社交'}]}};
+        let currentEmotion=null;
+        document.querySelectorAll('.emotion-btn').forEach(btn=>{btn.addEventListener('click',function(){document.querySelectorAll('.emotion-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');currentEmotion=this.dataset.emotion})});
+        function generateRoute(){if(!currentEmotion){showToast('请先选择一个情绪哦~');return}document.getElementById('loading').style.display='block';document.getElementById('resultCard').style.display='none';setTimeout(()=>{const route=routes[currentEmotion];document.getElementById('routeTitle').textContent=route.title;document.getElementById('scoreValue').textContent=route.score;document.getElementById('photoValue').textContent=route.photos;document.getElementById('saveValue').textContent=route.save;const pointList=document.getElementById('pointList');pointList.innerHTML=route.points.map((point,index)=>'<li class="point-item"><div class="point-name">'+(index+1)+'. '+point.name+'</div><div class="point-desc">'+point.desc+'</div></li>').join('');document.getElementById('loading').style.display='none';document.getElementById('resultCard').style.display='block';document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});speakWelcome(route.title)},1500)}
+        function speakWelcome(text){if('speechSynthesis' in window){const utterance=new SpeechSynthesisUtterance('为你推荐：'+text);utterance.lang='zh-CN';speechSynthesis.speak(utterance)}}
+        function showKnowledge(){showToast('📚 知识库开发中...')}
+        function shareRoute(){const route=routes[currentEmotion||'relax'];const text='🐉 我在龙华·灵境向导发现了一条超棒的路线！\n\n【'+route.title+'】\n⭐ 体验分：'+route.score+'/10\n📸 出片点：'+route.points.length+'个\n\n快来和我一起探索龙华吧！\n#龙华 #上海旅游 #情绪路线';if(navigator.share){navigator.share({title:'龙华·灵境向导',text:text,url:window.location.href})}else{navigator.clipboard.writeText(text);showToast('文案已复制！')}}
+        function showEgg(){document.getElementById('eggModal').style.display='flex';showToast('喵~ 福来向你问好！🐱')}
+        function closeEgg(){document.getElementById('eggModal').style.display='none'}
+        function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.style.display='block';setTimeout(()=>{toast.style.display='none'},3000)}
+        document.getElementById('eggModal').addEventListener('click',function(e){if(e.target===this)closeEgg()});
+        window.addEventListener('load',function(){setTimeout(()=>{showToast('🐉 欢迎来到龙华·灵境向导！')},500)})
+    </script>
+</body>
+</html>

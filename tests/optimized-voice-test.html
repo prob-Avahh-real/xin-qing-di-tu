@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优化语音测试 - 更自然连贯</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#f9e0c0,#fce4bc);min-height:100vh;padding:40px 20px}
+        .container{max-width:800px;margin:0 auto}
+        h1{text-align:center;color:#E87A5D;margin-bottom:30px}
+        .test-card{background:white;border-radius:24px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+        .test-card h3{color:#5a4a42;margin-bottom:16px;font-size:1.1rem}
+        .text-display{background:#fef7f2;padding:16px;border-radius:16px;margin-bottom:16px;border-left:4px solid #F9B572}
+        .text-display p{color:#5a4a42;line-height:1.8;margin-bottom:8px}
+        .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+        .btn{background:#F9B572;color:white;border:none;padding:12px 24px;border-radius:24px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .btn:hover{background:#E87A5D;transform:translateY(-2px)}
+        .btn:active{transform:scale(0.98)}
+        .btn-secondary{background:#7EAA92}
+        .btn-secondary:hover{background:#5a8a72}
+        .settings{background:#fef7f2;padding:16px;border-radius:16px;margin-top:16px}
+        .setting-item{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+        .setting-item label{min-width:80px;font-size:0.85rem;color:#7a5a48;font-weight:600}
+        .setting-item input[type="range"]{flex:1}
+        .setting-item .value{min-width:60px;text-align:right;font-size:0.85rem;color:#5a4a42;font-weight:600}
+        .tip{background:#e0f2fe;padding:12px;border-radius:12px;margin-top:16px;font-size:0.85rem;color:#0369a1}
+        .tip strong{color:#0284c7}
+        .comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+        .comparison-card{padding:16px;border-radius:16px}
+        .comparison-card.old{background:#fee2e2;border:2px solid #fca5a5}
+        .comparison-card.new{background:#d1fae5;border:2px solid #6ee7b7}
+        .comparison-card h4{font-size:0.9rem;margin-bottom:8px}
+        .comparison-card p{font-size:0.85rem;line-height:1.6}
+        .status{padding:8px 16px;border-radius:20px;font-size:0.85rem;text-align:center;margin-top:12px}
+        .status.playing{background:#fef3c7;color:#92400e}
+        .status.done{background:#d1fae5;color:#059669}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎙️ 优化语音测试</h1>
+    <p style="text-align:center;color:#7a5a48;margin-bottom:30px">更自然、更连贯、更有感情的语音合成</p>
+
+    <!-- 对比测试 -->
+    <div class="test-card">
+        <h3>📊 新旧版本对比</h3>
+        <div class="comparison">
+            <div class="comparison-card old">
+                <h4>❌ 旧版本（机械感）</h4>
+                <p>语速：1.1（太快）<br>音调：1.4（太高）<br>问题：像机器人，没有停顿，语调平淡</p>
+                <button class="btn" onclick="playOld()" style="margin-top:12px;width:100%">▶️ 听旧版本</button>
+            </div>
+            <div class="comparison-card new">
+                <h4>✅ 新版本（自然感）</h4>
+                <p>语速：0.9（适中）<br>音调：1.1（柔和）<br>优化：智能断句，语调起伏，情感丰富</p>
+                <button class="btn btn-secondary" onclick="playNew()" style="margin-top:12px;width:100%">▶️ 听新版本</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 场景 1：EMO 治愈 -->
+    <div class="test-card">
+        <h3>😔 场景 1：EMO 治愈路线</h3>
+        <div class="text-display" id="text1">
+            <p>我知道你很难过。</p>
+            <p>让福来抱抱你。</p>
+            <p>龙华寺的猫咪，在天王殿门口等你。</p>
+            <p>它不会说话，但它会轻轻蹭你的裤腿。</p>
+            <p>有时候，被理解，不需要语言。</p>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="playScene(1)">🎙️ 播放优化版</button>
+            <button class="btn btn-secondary" onclick="playSceneOld(1)">▶️ 播放旧版</button>
+        </div>
+        <div id="status1" class="status" style="display:none"></div>
+    </div>
+
+    <!-- 场景 2：拍照打卡 -->
+    <div class="test-card">
+        <h3>📸 场景 2：拍照打卡路线</h3>
+        <div class="text-display" id="text2">
+            <p>哇！这里超好拍的！</p>
+            <p>塔影空间的倒影，刷爆朋友圈。</p>
+            <p>穿白色衣服，下午三点光线最好。</p>
+            <p>怎么拍，都美！</p>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="playScene(2)">🎙️ 播放优化版</button>
+            <button class="btn btn-secondary" onclick="playSceneOld(2)">▶️ 播放旧版</button>
+        </div>
+        <div id="status2" class="status" style="display:none"></div>
+    </div>
+
+    <!-- 场景 3：约会路线 -->
+    <div class="test-card">
+        <h3>💕 场景 3：约会谈恋爱</h3>
+        <div class="text-display" id="text3">
+            <p>下午五点二十分。</p>
+            <p>太阳会落在江面上。</p>
+            <p>把天空，染成橘红色。</p>
+            <p>这个时候，最适合说...</p>
+            <p>"我喜欢你"。</p>
+            <p>因为，连夕阳都在帮你说情话。</p>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="playScene(3)">🎙️ 播放优化版</button>
+            <button class="btn btn-secondary" onclick="playSceneOld(3)">▶️ 播放旧版</button>
+        </div>
+        <div id="status3" class="status" style="display:none"></div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div class="test-card">
+        <h3>⚙️ 语音设置</h3>
+        <div class="settings">
+            <div class="setting-item">
+                <label>🎼 音调</label>
+                <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.05" value="1.1">
+                <div class="value"><span id="pitchValue">1.1</span></div>
+            </div>
+            <div class="setting-item">
+                <label>⏱️ 语速</label>
+                <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.05" value="0.9">
+                <div class="value"><span id="rateValue">0.9</span></div>
+            </div>
+            <div class="setting-item">
+                <label>🔊 音量</label>
+                <input type="range" id="volumeSlider" min="0.1" max="1.0" step="0.05" value="0.9">
+                <div class="value"><span id="volumeValue">0.9</span></div>
+            </div>
+            <div class="setting-item">
+                <label>⏸️ 停顿</label>
+                <input type="range" id="pauseSlider" min="0" max="1000" step="50" value="300">
+                <div class="value"><span id="pauseValue">300</span>ms</div>
+            </div>
+        </div>
+        <div class="tip">
+            <strong>💡 优化建议：</strong><br>
+            • 音调 1.0-1.2：柔和自然，不那么尖锐<br>
+            • 语速 0.8-1.0：慢一点更有感情<br>
+            • 停顿 200-400ms：给听众思考时间<br>
+            • 短句分开读：更有节奏感
+        </div>
+    </div>
+
+    <!-- 预设按钮 -->
+    <div class="test-card">
+        <h3>🎯 一键预设</h3>
+        <div class="controls">
+            <button class="btn" onclick="applyPreset('gentle')">🌸 温柔女声</button>
+            <button class="btn" onclick="applyPreset('cute')">🐱 可爱萝莉</button>
+            <button class="btn" onclick="applyPreset('warm')">☕ 温暖大叔</button>
+            <button class="btn" onclick="applyPreset('anime')">🎬 动漫少女</button>
+            <button class="btn btn-secondary" onclick="applyPreset('custom')">⚙️ 自定义</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let synth = window.speechSynthesis;
+let voices = [];
+let isPlaying = false;
+
+// 加载语音列表
+function loadVoices() {
+    voices = synth.getVoices();
+    console.log('可用语音:', voices.length);
+    voices.forEach((v, i) => {
+        console.log(`${i}: ${v.name} (${v.lang})`);
+    });
+}
+
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+// 更新滑块值
+function updateSliderValues() {
+    document.getElementById('pitchValue').textContent = document.getElementById('pitchSlider').value;
+    document.getElementById('rateValue').textContent = document.getElementById('rateSlider').value;
+    document.getElementById('volumeValue').textContent = document.getElementById('volumeSlider').value;
+    document.getElementById('pauseValue').textContent = document.getElementById('pauseSlider').value;
+}
+
+// 应用预设
+function applyPreset(name) {
+    const presets = {
+        gentle: { pitch: 1.15, rate: 0.85, volume: 0.9, pause: 300 },  // 温柔女声
+        cute: { pitch: 1.4, rate: 1.0, volume: 0.95, pause: 200 },     // 可爱萝莉
+        warm: { pitch: 0.9, rate: 0.85, volume: 0.9, pause: 400 },     // 温暖大叔
+        anime: { pitch: 1.5, rate: 1.1, volume: 1.0, pause: 250 },     // 动漫少女
+        custom: { pitch: 1.1, rate: 0.9, volume: 0.9, pause: 300 }     // 自定义
+    };
+    
+    const p = presets[name];
+    document.getElementById('pitchSlider').value = p.pitch;
+    document.getElementById('rateSlider').value = p.rate;
+    document.getElementById('volumeSlider').value = p.volume;
+    document.getElementById('pauseSlider').value = p.pause;
+    updateSliderValues();
+    
+    showToast(`已应用：${name}`);
+}
+
+// 智能断句 - 核心优化！
+function splitText(text) {
+    // 按句号、感叹号、问号分割
+    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+    const segments = [];
+    
+    sentences.forEach(s => {
+        // 如果句子超过 15 个字，按逗号分割
+        if (s.length > 15) {
+            const clauses = s.split(/[,,]/);
+            clauses.forEach(c => {
+                if (c.trim()) segments.push(c.trim());
+            });
+        } else {
+            if (s.trim()) segments.push(s.trim());
+        }
+    });
+    
+    return segments;
+}
+
+// 优化版播放 - 逐句播放 + 停顿
+function playOptimized(text, statusId) {
+    if (synth.speaking) {
+        synth.cancel();
+    }
+    
+    const status = document.getElementById(statusId);
+    if (status) {
+        status.style.display = 'block';
+        status.className = 'status playing';
+        status.textContent = '🔊 正在播放...';
+    }
+    
+    // 智能断句
+    const segments = splitText(text);
+    console.log('断句结果:', segments);
+    
+    const pause = parseInt(document.getElementById('pauseSlider').value);
+    let index = 0;
+    
+    function playNext() {
+        if (index >= segments.length) {
+            if (status) {
+                status.className = 'status done';
+                status.textContent = '✅ 播放完成';
+                setTimeout(() => status.style.display = 'none', 3000);
+            }
+            isPlaying = false;
+            return;
+        }
+        
+        const segment = segments[index];
+        const utterance = new SpeechSynthesisUtterance(segment);
+        
+        // 应用优化的参数
+        utterance.pitch = parseFloat(document.getElementById('pitchSlider').value);
+        utterance.rate = parseFloat(document.getElementById('rateSlider').value);
+        utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+        utterance.lang = 'zh-CN';
+        
+        // 选择语音（优先女声）
+        const zhVoices = voices.filter(v => v.lang.includes('zh'));
+        if (zhVoices.length > 0) {
+            // 尝试选择女性语音
+            const femaleVoice = zhVoices.find(v => 
+                v.name.includes('Female') || 
+                v.name.includes('Girl') ||
+                v.name.includes('女')
+            );
+            utterance.voice = femaleVoice || zhVoices[0];
+        }
+        
+        utterance.onend = () => {
+            index++;
+            setTimeout(playNext, pause); // 停顿后再读下一句
+        };
+        
+        utterance.onerror = (e) => {
+            console.error('播放错误:', e);
+            isPlaying = false;
+            if (status) {
+                status.className = 'status';
+                status.style.background = '#fee2e2';
+                status.style.color = '#dc2626';
+                status.textContent = '❌ 播放失败';
+            }
+        };
+        
+        synth.speak(utterance);
+    }
+    
+    isPlaying = true;
+    playNext();
+}
+
+// 旧版本播放（对比用）
+function playOldVersion(text, statusId) {
+    if (synth.speaking) {
+        synth.cancel();
+    }
+    
+    const status = document.getElementById(statusId);
+    if (status) {
+        status.style.display = 'block';
+        status.className = 'status playing';
+        status.textContent = '🔊 旧版本（机械感）...';
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.pitch = 1.4;   // 太高
+    utterance.rate = 1.1;    // 太快
+    utterance.volume = 1.0;
+    utterance.lang = 'zh-CN';
+    
+    utterance.onend = () => {
+        if (status) {
+            status.className = 'status done';
+            status.textContent = '✅ 旧版本播放完成';
+            setTimeout(() => status.style.display = 'none', 3000);
+        }
+    };
+    
+    synth.speak(utterance);
+}
+
+// 场景播放
+function playScene(id) {
+    const text = document.getElementById('text' + id).innerText;
+    playOptimized(text, 'status' + id);
+}
+
+function playSceneOld(id) {
+    const text = document.getElementById('text' + id).innerText;
+    playOldVersion(text, 'status' + id);
+}
+
+// 对比播放
+function playOld() {
+    const text = "我知道你很难过。让福来抱抱你。龙华寺的猫咪在天王殿门口等你。它不会说话但它会轻轻蹭你的裤腿。有时候被理解不需要语言。";
+    playOldVersion(text, null);
+}
+
+function playNew() {
+    const text = "我知道你很难过。让福来抱抱你。龙华寺的猫咪，在天王殿门口等你。它不会说话，但它会轻轻蹭你的裤腿。有时候，被理解，不需要语言。";
+    playOptimized(text, null);
+}
+
+// 工具函数
+function showToast(msg) {
+    console.log(msg);
+}
+
+// 初始化
+updateSliderValues();
+
+// 滑块事件
+['pitch', 'rate', 'volume', 'pause'].forEach(name => {
+    document.getElementById(name + 'Slider').addEventListener('input', updateSliderValues);
+});
+</script>
+</body>
+</html>

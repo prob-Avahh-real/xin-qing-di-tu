@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华寺 - 语音修复版</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px;text-align:center}
+        .header h1{font-size:1.3rem;font-weight:600}
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e0e0e0;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+        .tabs-inner{display:flex;gap:8px;max-width:600px;margin:0 auto;overflow-x:auto;padding:0 8px}
+        .tab-btn{flex-shrink:0;background:#f5f5f5;border:none;padding:8px 16px;border-radius:20px;font-size:0.85rem;color:#666;cursor:pointer;transition:all 0.3s;white-space:nowrap}
+        .tab-btn.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        main{max-width:600px;margin:0 auto;padding:16px}
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .card h3{font-size:1.1rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .story-card{text-align:center}
+        .longlong-avatar{font-size:4rem;margin-bottom:16px;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .story-text{background:#f9f5f0;border-radius:12px;padding:20px;font-size:0.95rem;line-height:1.8;color:#333;margin-bottom:16px;text-align:left}
+        .voice-btn{background:#f5eee9;border:none;padding:12px 32px;border-radius:36px;font-size:0.95rem;color:#E87A5D;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.3s;margin:8px 0}
+        .voice-btn:hover{background:#E87A5D;color:white}
+        .voice-btn.playing{background:#E87A5D;color:white;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        .nav-buttons{margin-top:20px;padding-top:20px;border-top:1px solid #e0e0e0}
+        .nav-buttons h4{font-size:1rem;color:#333;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:14px 20px;border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;margin-bottom:10px;width:100%;text-align:left}
+        .nav-btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,0.3)}
+        .nav-btn .icon{font-size:1.5rem}
+        .nav-btn .text{flex:1}
+        .nav-btn .arrow{font-size:1.2rem;opacity:0.8}
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:24px;font-size:0.9rem;display:none;z-index:1000}
+        .status{background:#f0f0f0;border-radius:8px;padding:12px;margin-top:16px;font-size:0.85rem;color:#666}
+        .status.error{background:#f8d7da;color:#721c24}
+        .status.success{background:#d4edda;color:#155724}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1>🗺️ 龙华寺</h1>
+</header>
+
+<nav class="tabs">
+    <div class="tabs-inner">
+        <button class="tab-btn active" onclick="switchTab('story')"><span class="icon">📖</span> 龙龙讲故事</button>
+        <button class="tab-btn" onclick="switchTab('photo')"><span class="icon">📸</span> 拍照点</button>
+        <button class="tab-btn" onclick="switchTab('danmu')"><span class="icon">💬</span> 弹幕</button>
+    </div>
+</nav>
+
+<main>
+    <section id="story" class="section active">
+        <div class="card">
+            <h3><span class="icon">📖</span> 龙龙讲故事</h3>
+            <div class="story-card">
+                <div class="longlong-avatar">🐉</div>
+                <div class="story-text" id="storyText">加载中...</div>
+                <button class="voice-btn" id="playBtn" onclick="togglePlay()">
+                    <span>🔊</span> <span id="playBtnText">听龙龙讲</span>
+                </button>
+                <div id="status" class="status" style="display:none"></div>
+            </div>
+            
+            <div class="nav-buttons">
+                <h4>🧭 接下来去哪？</h4>
+                <button class="nav-btn" onclick="goToPOI('longhua_pagoda')">
+                    <span class="icon">🏯</span>
+                    <span class="text">
+                        <div style="font-weight:600">龙华塔</div>
+                        <div style="font-size:0.8rem;opacity:0.9">登塔俯瞰，风景绝佳</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+                <button class="nav-btn" onclick="goToRoute('sad')">
+                    <span class="icon">😌</span>
+                    <span class="text">
+                        <div style="font-weight:600">治愈路线</div>
+                        <div style="font-size:0.8rem;opacity:0.9">18 个景点，3-4 小时</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+                <button class="nav-btn" onclick="goToFunction('tickets')">
+                    <span class="icon">🎫</span>
+                    <span class="text">
+                        <div style="font-weight:600">门票预订</div>
+                        <div style="font-size:0.8rem;opacity:0.9">官方优惠，扫码入园</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <section id="photo" class="section">
+        <div class="card">
+            <h3><span class="icon">📸</span> 最佳拍照点</h3>
+            <div style="text-align:center;padding:40px;color:#666">📸 拍照点内容</div>
+        </div>
+    </section>
+    
+    <section id="danmu" class="section">
+        <div class="card">
+            <h3><span class="icon">💬</span> 弹幕</h3>
+            <div style="text-align:center;padding:40px;color:#666">💬 弹幕内容</div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 干净的故事文本（无特殊符号，避免重复字）
+const STORY_TEXT = "我是龙龙，让我给你讲讲龙华寺的故事。龙华寺是上海最古老的寺庙，距今已经有 1700 多年历史啦。相传在三国时期，孙权为孝敬他的母亲，特地建造了这座寺庙。龙华寺的建筑布局非常讲究。沿中轴线依次是山门、弥勒殿、天王殿、大雄宝殿、三圣殿和方丈室。每当除夕之夜，寺里的钟声会敲响 108 下。寓意消除 108 种烦恼。现在的龙华寺里住着好几只可爱的猫咪。它们可是寺庙的守护神哦。";
+
+let isPlaying = false;
+let currentUtterance = null;
+let isPaused = false;
+
+// 切换标签
+function switchTab(tabId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// 初始化
+function init() {
+    console.log('页面初始化');
+    document.getElementById('storyText').textContent = STORY_TEXT;
+    
+    // 预加载语音
+    if ('speechSynthesis' in window) {
+        setTimeout(() => {
+            const voices = speechSynthesis.getVoices();
+            console.log('语音列表加载完成，共', voices.length, '个语音');
+            showStatus('语音已就绪，共' + voices.length + '个语音', 'success');
+        }, 500);
+    }
+}
+
+// 播放/暂停切换
+function togglePlay() {
+    console.log('点击播放按钮，当前状态:', isPlaying ? '播放中' : '未播放');
+    
+    if (isPlaying) {
+        stopStory();
+    } else {
+        startStory();
+    }
+}
+
+// 开始播放
+function startStory() {
+    console.log('开始播放故事');
+    
+    if (!('speechSynthesis' in window)) {
+        showStatus('您的浏览器不支持语音播放', 'error');
+        return;
+    }
+    
+    // 停止之前的播放
+    speechSynthesis.cancel();
+    
+    // 创建语音
+    currentUtterance = new SpeechSynthesisUtterance(STORY_TEXT);
+    
+    // 设置参数（自然语速）
+    currentUtterance.rate = 0.9;  // 稍慢
+    currentUtterance.pitch = 1.1; // 自然音调
+    currentUtterance.volume = 1.0;
+    currentUtterance.lang = 'zh-CN';
+    
+    // 选择中文语音
+    const voices = speechSynthesis.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+    if (zhVoice) {
+        currentUtterance.voice = zhVoice;
+        console.log('使用中文语音:', zhVoice.name);
+    } else {
+        console.log('未找到中文语音，使用默认语音');
+    }
+    
+    // 事件监听
+    currentUtterance.onstart = function() {
+        console.log('播放开始');
+        isPlaying = true;
+        isPaused = false;
+        document.getElementById('playBtn').classList.add('playing');
+        document.getElementById('playBtnText').textContent = '播放中...';
+        showStatus('龙龙正在讲故事...', 'success');
+    };
+    
+    currentUtterance.onend = function() {
+        console.log('播放结束');
+        isPlaying = false;
+        isPaused = false;
+        document.getElementById('playBtn').classList.remove('playing');
+        document.getElementById('playBtnText').textContent = '听龙龙讲';
+        showStatus('故事讲完啦！', 'success');
+    };
+    
+    currentUtterance.onerror = function(event) {
+        console.error('播放出错:', event);
+        isPlaying = false;
+        document.getElementById('playBtn').classList.remove('playing');
+        document.getElementById('playBtnText').textContent = '听龙龙讲';
+        showStatus('播放出错：' + (event.error || '未知错误'), 'error');
+    };
+    
+    // 开始播放
+    try {
+        speechSynthesis.speak(currentUtterance);
+        console.log('已提交播放请求');
+        
+        // 验证播放状态
+        setTimeout(() => {
+            if (speechSynthesis.speaking) {
+                console.log('确认正在播放');
+            } else if (speechSynthesis.pending) {
+                console.log('播放排队中');
+            } else {
+                console.warn('播放未开始');
+                showStatus('播放未开始，请点击重试', 'error');
+            }
+        }, 300);
+        
+    } catch (e) {
+        console.error('播放异常:', e);
+        showStatus('播放异常：' + e.message, 'error');
+    }
+}
+
+// 停止播放
+function stopStory() {
+    console.log('停止播放');
+    speechSynthesis.cancel();
+    isPlaying = false;
+    isPaused = false;
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('playBtnText').textContent = '听龙龙讲';
+    showStatus('已停止播放', 'success');
+}
+
+// 导航功能
+function goToPOI(poiId) {
+    showToast('前往' + (poiId === 'longhua_pagoda' ? '龙华塔' : '其他景点'));
+}
+
+function goToRoute(emotion) {
+    showToast('生成' + (emotion === 'sad' ? '治愈' : '其他') + '路线');
+}
+
+function goToFunction(func) {
+    showToast('打开' + func);
+}
+
+// Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+// 状态显示
+function showStatus(message, type) {
+    const status = document.getElementById('status');
+    status.textContent = message;
+    status.className = 'status ' + (type || '');
+    status.style.display = 'block';
+}
+
+// 页面加载
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('页面加载完成');
+    init();
+});
+
+// 语音列表变化
+if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = function() {
+        console.log('语音列表已更新');
+        const voices = speechSynthesis.getVoices();
+        console.log('现在共有', voices.length, '个语音');
+    };
+}
+</script>
+
+</body>
+</html>

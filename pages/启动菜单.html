@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺️ 心情地图 - 启动菜单</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .menu{background:white;padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:700px;width:100%}
+        h1{color:#667eea;text-align:center;margin-bottom:10px;font-size:2.5rem}
+        .subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:1.1rem}
+        .version{display:inline-block;background:#f0f0f0;padding:4px 12px;border-radius:20px;font-size:0.85rem;color:#666;margin-top:10px}
+        .btn-group{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:30px}
+        .btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:18px 20px;border-radius:12px;font-size:1rem;cursor:pointer;text-align:left;transition:all 0.2s;display:flex;align-items:center;gap:12px;font-weight:500}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(102,126,234,0.4)}
+        .btn:active{transform:translateY(-1px)}
+        .btn .emoji{font-size:28px}
+        .btn .text{flex:1}
+        .btn .desc{display:block;font-size:0.8rem;opacity:0.8;margin-top:4px}
+        .btn-primary{grid-column:1/-1;justify-content:center;text-align:center}
+        .btn-primary .emoji{font-size:32px}
+        .info{background:linear-gradient(135deg,#f5f7fa,#c3cfe2);padding:20px;border-radius:12px;margin-bottom:20px}
+        .info h3{color:#333;margin-bottom:10px;font-size:1rem}
+        .info ul{margin-left:18px;color:#555;font-size:0.9rem}
+        .info li{margin:6px 0}
+        .status{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
+        .status-item{flex:1;background:#f9f9f9;padding:12px;border-radius:8px;text-align:center}
+        .status-item .label{font-size:0.8rem;color:#999;margin-bottom:5px}
+        .status-item .value{font-size:1.2rem;font-weight:600;color:#333}
+        .status-item.success .value{color:#52c41a}
+        .status-item.warning .value{color:#faad14}
+        .shortcuts{background:#fffbe6;border:1px solid #ffe58f;padding:15px;border-radius:8px;margin-top:15px}
+        .shortcuts h4{color:#b77b5c;margin-bottom:10px;font-size:0.95rem}
+        .shortcut-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem}
+        .shortcut-item{display:flex;align-items:center;gap:8px}
+        .key{background:#f5f5f5;padding:4px 8px;border-radius:4px;font-family:monospace;font-size:0.8rem;border:1px solid #e0e0e0}
+        @media(max-width:600px){.btn-group{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="menu">
+    <h1>🗺️ 心情地图</h1>
+    <p class="subtitle">今天是什么心情，就去哪里玩</p>
+    <div style="text-align:center"><span class="version">v1.0.0 | 2026-04-24</span></div>
+
+    <!-- 状态检查 -->
+    <div class="status" style="margin-top:25px;">
+        <div class="status-item success">
+            <div class="label">项目文件</div>
+            <div class="value">✅ 就绪</div>
+        </div>
+        <div class="status-item" id="networkStatus">
+            <div class="label">网络状态</div>
+            <div class="value">🔄 检测中...</div>
+        </div>
+        <div class="status-item">
+            <div class="label">浏览器</div>
+            <div class="value" id="browserInfo">Chrome</div>
+        </div>
+    </div>
+
+    <!-- 核心功能 -->
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="openPage('demo-judge.html')">
+            <span class="emoji">🎭</span>
+            <div class="text">
+                <div>评委演示版（推荐）⭐</div>
+                <span class="desc">一键演示所有功能 + AI 对话 + 二维码扫码</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('business-pro-rich-routes.html')">
+            <span class="emoji">📱</span>
+            <div class="text">
+                <div>主 APP</div>
+                <span class="desc">12 种情绪路线</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('parking-stats.html')">
+            <span class="emoji">🅿️</span>
+            <div class="text">
+                <div>停车位统计</div>
+                <span class="desc">实时车位监控</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('points-mall-app.html')">
+            <span class="emoji">🎁</span>
+            <div class="text">
+                <div>积分商城</div>
+                <span class="desc">任务 + 兑换</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('knowledge-base.html')">
+            <span class="emoji">📚</span>
+            <div class="text">
+                <div>知识库</div>
+                <span class="desc">龙华历史文化</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('wishing-pool.html')">
+            <span class="emoji">🌊</span>
+            <div class="text">
+                <div>许愿池</div>
+                <span class="desc">时间胶囊</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('merchant-partnership.html')">
+            <span class="emoji">🏪</span>
+            <div class="text">
+                <div>商户端</div>
+                <span class="desc">入驻管理</span>
+            </div>
+        </button>
+
+        <button class="btn" onclick="openPage('admin-dashboard.html')">
+            <span class="emoji">⚙️</span>
+            <div class="text">
+                <div>管理后台</div>
+                <span class="desc">审核 + 数据</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- 使用说明 -->
+    <div class="info">
+        <h3>💡 使用说明</h3>
+        <ul>
+            <li><strong>推荐浏览器：</strong>Chrome / Edge（最新版本）</li>
+            <li><strong>网络要求：</strong>需要网络连接（地图和二维码功能）</li>
+            <li><strong>U 盘使用：</strong>整个 U 盘复制到电脑，双击此文件</li>
+            <li><strong>数据保存：</strong>数据存在浏览器中，清除缓存会丢失</li>
+        </ul>
+    </div>
+
+    <!-- 快捷键 -->
+    <div class="shortcuts">
+        <h4>⌨️ 快捷键</h4>
+        <div class="shortcut-list">
+            <div class="shortcut-item"><span class="key">F5</span> 刷新页面</div>
+            <div class="shortcut-item"><span class="key">F11</span> 全屏演示</div>
+            <div class="shortcut-item"><span class="key">Ctrl</span>+<span class="key">+</span> 放大页面</div>
+            <div class="shortcut-item"><span class="key">Ctrl</span>+<span class="key">0</span> 重置缩放</div>
+        </div>
+    </div>
+
+    <!-- 链接信息 -->
+    <div style="text-align:center;margin-top:20px;color:#999;font-size:0.85rem;">
+        <p>📂 项目位置：<code id="projectPath">E:\hackathon-travel-experience-main\</code></p>
+        <p>📅 更新日期：2026-04-24 | 🎯 黑客松提交：2026-04-25 20:00</p>
+    </div>
+</div>
+
+<script>
+// 检测网络状态
+function checkNetwork() {
+    const statusEl = document.getElementById('networkStatus');
+    if (navigator.onLine) {
+        statusEl.className = 'status-item success';
+        statusEl.innerHTML = '<div class="label">网络状态</div><div class="value">✅ 在线</div>';
+    } else {
+        statusEl.className = 'status-item warning';
+        statusEl.innerHTML = '<div class="label">网络状态</div><div class="value">⚠️ 离线</div>';
+    }
+}
+
+// 检测浏览器
+function getBrowserInfo() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Chrome')) return 'Chrome ✅';
+    if (ua.includes('Edge')) return 'Edge ✅';
+    if (ua.includes('Firefox')) return 'Firefox ⚠️';
+    if (ua.includes('Safari')) return 'Safari ⚠️';
+    return '其他 ⚠️';
+}
+
+// 打开页面
+function openPage(url) {
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+        alert('弹窗被拦截，请允许弹窗后重试');
+    }
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    checkNetwork();
+    document.getElementById('browserInfo').textContent = getBrowserInfo();
+    
+    // 监听网络变化
+    window.addEventListener('online', checkNetwork);
+    window.addEventListener('offline', checkNetwork);
+    
+    // 显示项目路径
+    const path = window.location.href.replace('/启动菜单.html', '').replace('file:///', '');
+    document.getElementById('projectPath').textContent = path + '\\';
+});
+
+// 阻止右键菜单（可选）
+// document.addEventListener('contextmenu', event => event.preventDefault());
+</script>
+</body>
+</html>

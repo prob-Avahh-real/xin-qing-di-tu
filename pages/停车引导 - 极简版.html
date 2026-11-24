@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 停车引导</title>
+    <meta name="description" content="一键导航到最近停车场">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;padding-top:70px}
+        .container{max-width:600px;margin:0 auto}
+        
+        /* 顶部导航 */
+        #moodmap-navbar{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 2px 10px rgba(0,0,0,0.2);padding:10px 20px;display:flex;justify-content:space-between;align-items:center}
+        .nav-brand{display:flex;align-items:center;gap:10px;color:white;font-size:1.1rem;font-weight:600}
+        .nav-links{display:flex;gap:8px}
+        .nav-links a{color:white;text-decoration:none;padding:6px 12px;background:rgba(255,255,255,0.2);border-radius:6px;font-size:0.9rem}
+        .nav-links a.active{background:rgba(255,255,255,0.3);font-weight:600}
+        
+        /* 主卡片 */
+        .main-card{background:white;border-radius:20px;padding:30px;margin-bottom:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center}
+        .main-card .title{font-size:2rem;margin-bottom:10px;color:#333}
+        .main-card .subtitle{font-size:1rem;color:#999;margin-bottom:30px}
+        
+        /* 推荐停车场 */
+        .recommendation{background:linear-gradient(135deg,#52c41a,#73d13d);color:white;padding:30px;border-radius:16px;margin-bottom:20px;box-shadow:0 4px 20px rgba(82,196,26,0.3)}
+        .recommendation .badge{display:inline-block;background:rgba(255,255,255,0.3);padding:6px 15px;border-radius:20px;font-size:0.85rem;margin-bottom:15px}
+        .recommendation h2{font-size:1.8rem;margin-bottom:15px}
+        .recommendation .distance{font-size:3rem;font-weight:700;margin:20px 0}
+        .recommendation .distance small{font-size:1rem;font-weight:400}
+        .recommendation .info{display:flex;justify-content:space-around;margin:20px 0}
+        .recommendation .info div{text-align:center}
+        .recommendation .info .label{font-size:0.85rem;opacity:0.9;margin-bottom:5px}
+        .recommendation .info .value{font-size:1.5rem;font-weight:600}
+        .recommendation .address{background:rgba(255,255,255,0.2);padding:15px;border-radius:12px;margin:20px 0}
+        .recommendation .address p{font-size:1rem;margin:5px 0}
+        
+        /* 导航按钮 */
+        .nav-btn{display:block;background:white;color:#52c41a;text-decoration:none;padding:18px 30px;border-radius:12px;font-size:1.3rem;font-weight:600;margin:15px 0;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:all 0.3s}
+        .nav-btn:hover{transform:translateY(-3px);box-shadow:0 6px 25px rgba(0,0,0,0.3)}
+        .nav-btn:active{transform:translateY(-1px)}
+        .nav-btn .emoji{margin-right:10px;font-size:1.5rem}
+        
+        /* 备选方案 */
+        .alternatives{background:#f9f9f9;padding:20px;border-radius:12px;margin-top:20px}
+        .alternatives h3{font-size:1.2rem;margin-bottom:15px;color:#333}
+        .alt-item{background:white;padding:15px;border-radius:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+        .alt-item .name{font-size:1rem;font-weight:600;color:#333;margin-bottom:5px}
+        .alt-item .meta{font-size:0.85rem;color:#999}
+        .alt-item .action{background:#667eea;color:white;text-decoration:none;padding:8px 15px;border-radius:8px;font-size:0.85rem;font-weight:600}
+        
+        /* 地图 */
+        .map-container{background:white;border-radius:16px;padding:20px;margin-bottom:20px}
+        .map-container h3{font-size:1.2rem;margin-bottom:15px;color:#333}
+        #mapContainer{width:100%;height:300px;border-radius:12px}
+        
+        /* 刷新按钮 */
+        .refresh-btn{background:#667eea;color:white;border:none;padding:12px 25px;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;margin-top:20px}
+        .refresh-btn:hover{background:#5568d3}
+        
+        /* 状态标签 */
+        .status-tag{display:inline-block;padding:4px 10px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-left:10px}
+        .status-good{background:#f6ffed;color:#52c41a}
+        .status-warning{background:#fffbe6;color:#faad14}
+        .status-bad{background:#fff2f0;color:#f5222d}
+    </style>
+</head>
+<body>
+<!-- 顶部导航 -->
+<div id="moodmap-navbar">
+    <div class="nav-brand">
+        <span style="font-size:1.5rem">🅿️</span>
+        <span>停车引导</span>
+    </div>
+    <div class="nav-links">
+        <a href="business-pro-fixed.html">📱 主 APP</a>
+        <a href="demo-judge-fixed.html">🎭 演示</a>
+        <a href="smart-parking.html" class="active">🅿️ 停车</a>
+        <a href="全局导航中心.html">🗺️ 导航</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 主推荐 -->
+    <div class="main-card">
+        <div class="title">🎯 推荐停车场</div>
+        <div class="subtitle">综合距离、车位、价格，为您推荐最优选择</div>
+        
+        <div class="recommendation" id="topRecommendation">
+            <div class="badge" id="recBadge">🏆 综合最优</div>
+            <h2 id="recName">正在计算...</h2>
+            <div class="distance" id="recDistance">--<small>米</small></div>
+            
+            <div class="info">
+                <div>
+                    <div class="label">空闲车位</div>
+                    <div class="value" id="recAvailable">--/--</div>
+                </div>
+                <div>
+                    <div class="label">停车费用</div>
+                    <div class="value" id="recPrice">--元</div>
+                </div>
+                <div>
+                    <div class="label">营业状态</div>
+                    <div class="value" id="recStatus">--</div>
+                </div>
+            </div>
+            
+            <div class="address">
+                <p style="opacity:0.9">📍 <span id="recAddress">--</span></p>
+                <p style="opacity:0.9;font-size:0.9rem">📞 <span id="recPhone">--</span></p>
+            </div>
+            
+            <a href="#" class="nav-btn" id="navBtn" onclick="navigate()">
+                <span class="emoji">🗺️</span>一键导航
+            </a>
+            
+            <button class="refresh-btn" onclick="refresh()">🔄 刷新数据</button>
+        </div>
+        
+        <!-- 备选方案 -->
+        <div class="alternatives" id="alternatives">
+            <h3>📋 其他停车场</h3>
+            <!-- 动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 地图 -->
+    <div class="map-container">
+        <h3>🗺️ 位置示意</h3>
+        <div id="mapContainer"></div>
+    </div>
+</div>
+
+<script>
+// 停车场数据
+const PARKINGS = [
+    {id:'p1',name:'龙华烈士陵园停车场',lat:31.179532,lng:121.443876,available:62,total:80,price:0,hours:'8:00-16:30',phone:'021-64561234',address:'龙华西路 180 号',features:['免费','爱国教育']},
+    {id:'p2',name:'龙华寺停车场',lat:31.180147,lng:121.444807,available:45,total:150,price:10,hours:'7:00-17:00',phone:'021-64567890',address:'龙华路 2853 号',features:['近景点','免费领香']},
+    {id:'p3',name:'塔影空间地下车库',lat:31.178943,lng:121.446231,available:135,total:200,price:15,hours:'9:00-21:00',phone:'021-64563456',address:'云锦路 701 号',features:['车位充足','网红打卡']},
+    {id:'p4',name:'龙华老街停车场',lat:31.181234,lng:121.443567,available:8,total:120,price:8,hours:'24 小时',phone:'021-64562345',address:'龙华路 2790 号',features:['小吃街','24 小时']},
+    {id:'p5',name:'西岸滨江公园停车场',lat:31.175234,lng:121.448765,available:92,total:180,price:10,hours:'6:00-22:00',phone:'021-64565678',address:'龙腾大道 2290 号',features:['江景','日落']},
+    {id:'p6',name:'西岸大剧院停车场',lat:31.174567,lng:121.450234,available:180,total:250,price:15,hours:'9:00-22:00',phone:'021-64566789',address:'龙腾大道 2290 号',features:['车位充足','剧院']},
+    {id:'p7',name:'龙华西路路边停车',lat:31.182345,lng:121.442345,available:28,total:50,price:6,hours:'7:00-19:00',phone:'-',address:'龙华西路近龙水北路',features:['便宜','路边']},
+    {id:'p8',name:'西岸美术馆停车场',lat:31.176543,lng:121.447654,available:78,total:150,price:12,hours:'10:00-18:00',phone:'021-64568912',address:'龙腾大道 2777 号',features:['美术馆','充足']}
+];
+
+// 用户位置（默认龙华寺）
+const USER_LAT = 31.180147;
+const USER_LNG = 121.444807;
+
+// 计算距离
+function calcDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return Math.round(R * c);
+}
+
+// 智能推荐
+function getRecommendation() {
+    return PARKINGS.map(p => {
+        const dist = calcDistance(USER_LAT, USER_LNG, p.lat, p.lng);
+        const rate = p.available / p.total;
+        
+        // 综合评分
+        let score = 0;
+        if (dist < 300) score += 40;
+        else if (dist < 500) score += 30;
+        else if (dist < 1000) score += 20;
+        else score += 10;
+        
+        score += rate * 40;
+        score += (p.price === 0 ? 20 : p.price <= 8 ? 15 : p.price <= 12 ? 10 : 5);
+        
+        if (p.available === 0) score = 0;
+        
+        return {...p, distance: dist, score};
+    }).sort((a, b) => b.score - a.score)[0];
+}
+
+// 渲染推荐
+function render() {
+    const rec = getRecommendation();
+    
+    // 更新主推荐
+    document.getElementById('recBadge').textContent = rec.price === 0 ? '🆓 免费停车' : '🏆 综合最优';
+    document.getElementById('recName').textContent = rec.name;
+    document.getElementById('recDistance').innerHTML = `${rec.distance}<small>米</small>`;
+    document.getElementById('recAvailable').textContent = `${rec.available}/${rec.total}`;
+    document.getElementById('recPrice').textContent = rec.price === 0 ? '免费' : `${rec.price}元/小时`;
+    document.getElementById('recStatus').textContent = rec.hours;
+    document.getElementById('recAddress').textContent = rec.address;
+    document.getElementById('recPhone').textContent = rec.phone;
+    
+    // 备选方案
+    const alts = PARKINGS.filter(p => p.id !== rec.id)
+        .sort((a, b) => calcDistance(USER_LAT, USER_LNG, a.lat, a.lng) - calcDistance(USER_LAT, USER_LNG, b.lat, b.lng))
+        .slice(0, 3);
+    
+    document.getElementById('alternatives').innerHTML = `
+        <h3>📋 其他停车场（按距离排序）</h3>
+        ${alts.map(alt => {
+            const dist = calcDistance(USER_LAT, USER_LNG, alt.lat, alt.lng);
+            const rate = (alt.available / alt.total * 100).toFixed(0);
+            let status = rate > 50 ? '<span class="status-tag status-good">充足</span>' : rate > 20 ? '<span class="status-tag status-warning">适中</span>' : '<span class="status-tag status-bad">紧张</span>';
+            
+            return `
+                <div class="alt-item">
+                    <div>
+                        <div class="name">${alt.name} ${status}</div>
+                        <div class="meta">${dist}米 · ${alt.available}/${alt.total}车位 · ${alt.price === 0 ? '免费' : alt.price + '元/小时'}</div>
+                    </div>
+                    <a href="https://uri.amap.com/navigation?from=${USER_LNG},${USER_LAT}&to=${alt.lng},${alt.lat}" target="_blank" class="action">🗺️ 导航</a>
+                </div>
+            `;
+        }).join('')}
+    `;
+}
+
+// 一键导航
+function navigate() {
+    const rec = getRecommendation();
+    const url = `https://uri.amap.com/navigation?from=${USER_LNG},${USER_LAT}&to=${rec.lng},${rec.lat}`;
+    window.open(url, '_blank');
+}
+
+// 刷新数据
+function refresh() {
+    document.getElementById('recName').textContent = '正在刷新...';
+    setTimeout(() => {
+        render();
+        alert('✅ 数据已刷新');
+    }, 500);
+}
+
+// 初始化地图
+function initMap() {
+    if (typeof AMap === 'undefined') {
+        document.getElementById('mapContainer').innerHTML = '<div style="height:300px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#999">地图加载中...</div>';
+        return;
+    }
+    
+    const map = new AMap.Map('mapContainer', {
+        zoom: 15,
+        center: [USER_LNG, USER_LAT],
+        mapStyle: 'amap://styles/light'
+    });
+    
+    // 用户位置
+    new AMap.Marker({
+        position: [USER_LNG, USER_LAT],
+        title: '我的位置',
+        map: map
+    });
+    
+    // 推荐停车场
+    const rec = getRecommendation();
+    new AMap.Marker({
+        position: [rec.lng, rec.lat],
+        title: `推荐：${rec.name}`,
+        map: map,
+        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png'
+    });
+}
+
+// 页面加载
+window.addEventListener('load', () => {
+    render();
+    setTimeout(initMap, 500);
+});
+</script>
+</body>
+</html>

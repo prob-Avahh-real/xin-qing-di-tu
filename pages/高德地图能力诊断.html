@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高德地图能力诊断工具</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:1000px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2rem;margin-bottom:10px}
+        header p{opacity:0.9}
+        .card{background:white;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-bottom:20px}
+        .status-item{background:#f9f9f9;padding:20px;border-radius:12px;border-left:4px solid #667eea}
+        .status-item.success{border-left-color:#52c41a}
+        .status-item.warning{border-left-color:#faad14}
+        .status-item.error{border-left-color:#f5222d}
+        .status-item h3{font-size:1rem;margin-bottom:10px;color:#333}
+        .status-item .value{font-size:1.5rem;font-weight:600;margin-bottom:5px}
+        .status-item .desc{font-size:0.85rem;color:#666}
+        .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-left:10px}
+        .badge-success{background:#52c41a;color:white}
+        .badge-warning{background:#faad14;color:white}
+        .badge-error{background:#f5222d;color:white}
+        .badge-info{background:#1890ff;color:white}
+        .capability-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px}
+        .capability-item{background:#f9f9f9;padding:15px;border-radius:12px}
+        .capability-item h4{font-size:1rem;margin-bottom:8px;color:#333;display:flex;align-items:center;gap:8px}
+        .capability-item .desc{font-size:0.85rem;color:#666;margin-bottom:10px}
+        .capability-item .status{font-size:0.85rem}
+        .capability-item .status.ok{color:#52c41a}
+        .capability-item .status.no{color:#f5222d}
+        .capability-item .status.unknown{color:#faad14}
+        .log-area{background:#1e1e1e;color:#d4d4d4;padding:15px;border-radius:8px;font-family:monospace;font-size:0.85rem;max-height:400px;overflow-y:auto}
+        .log-line{margin:5px 0}
+        .log-line.info{color:#4ec9b0}
+        .log-line.success{color:#52c41a}
+        .log-line.error{color:#f5222d}
+        .log-line.warning{color:#ce9178}
+        .btn-group{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .btn{background:#667eea;color:white;border:none;padding:12px 20px;border-radius:8px;font-size:0.95rem;cursor:pointer;font-weight:600;transition:all 0.2s}
+        .btn:hover{background:#5568d3;transform:translateY(-2px)}
+        .btn:disabled{opacity:0.5;cursor:not-allowed}
+        .test-result{margin-top:15px;padding:15px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px}
+        .map-container{width:100%;height:400px;border-radius:12px;margin-bottom:20px}
+        code{background:#f5f5f5;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.85rem;color:#f5222d}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🗺️ 高德地图能力诊断工具</h1>
+        <p>检查 API Key、已接入能力、功能测试</p>
+    </header>
+
+    <!-- API 信息 -->
+    <div class="card">
+        <h2>📋 API 配置信息</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <h3>API Key</h3>
+                <div class="value" style="font-size:1rem;font-family:monospace">03e7166e1e73fbe7d922efa31319be77</div>
+                <div class="desc">高德地图 Web 服务 Key</div>
+            </div>
+            <div class="status-item">
+                <h3>API 版本</h3>
+                <div class="value">v2.0</div>
+                <div class="desc">JavaScript API GL 版</div>
+            </div>
+            <div class="status-item">
+                <h3>加载状态</h3>
+                <div class="value" id="loadStatus">检查中...</div>
+                <div class="desc">API 脚本加载状态</div>
+            </div>
+            <div class="status-item">
+                <h3>安全密钥</h3>
+                <div class="value" id="securityStatus">未配置</div>
+                <div class="desc">2021 年后需要配置安全密钥</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 能力检测 -->
+    <div class="card">
+        <h2>⚡ 已接入能力检测</h2>
+        <div class="capability-list" id="capabilityList">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 功能测试 -->
+    <div class="card">
+        <h2>🧪 功能测试</h2>
+        <div class="btn-group">
+            <button class="btn" onclick="testMapDisplay()">1️⃣ 地图显示测试</button>
+            <button class="btn" onclick="testGeocoder()">2️⃣ 地理编码测试</button>
+            <button class="btn" onclick="testDriving()">3️⃣ 路径规划测试</button>
+            <button class="btn" onclick="testSearch()">4️⃣ 周边搜索测试</button>
+            <button class="btn" onclick="testAll()">🚀 一键全测</button>
+        </div>
+        <div id="mapContainer" class="map-container"></div>
+        <div id="testResult"></div>
+    </div>
+
+    <!-- 使用详情 -->
+    <div class="card">
+        <h2>📊 本项目高德地图使用情况</h2>
+        <div id="usageList">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 日志 -->
+    <div class="card">
+        <h2>📝 诊断日志</h2>
+        <div class="log-area" id="logArea"></div>
+    </div>
+</div>
+
+<script>
+const CAPABILITIES = [
+    {id:'map', name:'基础地图', desc:'显示地图、缩放、拖拽', test:'AMap.Map'},
+    {id:'marker', name:'标记点', desc:'添加 POI 标记', test:'AMap.Marker'},
+    {id:'geocoder', name:'地理编码', desc:'地址转坐标/坐标转地址', test:'AMap.Geocoder'},
+    {id:'driving', name:'驾车路径规划', desc:'驾车路线规划', test:'AMap.Driving'},
+    {id:'walking', name:'步行路径规划', desc:'步行路线规划', test:'AMap.Walking'},
+    {id:'transit', name:'公交路径规划', desc:'公交路线规划', test:'AMap.Transit'},
+    {id:'search', name:'周边搜索', desc:'搜索周边 POI', test:'AMap.PlaceSearch'},
+    {id:'autocomplete', name:'输入提示', desc:'搜索关键词提示', test:'AMap.AutoComplete'},
+    {id:'scale', name:'比例尺', desc:'地图比例尺', test:'AMap.Scale'},
+    {id:'toolbar', name:'工具栏', desc:'缩放/方向控制', test:'AMap.ToolBar'},
+    {id:'overview', name:'鹰眼', desc:'小地图预览', test:'AMap.OverView'},
+    {id:'heatmap', name:'热力图', desc:'数据热力图', test:'AMap.Heatmap'}
+];
+
+// 添加日志
+function addLog(message, type='info') {
+    const logArea = document.getElementById('logArea');
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    logArea.appendChild(line);
+    logArea.scrollTop = logArea.scrollHeight;
+}
+
+// 检查 API 加载
+function checkAPILoad() {
+    const loadStatus = document.getElementById('loadStatus');
+    
+    if (typeof AMap === 'undefined') {
+        loadStatus.innerHTML = '<span class="badge badge-error">❌ 未加载</span>';
+        addLog('高德地图 API 未加载', 'error');
+        return false;
+    }
+    
+    loadStatus.innerHTML = '<span class="badge badge-success">✅ 已加载</span>';
+    addLog('高德地图 API 加载成功', 'success');
+    return true;
+}
+
+// 检查安全密钥
+function checkSecurity() {
+    const statusEl = document.getElementById('securityStatus');
+    
+    if (window._AMapSecurityConfig && window._AMapSecurityConfig.jscode) {
+        statusEl.innerHTML = '<span class="badge badge-success">✅ 已配置</span>';
+        addLog('安全密钥已配置', 'success');
+    } else {
+        statusEl.innerHTML = '<span class="badge badge-warning">⚠️ 未配置</span>';
+        addLog('安全密钥未配置（v2.0 可能不需要）', 'warning');
+    }
+}
+
+// 检测能力
+function detectCapabilities() {
+    const listEl = document.getElementById('capabilityList');
+    
+    CAPABILITIES.forEach(cap => {
+        const parts = cap.test.split('.');
+        let available = typeof AMap !== 'undefined';
+        
+        if (available) {
+            let obj = AMap;
+            for (let part of parts) {
+                if (obj[part]) {
+                    obj = obj[part];
+                } else {
+                    available = false;
+                    break;
+                }
+            }
+        }
+        
+        const item = document.createElement('div');
+        item.className = 'capability-item';
+        item.innerHTML = `
+            <h4>
+                ${available ? '✅' : '❌'} ${cap.name}
+                <span class="badge ${available ? 'badge-success' : 'badge-error'}">${available ? '可用' : '不可用'}</span>
+            </h4>
+            <div class="desc">${cap.desc}</div>
+            <div class="status ${available ? 'ok' : 'no'}">
+                检测：${cap.test} → ${available ? '存在' : '不存在'}
+            </div>
+        `;
+        listEl.appendChild(item);
+        
+        addLog(`能力检测：${cap.name} - ${available ? '✅' : '❌'}`, available ? 'success' : 'error');
+    });
+}
+
+// 地图显示测试
+function testMapDisplay() {
+    addLog('开始测试：地图显示', 'info');
+    
+    try {
+        const map = new AMap.Map('mapContainer', {
+            zoom: 15,
+            center: [121.444807, 31.180147],
+            mapStyle: 'amap://styles/light'
+        });
+        
+        addLog('地图创建成功', 'success');
+        showTestResult('✅ 地图显示正常', '地图中心：龙华寺，缩放级别：15');
+    } catch (error) {
+        addLog(`地图创建失败：${error.message}`, 'error');
+        showTestResult('❌ 地图显示失败', error.message);
+    }
+}
+
+// 地理编码测试
+function testGeocoder() {
+    addLog('开始测试：地理编码', 'info');
+    
+    try {
+        const geocoder = new AMap.Geocoder();
+        geocoder.getLocation('上海市徐汇区龙华寺', (status, result) => {
+            if (status === 'complete' && result.geocodes.length) {
+                const location = result.geocodes[0].location;
+                addLog(`地理编码成功：${location.lng},${location.lat}`, 'success');
+                showTestResult('✅ 地理编码正常', `龙华寺坐标：${location.lng},${location.lat}`);
+            } else {
+                addLog('地理编码失败：无结果', 'error');
+                showTestResult('❌ 地理编码失败', '未找到匹配结果');
+            }
+        });
+    } catch (error) {
+        addLog(`地理编码失败：${error.message}`, 'error');
+        showTestResult('❌ 地理编码失败', error.message);
+    }
+}
+
+// 驾车路径规划测试
+function testDriving() {
+    addLog('开始测试：驾车路径规划', 'info');
+    
+    try {
+        const driving = new AMap.Driving({
+            map: document.getElementById('mapContainer'),
+            panel: 'testResult'
+        });
+        
+        driving.search(
+            {keyword: '龙华寺'},
+            {keyword: '东方明珠'}
+        );
+        
+        addLog('路径规划请求已发送', 'success');
+        showTestResult('🚗 路径规划中...', '正在计算从龙华寺到东方明珠的驾车路线');
+    } catch (error) {
+        addLog(`路径规划失败：${error.message}`, 'error');
+        showTestResult('❌ 路径规划失败', error.message);
+    }
+}
+
+// 周边搜索测试
+function testSearch() {
+    addLog('开始测试：周边搜索', 'info');
+    
+    try {
+        const placeSearch = new AMap.PlaceSearch({
+            pageSize: 10,
+            pageIndex: 1
+        });
+        
+        placeSearch.searchNearBy('咖啡店', [121.444807, 31.180147], 1000, (status, result) => {
+            if (status === 'complete' && result.poiList) {
+                const pois = result.poiList.pois;
+                addLog(`周边搜索成功：找到${pois.length}个咖啡店`, 'success');
+                showTestResult(`✅ 周边搜索正常`, `找到${pois.length}个咖啡店:\n${pois.map(p => p.name).join(', ')}`);
+            } else {
+                addLog('周边搜索失败：无结果', 'error');
+                showTestResult('❌ 周边搜索失败', '未找到周边 POI');
+            }
+        });
+    } catch (error) {
+        addLog(`周边搜索失败：${error.message}`, 'error');
+        showTestResult('❌ 周边搜索失败', error.message);
+    }
+}
+
+// 一键全测
+function testAll() {
+    addLog('========== 开始一键全测 ==========', 'info');
+    testMapDisplay();
+    setTimeout(() => testGeocoder(), 1000);
+    setTimeout(() => testSearch(), 2000);
+    setTimeout(() => {
+        addLog('========== 全测完成 ==========', 'success');
+    }, 3000);
+}
+
+// 显示测试结果
+function showTestResult(title, content) {
+    const resultEl = document.getElementById('testResult');
+    resultEl.innerHTML = `
+        <div class="test-result">
+            <h3 style="margin-bottom:10px">${title}</h3>
+            <p style="white-space:pre-wrap;line-height:1.6">${content}</p>
+        </div>
+    `;
+}
+
+// 显示使用情况
+function showUsage() {
+    const usageEl = document.getElementById('usageList');
+    
+    const files = [
+        {name:'business-pro-fixed.html', usage:'情绪路线地图展示、POI 标记', status:'✅ 使用中'},
+        {name:'smart-parking.html', usage:'停车场位置标记、一键导航', status:'✅ 使用中'},
+        {name:'embedded-navigation.html', usage:'嵌入式路径规划（步行/驾车/公交）', status:'✅ 使用中'},
+        {name:'demo-judge-fixed.html', usage:'评委演示地图展示', status:'✅ 使用中'}
+    ];
+    
+    usageEl.innerHTML = files.map(file => `
+        <div style="padding:15px;background:#f9f9f9;margin-bottom:10px;border-radius:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <strong style="font-size:1rem">${file.name}</strong>
+                <span class="badge badge-success">${file.status}</span>
+            </div>
+            <div style="font-size:0.85rem;color:#666">${file.usage}</div>
+        </div>
+    `).join('');
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    addLog('===== 高德地图能力诊断开始 =====', 'info');
+    
+    // 延迟检查确保 API 加载
+    setTimeout(() => {
+        checkAPILoad();
+        checkSecurity();
+        
+        if (checkAPILoad()) {
+            detectCapabilities();
+        }
+        
+        showUsage();
+        
+        addLog('===== 诊断完成 =====', 'success');
+        addLog('提示：点击下方功能测试按钮验证具体能力', 'info');
+    }, 1000);
+});
+</script>
+</body>
+</html>

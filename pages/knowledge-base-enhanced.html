@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华知识库增强版 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px 16px;position:sticky;top:0;z-index:100}
+        .header h1{font-size:1.3rem;font-weight:600;text-align:center}
+        .tabs{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;background:white;position:sticky;top:60px;z-index:99}
+        .tab{padding:8px 16px;background:#f5f5f5;border-radius:20px;font-size:14px;color:#666;cursor:pointer;white-space:nowrap}
+        .tab.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+        .content{max-width:800px;margin:0 auto;padding:16px}
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .card-title{font-size:1.1rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .card-text{font-size:0.95rem;color:#666;line-height:1.8;white-space:pre-line}
+        .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+        .tag{padding:4px 10px;background:#f3f4f6;border-radius:6px;font-size:0.75rem;color:#666}
+        .tag.hot{background:linear-gradient(135deg,#FF2442,#ff6b6b);color:white}
+        .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0}
+        .info-item{display:flex;flex-direction:column;gap:4px}
+        .info-label{font-size:0.75rem;color:#999}
+        .info-value{font-size:0.9rem;color:#333;font-weight:500}
+        .rating{color:#faad14}
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:white;padding:12px 24px;border-radius:24px;display:none;z-index:1000}
+    </style>
+</head>
+<body>
+<header class="header"><h1>📚 龙华知识库增强版</h1></header>
+<div class="tabs">
+    <div class="tab active" onclick="loadCategory('history')">📜 历史</div>
+    <div class="tab" onclick="loadCategory('culture')">🎭 人文</div>
+    <div class="tab" onclick="loadCategory('food')">🍜 美食</div>
+    <div class="tab" onclick="loadCategory('cafe')">☕ 网红咖啡</div>
+    <div class="tab" onclick="loadCategory('photo')">📸 拍照</div>
+    <div class="tab" onclick="loadCategory('art')">🎨 艺术</div>
+    <div class="tab" onclick="loadCategory('easter')">🎁 彩蛋</div>
+</div>
+<div class="content" id="content"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KNOWLEDGE = {
+history: [
+{title:'龙华寺 - 千年古刹',emoji:'🏯',content:`龙华寺始建于三国吴赤乌五年（公元 242 年），距今 1780 多年，是上海最古老的寺庙。
+
+📜 历史：孙权为母建寺，唐代赐额"龙华寺"
+🏯 建筑：伽蓝七堂制，大雄宝殿等
+🔔 龙华晚钟：除夕 108 响，消除烦恼`,tags:['三国时期','上海最古','佛教圣地'],hot:true,info:{openTime:'7:00-16:30',ticket:'免费',duration:'2-3 小时',bestTime:'清晨或傍晚'},rating:5.0},
+{title:'龙华塔 - 宋代古塔',emoji:'🗼',content:`龙华塔始建于北宋 977 年，距今 1000 多年。
+
+📐 高 40.64 米，七层八角，砖木结构
+🎨 上海保存最完好的宋代古塔
+🌟 可登塔俯瞰龙华全景`,tags:['北宋','七层八角','可登塔'],hot:true,info:{openTime:'9:00-16:00',ticket:'¥20',duration:'30-45 分钟',bestTime:'上午 9-10 点'},rating:5.0},
+{title:'龙华烈士陵园',emoji:'🎖️',content:`国家级爱国主义教育基地，1000 多位烈士在此牺牲。
+
+📍 淞沪警备司令部旧址
+🏛️ 纪念馆、纪念碑、烈士墓
+📚 适合研学、党员活动`,tags:['红色教育','爱国主义','免费'],info:{openTime:'9:00-16:30(周一闭馆)',ticket:'免费',duration:'2 小时',bestTime:'工作日'},rating:4.8}
+],
+culture: [
+{title:'龙华庙会 - 国家级非遗',emoji:'🎪',content:`📅 2026 年 4 月 19 日 -5 月 3 日（农历三月初三）
+
+🎭 舞龙舞狮、戏曲表演、非遗展示
+🍜 龙华素面、定胜糕、海棠糕
+🏆 400 多年历史，年吸引百万游客`,tags:['非遗','传统民俗','年度盛事'],hot:true,new:true,info:{openTime:'全天',ticket:'免费',duration:'3-4 小时',bestTime:'农历三月初三'},rating:5.0},
+{title:'塔影空间 - 文艺地标',emoji:'📚',content:`☕ 百年老建筑改造，咖啡 + 书店 + 展览
+📸 可远眺龙华塔，拍照出片率 100%
+🎨 文艺青年聚集地，适合约会办公`,tags:['网红打卡','文艺咖啡','龙华塔景'],hot:true,new:true,info:{openTime:'10:00-22:00',ticket:'低消 35 元',duration:'1-2 小时',bestTime:'下午 3-5 点'},rating:4.9}
+],
+food: [
+{title:'龙华素斋',emoji:'🍜',content:`🥗 罗汉面¥25、素鸭¥38、八宝饭¥28
+🍽️ 素面馆 (人均 30)、素菜馆 (人均 150)
+⏰ 10:30-21:00，初一十五人多`,tags:['寺庙素食','老字号','必吃'],hot:true,info:{openTime:'10:30-21:00',ticket:'人均 30-150 元',duration:'30-60 分钟',bestTime:'工作日午餐'},rating:4.7},
+{title:'龙华老街小吃',emoji:'🍢',content:`🍜 南翔小笼、生煎包、葱油拌面
+🍰 海棠糕、五香豆、梨膏糖
+💰 小吃 50-80 元，手信 100-200 元`,tags:['上海小吃','老街美食','手信'],hot:true,info:{openTime:'9:00-21:00',ticket:'人均 50-80 元',duration:'1-2 小时',bestTime:'晚上'},rating:4.5}
+],
+cafe: [
+{title:'Manner Coffee 龙华店',emoji:'☕',content:`☕ 拿铁¥20、澳白¥22、特调¥28-32
+🎨 极简工业风，适合拍照
+⏰ 7:30-21:00，自带杯减 5 元`,tags:['精品咖啡','上海本土','性价比高'],hot:true,new:true,info:{openTime:'7:30-21:00',ticket:'人均 20-30 元',duration:'15-30 分钟',bestTime:'早晨'},rating:4.6},
+{title:'Seesaw Coffee 西岸店',emoji:'☕',content:`☕ 创意拿铁¥32-38、手冲¥45-68
+🎨 艺术区景观，适合办公
+🍰 提拉米苏¥32、芝士蛋糕¥35`,tags:['精品咖啡','艺术区','适合办公'],hot:true,new:true,info:{openTime:'9:00-20:00',ticket:'人均 35-50 元',duration:'1-2 小时',bestTime:'工作日下午'},rating:4.7}
+],
+photo: [
+{title:'塔影空间拍照点',emoji:'📸',content:`📷 机位：一楼窗边 (塔影)、二楼露台 (合影)
+👗 穿搭：文艺风、浅色系
+🎨 最佳时间：下午 3-5 点`,tags:['拍照圣地','网红打卡','龙华塔景'],hot:true,new:true,info:{openTime:'10:00-22:00',ticket:'低消 35 元',duration:'1-2 小时',bestTime:'下午 3-5 点'},rating:4.9},
+{title:'西岸滨江日落',emoji:'🌅',content:`📷 滨江步道拍江景、龙美术馆拍工业风
+👗 穿搭：休闲度假风、亮色系
+🎨 最佳时间：日落前 1 小时`,tags:['日落拍摄','江景','免费'],hot:true,info:{openTime:'全天',ticket:'免费',duration:'1-2 小时',bestTime:'日落前'},rating:4.8}
+],
+art: [
+{title:'龙美术馆 (西岸馆)',emoji:'🎨',content:`🏛️ 工业风改造，33000 平米
+🎨 当代艺术展，票价¥80-150
+📸 旋转楼梯、挑高展厅、光影走廊`,tags:['艺术展览','工业风','拍照圣地'],hot:true,info:{openTime:'10:00-18:00(周一闭馆)',ticket:'¥80-150',duration:'2-3 小时',bestTime:'工作日上午'},rating:4.8}
+],
+easter: [
+{title:'龙华寺猫咪 - 福来',emoji:'🐱',content:`🐱 大橘猫福来，寺庙守护神
+📍 弥勒殿附近最常见
+⏰ 上午 9-10 点、下午 3-4 点`,tags:['寺庙猫咪','网红福来','治愈系'],hot:true,new:true,rating:5.0},
+{title:'隐藏机位 - 龙华塔最佳视角',emoji:'🗼',content:`📷 塔影空间二楼、龙华寺后墙、地铁天桥
+🎨 蓝调时刻、黄金时刻、夜晚亮灯
+💡 带三脚架拍夜景`,tags:['隐藏机位','拍照攻略','小众'],hot:true,new:true,rating:4.9}
+]
+};
+
+function loadCategory(cat){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+event.target.classList.add('active');
+const data=KNOWLEDGE[cat]||[];
+const container=document.getElementById('content');
+if(data.length===0){container.innerHTML='<div style="text-align:center;padding:60px;color:#999">暂无内容</div>';return;}
+container.innerHTML=data.map(item=>{
+const stars='⭐'.repeat(Math.floor(item.rating));
+return `<div class="card">
+<div class="card-title">${item.emoji} ${item.title}${item.hot?'<span class="tag hot">🔥热门</span>':''}${item.new?'<span class="tag" style="background:#52c41a;color:white">✨新增</span>':''}</div>
+<div class="card-text">${item.content}</div>
+${item.tags?`<div class="tags">${item.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
+${item.info?`<div class="info-grid">
+<div class="info-item"><div class="info-label">⏰营业时间</div><div class="info-value">${item.info.openTime}</div></div>
+<div class="info-item"><div class="info-label">🎫门票</div><div class="info-value">${item.info.ticket}</div></div>
+<div class="info-item"><div class="info-label">⏱️建议游玩</div><div class="info-value">${item.info.duration}</div></div>
+<div class="info-item"><div class="info-label">📅最佳时间</div><div class="info-value">${item.info.bestTime}</div></div>
+</div>`:''}
+${item.rating?`<div style="margin-top:12px;color:#999;font-size:0.85rem">${stars} ${item.rating}分</div>`:''}
+</div>`}).join('');
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+window.addEventListener('load',()=>loadCategory('history'));
+</script>
+</body>
+</html>

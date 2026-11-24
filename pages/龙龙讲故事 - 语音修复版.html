@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙龙讲故事 - 语音测试</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding:20px}
+        .container{max-width:600px;margin:0 auto}
+        .card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        h1{font-size:1.5rem;margin-bottom:16px;color:#333}
+        .story-text{background:#f9f5f0;border-radius:12px;padding:20px;font-size:1rem;line-height:1.8;color:#333;margin-bottom:16px}
+        .btn-group{display:flex;gap:12px;flex-wrap:wrap}
+        button{flex:1;min-width:140px;background:#F9B572;color:white;border:none;padding:14px 20px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+        button:hover{background:#E87A5D}
+        button:active{transform:scale(0.95)}
+        button:disabled{background:#ccc;cursor:not-allowed}
+        .status{background:#f0f0f0;border-radius:8px;padding:12px;margin-top:16px;font-size:0.9rem}
+        .status.success{background:#d4edda;color:#155724}
+        .status.error{background:#f8d7da;color:#721c24}
+        .status.info{background:#d1ecf1;color:#0c5460}
+        .log{background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:12px;font-family:monospace;font-size:0.85rem;max-height:300px;overflow-y:auto;margin-top:16px}
+        .volume-control{margin:16px 0}
+        .volume-control input{width:100%}
+        .voice-select{margin:16px 0}
+        .voice-select select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>🐉 龙龙讲故事 - 语音测试</h1>
+        
+        <div class="story-text" id="storyText">
+🐉 龙龙来啦！让我给你讲讲龙华寺的故事～
+
+龙华寺是上海最古老的寺庙，距今已经有 1700 多年历史啦！
+
+相传在三国时期，孙权为孝敬他的母亲，特地建造了这座寺庙。寺名"龙华"来源于佛经中的"弥勒下生，龙华三会"。
+
+龙华寺的建筑布局非常讲究，沿中轴线依次是山门、弥勒殿、天王殿、大雄宝殿、三圣殿和方丈室。
+
+每当除夕之夜，寺里的钟声会敲响 108 下，寓意消除 108 种烦恼。
+
+现在的龙华寺里住着好几只可爱的猫咪，它们可是寺庙的"守护神"哦！
+        </div>
+        
+        <div class="voice-select" id="voiceSelectContainer" style="display:none">
+            <label><strong>🎤 选择语音：</strong></label>
+            <select id="voiceSelect"></select>
+        </div>
+        
+        <div class="volume-control">
+            <label><strong>🔊 音量：</strong> <span id="volumeValue">100</span>%</label>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100">
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="playStory()" id="playBtn">
+                <span>🔊</span> 播放故事
+            </button>
+            <button onclick="stopStory()" id="stopBtn">
+                <span>⏹️</span> 停止播放
+            </button>
+            <button onclick="testVoices()" id="testBtn">
+                <span>🎤</span> 测试语音
+            </button>
+        </div>
+        
+        <div id="status" class="status info" style="display:none"></div>
+        <div class="log" id="log"></div>
+    </div>
+    
+    <div class="card">
+        <h2>💡 常见问题解决</h2>
+        <div style="margin-top:12px;font-size:0.95rem;line-height:1.8;color:#666">
+            <p><strong>1️⃣ 检查设备音量</strong><br>
+            确保手机/电脑音量已打开，未静音</p>
+            
+            <p><strong>2️⃣ 浏览器兼容性</strong><br>
+            推荐使用 Chrome、Edge、Safari 浏览器</p>
+            
+            <p><strong>3️⃣ 需要用户交互</strong><br>
+            某些浏览器需要点击页面后才能播放语音</p>
+            
+            <p><strong>4️⃣ 网络问题</strong><br>
+            某些在线语音需要网络加载</p>
+            
+            <p><strong>5️⃣ 重启浏览器</strong><br>
+            如果还是没声音，尝试关闭浏览器重新打开</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentUtterance = null;
+let isPlaying = false;
+
+// 日志函数
+function log(message, type = 'info') {
+    const logDiv = document.getElementById('log');
+    const time = new Date().toLocaleTimeString();
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    logDiv.innerHTML += `<div>[${time}] ${icon} ${message}</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+    console.log(`[${type}] ${message}`);
+}
+
+// 状态显示
+function showStatus(message, type = 'info') {
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
+}
+
+// 初始化语音列表
+function initVoices() {
+    log('🎤 初始化语音列表...');
+    
+    if (!('speechSynthesis' in window)) {
+        log('❌ 浏览器不支持语音合成', 'error');
+        showStatus('❌ 您的浏览器不支持语音播放', 'error');
+        document.getElementById('playBtn').disabled = true;
+        return;
+    }
+    
+    const voiceSelect = document.getElementById('voiceSelect');
+    const voiceSelectContainer = document.getElementById('voiceSelectContainer');
+    
+    // 加载语音列表
+    const voices = speechSynthesis.getVoices();
+    log(`📋 找到 ${voices.length} 个语音`);
+    
+    if (voices.length === 0) {
+        log('⚠️ 语音列表为空，可能需要等待', 'error');
+        showStatus('⚠️ 语音加载中，请稍后...', 'info');
+        
+        // 监听语音加载完成
+        speechSynthesis.onvoiceschanged = () => {
+            const newVoices = speechSynthesis.getVoices();
+            log(`🎉 语音列表已更新，现在 ${newVoices.length} 个语音`);
+            populateVoiceSelect(newVoices, voiceSelect);
+            voiceSelectContainer.style.display = 'block';
+        };
+        
+        // 强制刷新（某些浏览器需要）
+        setTimeout(() => {
+            const retryVoices = speechSynthesis.getVoices();
+            if (retryVoices.length > 0) {
+                populateVoiceSelect(retryVoices, voiceSelect);
+                voiceSelectContainer.style.display = 'block';
+            }
+        }, 1000);
+    } else {
+        populateVoiceSelect(voices, voiceSelect);
+        voiceSelectContainer.style.display = 'block';
+    }
+    
+    log('✅ 语音初始化完成');
+}
+
+// 填充语音选择器
+function populateVoiceSelect(voices, select) {
+    select.innerHTML = '';
+    
+    // 优先中文语音
+    const zhVoices = voices.filter(v => v.lang.includes('zh') || v.lang.includes('CN'));
+    const otherVoices = voices.filter(v => !zhVoices.includes(v));
+    
+    // 添加中文语音
+    zhVoices.forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `🇨🇳 ${voice.name} (${voice.lang})`;
+        option.dataset.voiceIndex = voices.indexOf(voice);
+        select.appendChild(option);
+    });
+    
+    // 添加分隔符
+    if (otherVoices.length > 0) {
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '─── 其他语言 ───';
+        select.appendChild(separator);
+        
+        // 添加其他语音
+        otherVoices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            option.dataset.voiceIndex = voices.indexOf(voice);
+            select.appendChild(option);
+        });
+    }
+    
+    log('✅ 语音选择器已填充');
+}
+
+// 播放故事
+function playStory() {
+    log('🚀 开始播放故事...');
+    
+    const storyText = document.getElementById('storyText').textContent.trim();
+    
+    if (!storyText || storyText.length < 10) {
+        log('❌ 故事内容太短或为空', 'error');
+        showStatus('❌ 故事内容尚未加载', 'error');
+        return;
+    }
+    
+    // 停止当前播放
+    stopStory();
+    
+    currentUtterance = new SpeechSynthesisUtterance(storyText);
+    
+    // 设置参数
+    currentUtterance.rate = 1.0;  // 正常语速
+    currentUtterance.pitch = 1.2; // 稍高音调（更亲切）
+    currentUtterance.volume = document.getElementById('volumeSlider').value / 100;
+    currentUtterance.lang = 'zh-CN';
+    
+    // 选择语音
+    const voiceSelect = document.getElementById('voiceSelect');
+    const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
+    if (selectedOption && selectedOption.dataset.voiceIndex !== undefined) {
+        const voices = speechSynthesis.getVoices();
+        const selectedVoice = voices[selectedOption.dataset.voiceIndex];
+        if (selectedVoice) {
+            currentUtterance.voice = selectedVoice;
+            log(`🎤 使用语音：${selectedVoice.name}`);
+        }
+    }
+    
+    // 事件监听
+    currentUtterance.onstart = () => {
+        isPlaying = true;
+        log('▶️ 开始播放');
+        showStatus('🔊 龙龙正在讲故事...', 'success');
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('playBtn').innerHTML = '<span>⏸️</span> 播放中...';
+    };
+    
+    currentUtterance.onend = () => {
+        isPlaying = false;
+        log('✅ 播放完成');
+        showStatus('✅ 故事讲完啦！', 'success');
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('playBtn').innerHTML = '<span>🔊</span> 重新播放';
+    };
+    
+    currentUtterance.onerror = (event) => {
+        isPlaying = false;
+        log(`❌ 播放失败：${event.error}`, 'error');
+        showStatus(`❌ 播放失败：${event.error}`, 'error');
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('playBtn').innerHTML = '<span>🔊</span> 重试播放';
+    };
+    
+    // 开始播放
+    try {
+        speechSynthesis.speak(currentUtterance);
+        log('📢 已提交到语音队列');
+        
+        // 验证播放状态
+        setTimeout(() => {
+            if (speechSynthesis.speaking) {
+                log('✅ 确认正在播放', 'success');
+            } else if (speechSynthesis.pending) {
+                log('⏳ 播放排队中...', 'info');
+            } else {
+                log('⚠️ 播放可能未开始，请检查音量', 'error');
+                showStatus('⚠️ 未检测到播放，请检查设备音量', 'info');
+            }
+        }, 500);
+        
+    } catch (e) {
+        log(`❌ 播放异常：${e.message}`, 'error');
+        showStatus(`❌ 播放异常：${e.message}`, 'error');
+    }
+}
+
+// 停止播放
+function stopStory() {
+    log('⏹️ 停止播放');
+    
+    if (speechSynthesis.speaking || speechSynthesis.pending) {
+        speechSynthesis.cancel();
+        log('✅ 已停止');
+    }
+    
+    isPlaying = false;
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('playBtn').innerHTML = '<span>🔊</span> 播放故事';
+    showStatus('⏹️ 已停止播放', 'info');
+}
+
+// 测试语音
+function testVoices() {
+    log('🎤 测试语音...');
+    
+    const voices = speechSynthesis.getVoices();
+    log(`📋 共有 ${voices.length} 个语音`);
+    
+    if (voices.length === 0) {
+        showStatus('⚠️ 未找到语音，请刷新页面', 'info');
+        return;
+    }
+    
+    // 找到第一个中文语音
+    const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+    
+    if (zhVoice) {
+        log(`🇨🇳 找到中文语音：${zhVoice.name}`);
+        showStatus(`🇨🇳 使用语音：${zhVoice.name}`, 'success');
+        
+        const testUtterance = new SpeechSynthesisUtterance('你好，我是龙龙，正在测试语音功能');
+        testUtterance.voice = zhVoice;
+        testUtterance.rate = 1.0;
+        testUtterance.pitch = 1.2;
+        testUtterance.volume = 1.0;
+        
+        testUtterance.onstart = () => log('▶️ 测试播放开始');
+        testUtterance.onend = () => log('✅ 测试播放完成');
+        testUtterance.onerror = (e) => log(`❌ 测试失败：${e.error}`, 'error');
+        
+        speechSynthesis.speak(testUtterance);
+    } else {
+        log('⚠️ 未找到中文语音，使用默认语音', 'info');
+        const testUtterance = new SpeechSynthesisUtterance('Hello, this is a voice test');
+        speechSynthesis.speak(testUtterance);
+    }
+}
+
+// 音量控制
+document.getElementById('volumeSlider').addEventListener('input', (e) => {
+    const volume = e.target.value;
+    document.getElementById('volumeValue').textContent = volume;
+    log(`🔊 音量设置为：${volume}%`);
+});
+
+// 页面加载
+window.addEventListener('load', () => {
+    log('✅ 页面加载完成');
+    initVoices();
+    
+    // 延迟加载语音列表（某些浏览器需要）
+    setTimeout(() => {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            log(`🎉 延迟加载成功，${voices.length} 个语音`);
+        }
+    }, 500);
+});
+
+// 点击页面激活音频上下文（某些浏览器需要）
+document.body.addEventListener('click', () => {
+    log('👆 用户交互 detected');
+}, {once: true});
+</script>
+
+</body>
+</html>

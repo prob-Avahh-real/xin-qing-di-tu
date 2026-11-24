@@ -1,0 +1,768 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华·灵境向导 | 丰富路线版</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(145deg,#fff9f5,#fef4ed);color:#3a2c2a;padding-bottom:30px}
+        header{background:rgba(255,250,245,0.96);padding:20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.04);border-radius:0 0 28px 28px;position:relative;}
+        header h1{font-size:1.8rem;color:#E87A5D}
+        header p{font-size:0.85rem;color:#a28c7c;margin-top:6px}
+        .back-btn{position:absolute;top:15px;left:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:8px 16px;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(249,181,114,0.3);transition:all 0.2s;}
+        .back-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(249,181,114,0.4);}
+        .input-section{padding:20px}
+        .emotion-section-title{text-align:center;font-size:0.85rem;color:#b3704b;margin-bottom:12px}
+        .emotion-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+        .emotion-btn{background:white;border:1px solid #ffe0d0;padding:12px 10px;border-radius:16px;font-size:0.85rem;font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,0.04);transition:all 0.2s;cursor:pointer;color:#5a4a42}
+        .emotion-btn .emoji{font-size:1.5rem;display:block;margin-bottom:4px}
+        .emotion-btn .label{display:block;margin-bottom:2px}
+        .emotion-btn .desc{font-size:0.7rem;color:#a28c7c;display:block}
+        .emotion-btn.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;box-shadow:0 6px 14px rgba(249,181,114,0.35);border-color:transparent;transform:translateY(-2px)}
+        .emotion-btn.active .desc{color:rgba(255,255,255,0.9)}
+        .custom-input{display:flex;flex-direction:column;gap:12px}
+        .custom-input input{padding:14px 18px;border:1px solid #ffe0d0;border-radius:44px;font-size:1rem;background:white}
+        .custom-input input:focus{outline:none;border-color:#F9B572;box-shadow:0 0 0 3px rgba(249,181,114,0.15)}
+        #generateBtn{background:#F9B572;color:white;border:none;padding:14px;border-radius:44px;font-size:1rem;font-weight:600;cursor:pointer}
+        #generateBtn:active{transform:scale(0.97);background:#E87A5D}
+        .loading{text-align:center;padding:50px 20px}
+        .loading-text{font-size:1.2rem;margin-bottom:16px;color:#E87A5D}
+        .spinner{width:48px;height:48px;border:4px solid #ffe0d0;border-top:4px solid #F9B572;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .route-display{padding:20px}
+        .route-header{background:white;border-radius:32px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(0,0,0,0.04)}
+        .route-header h2{font-size:1.6rem;color:#E87A5D;margin-bottom:6px}
+        .stats{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
+        .stats span{background:#fef7f2;padding:6px 14px;border-radius:40px;font-size:0.8rem;font-weight:500;color:#b77b5c}
+        #mapContainer{width:100%;height:280px;border-radius:28px;overflow:hidden;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.06)}
+        .route-cards{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+        .poi-card{background:white;border-radius:28px;padding:18px;border-left:5px solid #F9B572;box-shadow:0 2px 8px rgba(0,0,0,0.03);cursor:pointer;transition:all 0.25s ease;position:relative}
+        .poi-card:active{transform:scale(0.98)}
+        .poi-card .expand-hint{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.7rem;color:#c4a882;opacity:0.7}
+        /* 详情弹窗 */
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .modal-sheet{background:white;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:0;animation:slideUp 0.3s ease;box-shadow:0 -8px 40px rgba(0,0,0,0.15)}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-sheet .sheet-header{position:sticky;top:0;background:white;padding:20px 20px 12px;border-radius:28px 28px 0 0;z-index:2}
+        .modal-sheet .sheet-header h2{font-size:1.4rem;color:#3a2c2a;margin-bottom:4px}
+        .modal-sheet .sheet-header .sheet-rating{color:#ffb347;font-size:0.9rem}
+        .modal-sheet .sheet-handle{width:40px;height:4px;background:#e0d5cc;border-radius:2px;margin:0 auto 12px}
+        .modal-sheet .close-btn{position:absolute;top:16px;right:16px;background:#f5eee9;border:none;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;color:#8a7565;display:flex;align-items:center;justify-content:center}
+        .sheet-body{padding:0 20px 30px}
+        .sheet-section{margin-bottom:18px}
+        .sheet-section .section-label{font-size:0.75rem;color:#b3704b;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+        .sheet-section .section-content{font-size:0.9rem;color:#5a4a42;line-height:1.6}
+        .sheet-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+        .sheet-tag{background:#fef7f2;color:#b77b5c;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:500}
+        .sheet-tag.highlight{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        .sheet-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .sheet-info-item{background:#fef7f2;border-radius:16px;padding:14px;text-align:center}
+        .sheet-info-item .info-icon{font-size:1.3rem;margin-bottom:4px}
+        .sheet-info-item .info-value{font-size:1rem;font-weight:600;color:#5a4a42}
+        .sheet-info-item .info-label{font-size:0.7rem;color:#a28c7c;margin-top:2px}
+        .sheet-story{background:linear-gradient(135deg,#fff9f5,#fef4ed);border-radius:20px;padding:16px;border-left:4px solid #F9B572;font-size:0.88rem;color:#6b5a4e;line-height:1.7;font-style:italic}
+        .sheet-actions{display:flex;gap:10px;margin-top:16px}
+        .sheet-actions button{flex:1;padding:12px;border-radius:44px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+        .sheet-actions .nav-btn-action{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;box-shadow:0 4px 12px rgba(249,181,114,0.3)}
+        .sheet-actions .nav-btn-action:active{transform:scale(0.97)}
+        .sheet-actions .voice-btn-action{background:#f5eee9;color:#E87A5D}
+        .sheet-actions .voice-btn-action:active{transform:scale(0.97)}
+        .poi-card h3{font-size:1.1rem;margin-bottom:6px;color:#5a4a42}
+        .rating{color:#ffb347;font-size:0.85rem;margin-bottom:8px}
+        .heal-text{color:#7f6b5e;margin:8px 0;line-height:1.4;font-size:0.9rem}
+        .hook{background:#FEF3E8;color:#E87A5D;padding:5px 12px;border-radius:40px;font-size:0.75rem;display:inline-block;margin-top:8px;font-weight:500}
+        .coupon-tag{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:white;padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:600;display:inline-block;margin-top:6px}
+        .voice-btn{margin-top:12px;background:#f5eee9;border:none;padding:6px 14px;border-radius:40px;font-size:0.75rem;cursor:pointer;color:#E87A5D;display:inline-flex;align-items:center;gap:6px}
+        .bgm-card{background:linear-gradient(135deg,#f9e0c0,#fce4bc);color:#7a5a48;border-radius:28px;padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+        .bgm-card button{background:rgba(232,122,93,0.15);border:none;padding:8px 18px;border-radius:44px;color:#E87A5D;cursor:pointer;font-weight:500;margin-left:8px}
+        .egg-area{background:#fffaf5;border-radius:28px;padding:16px;margin-bottom:20px;border:1px solid #ffebdb}
+        .egg-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+        .egg-item button{background:#F9B572;border:none;padding:6px 14px;border-radius:40px;font-size:0.75rem;cursor:pointer;color:white}
+        .route-type-selector{background:white;border-radius:24px;padding:16px;margin-bottom:16px}
+        .route-type-selector h4{font-size:0.9rem;color:#b3704b;margin-bottom:12px;text-align:center}
+        .type-buttons{display:flex;gap:8px;flex-wrap:wrap}
+        .type-btn{flex:1;min-width:80px;background:#fef7f2;border:1px solid #ffe0d0;padding:8px;border-radius:20px;font-size:0.75rem;cursor:pointer;color:#7a5a48;font-weight:500}
+        .type-btn.active{background:#F9B572;color:white;border-color:#F9B572}
+        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:10px 20px;border-radius:6px;font-size:12px;display:none;z-index:1000}
+        /* 主题巴士路线卡 */
+        .bus-card{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:24px;padding:20px;margin-bottom:16px;box-shadow:0 6px 20px rgba(0,0,0,0.12);position:relative;overflow:hidden}
+        .bus-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(249,181,114,0.15),transparent);border-radius:50%}
+        .bus-card .bus-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+        .bus-card .bus-icon{font-size:1.6rem;animation:busBounce 2s ease infinite}
+        @keyframes busBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+        .bus-card .bus-name{font-size:1.1rem;font-weight:700;background:linear-gradient(90deg,#F9B572,#E87A5D);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .bus-card .bus-slogan{font-size:0.7rem;color:rgba(255,255,255,0.5);margin-left:auto;font-style:italic}
+        .bus-card .bus-route{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.06);border-radius:16px}
+        .bus-card .bus-stop{background:rgba(249,181,114,0.15);padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:500;color:#F9B572;white-space:nowrap}
+        .bus-card .bus-arrow{color:rgba(255,255,255,0.3);font-size:0.7rem}
+        .bus-card .bus-info{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+        .bus-card .bus-info span{font-size:0.75rem;color:rgba(255,255,255,0.6)}
+        .bus-card .bus-info span b{color:#F9B572}
+        .bus-card .bus-footer{display:flex;gap:8px}
+        .bus-card .bus-footer button{flex:1;padding:8px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+        .bus-card .bus-nav-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        .bus-card .bus-voice-btn{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8)}
+        .bus-card .bus-voice-btn:active,.bus-card .bus-nav-btn:active{transform:scale(0.97)}
+        .bus-tag-new{background:#ff4757;color:white;font-size:0.55rem;padding:1px 5px;border-radius:8px;margin-left:6px;font-weight:700;vertical-align:middle;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    </style>
+</head>
+<body>
+<header>
+    <button class="back-btn" onclick="window.location.href='心情地图 - 导航中心.html'">← 返回导航</button>
+    <h1>🐉 龙华·灵境向导</h1>
+    <p>丰富路线版 · 每条路线 10+ 景点</p>
+</header>
+<div class="input-section">
+    <div class="emotion-section-title">💭 今天是什么心情呢？</div>
+    <div class="emotion-buttons">
+        <button class="emotion-btn" data-emotion="sad"><span class="emoji">😔</span><span class="label">EMO 求治愈</span><span class="desc">难过/压力大</span></button>
+        <button class="emotion-btn" data-emotion="relax"><span class="emoji">😌</span><span class="label">一个人散心</span><span class="desc">静静/放空</span></button>
+        <button class="emotion-btn" data-emotion="photo"><span class="emoji">📸</span><span class="label">想出片打卡</span><span class="desc">拍照/发圈</span></button>
+        <button class="emotion-btn" data-emotion="social"><span class="emoji">👫</span><span class="label">朋友聚会</span><span class="desc">干饭/聊天</span></button>
+        <button class="emotion-btn" data-emotion="art"><span class="emoji">🎨</span><span class="label">文艺求灵感</span><span class="desc">看展/咖啡</span></button>
+        <button class="emotion-btn" data-emotion="date"><span class="emoji">💕</span><span class="label">约会谈恋爱</span><span class="desc">浪漫/甜蜜</span></button>
+        <button class="emotion-btn" data-emotion="family"><span class="emoji">👨‍👩‍👧‍👦</span><span class="label">带娃遛全家</span><span class="desc">亲子/全家</span></button>
+        <button class="emotion-btn" data-emotion="explore"><span class="emoji">🗺️</span><span class="label">探索新发现</span><span class="desc">小众/秘境</span></button>
+        <button class="emotion-btn" data-emotion="food"><span class="emoji">🍜</span><span class="label">吃货寻美食</span><span class="desc">探店/打卡</span></button>
+        <button class="emotion-btn" data-emotion="lucky"><span class="emoji">🙏</span><span class="label">祈福求好运</span><span class="desc">许愿/拜佛</span></button>
+        <button class="emotion-btn" data-emotion="fitness"><span class="emoji">🚴</span><span class="label">运动出点汗</span><span class="desc">骑行/徒步</span></button>
+        <button class="emotion-btn" data-emotion="chill"><span class="emoji">🌅</span><span class="label">躺平放松</span><span class="desc">发呆/晒太阳</span></button>
+        <button class="emotion-btn" data-emotion="tech"><span class="emoji">🚀</span><span class="label">青年机遇探索</span><span class="desc">创业/AI/充电</span></button>
+    </div>
+    <div class="route-type-selector">
+        <h4>🗺️ 路线长度偏好</h4>
+        <div class="type-buttons">
+            <button class="type-btn active" data-type="short">精华版(3-4 点)</button>
+            <button class="type-btn" data-type="medium">丰富版(6-8 点)</button>
+            <button class="type-btn" data-type="full">完整版(10-12 点)</button>
+        </div>
+        <div style="margin-top:16px;text-align:center;font-size:0.8rem;color:#a28c7c">
+            💡 当前选择：<span id="selectedTypeDisplay" style="color:#E87A5D;font-weight:600">丰富版(6-8 点)</span>
+        </div>
+    </div>
+    <div class="custom-input">
+        <input type="text" id="customQuery" placeholder="或者用一句话告诉我...">
+        <button id="generateBtn">✨ 生成我的情绪路线</button>
+    </div>
+</div>
+<div id="loading" class="loading" style="display:none">
+    <div class="loading-text">🐱 正在召唤福来...</div>
+    <div class="spinner"></div>
+</div>
+<div id="routeDisplay" class="route-display" style="display:none">
+    <div class="route-header">
+        <h2 id="routeTheme">自我疗愈之旅</h2>
+        <p id="emotionMatch" style="color:#b28b71;font-size:0.85rem"></p>
+        <div class="stats">
+            <span>📍 <span id="totalPoints">0</span>个景点</span>
+            <span>⏱️ <span id="totalTime">0</span>小时</span>
+            <span>💰 约<span id="totalCost">0</span>元</span>
+        </div>
+    </div>
+    <div id="mapContainer"></div>
+    <div id="busCard" class="bus-card" style="display:none"></div>
+    <div id="routeCards" class="route-cards"></div>
+    <div id="bgmCard" class="bgm-card" style="display:none"></div>
+    <div id="eggArea" class="egg-area"></div>
+</div>
+<div class="toast" id="toast"></div>
+<div id="poiModal"></div>
+<audio id="bgAudio" preload="none"></audio>
+<script>
+const MUSIC_MAP={
+    sad:{name:"遇见",url:"https://music.163.com/song/media/outer/url?id=186016.mp3"},
+    relax:{name:"起风了",url:"https://music.163.com/song/media/outer/url?id=402592562.mp3"},
+    photo:{name:"夏天的风",url:"https://music.163.com/song/media/outer/url?id=186790.mp3"},
+    social:{name:"小幸运",url:"https://music.163.com/song/media/outer/url?id=32834544.mp3"},
+    art:{name:"City of Stars",url:"https://music.163.com/song/media/outer/url?id=445393841.mp3"},
+    date:{name:"告白气球",url:"https://music.163.com/song/media/outer/url?id=32589056.mp3"},
+    family:{name:"稻香",url:"https://music.163.com/song/media/outer/url?id=186040.mp3"},
+    explore:{name:"平凡之路",url:"https://music.163.com/song/media/outer/url?id=28560955.mp3"},
+    food:{name:"甜蜜蜜",url:"https://music.163.com/song/media/outer/url?id=186020.mp3"},
+    lucky:{name:"好运来",url:"https://music.163.com/song/media/outer/url?id=186030.mp3"},
+    fitness:{name:"阳光彩虹小白马",url:"https://music.163.com/song/media/outer/url?id=569414519.mp3"},
+    chill:{name:"稻香",url:"https://music.163.com/song/media/outer/url?id=186040.mp3"},
+    tech:{name:"夜空中最亮的星",url:"https://music.163.com/song/media/outer/url?id=402592562.mp3"}
+};
+
+const ALL_POIS={
+sad:[
+    {name:"龙华寺",why:"千年古刹，听钟声静心。这里的猫比人更懂治愈力",score:"⭐⭐⭐⭐⭐",hook:"免费领香",tip:"寺里有只大橘猫叫'福来'",lat:31.180147,lng:121.444807,time:60,cost:0},
+    {name:"福来猫",why:"天王殿右侧石阶，摸猫耳朵招桃花，超级治愈感",score:"⭐⭐⭐⭐⭐",hook:"摸猫免费",tip:"带猫条效果更佳",lat:31.180200,lng:121.444900,time:15,cost:0},
+    {name:"龙华寺素斋馆",why:"百年老字号，素鸭一绝，暖心暖胃好",score:"⭐⭐⭐⭐",hook:"素面 5 元券",tip:"11 点前不排队",lat:31.180100,lng:121.444700,time:45,cost:50},
+    {name:"塔影空间",why:"安静角落，一杯咖啡发呆，看书写字都好看",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"窗边位置最安静",lat:31.178943,lng:121.446231,time:90,cost:38},
+    {name:"龙华烈士陵园",why:"庄严肃穆，思考人生，缅怀先烈好",score:"⭐⭐⭐⭐",hook:"免费参观",tip:"保持安静",lat:31.179532,lng:121.443876,time:30,cost:0},
+    {name:"猫咪咖啡馆",why:"5 只猫咪陪伴，撸猫治愈一切烦恼好",score:"⭐⭐⭐⭐⭐",hook:"撸猫 68 元",tip:"周末人多",lat:31.178500,lng:121.445800,time:60,cost:68},
+    {name:"西岸滨江",why:"看着日落慢慢呼吸，难过也是风景好",score:"⭐⭐⭐⭐⭐",hook:"咖啡车买一赠一",tip:"下午 5:20 江面最美",lat:31.175234,lng:121.448765,time:60,cost:25},
+    {name:"江边长椅",why:"一个人坐着听歌，看江水流淌好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带耳机",lat:31.175000,lng:121.449000,time:30,cost:0},
+    {name:"老上海茶馆",why:"听评弹，品茶，时光慢下来好",score:"⭐⭐⭐⭐",hook:"茶水 40 元",tip:"下午有评弹",lat:31.179000,lng:121.445000,time:45,cost:40},
+    {name:"许愿墙",why:"写下烦恼，挂在墙上，让风带走好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带支笔",lat:31.180300,lng:121.444600,time:10,cost:0}
+],
+relax:[
+    {name:"塔影空间",why:"窗边位置，看书发呆，一下午过去了好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"带本书",lat:31.178943,lng:121.446231,time:120,cost:38},
+    {name:"龙华寺",why:"听听钟声，心就静了好",score:"⭐⭐⭐⭐⭐",hook:"免费领香",tip:"下午 3 点人最少",lat:31.180147,lng:121.444807,time:45,cost:0},
+    {name:"西岸滨江草坪",why:"找个长椅，看云卷云舒好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带防晒",lat:31.175234,lng:121.448765,time:60,cost:0},
+    {name:"龙美术馆",why:"工业风，一个人看展，与艺术对话好",score:"⭐⭐⭐⭐⭐",hook:"门票 8 折",tip:"周一人最少",lat:31.177234,lng:121.449123,time:90,cost:80},
+    {name:"单向空间书店",why:"选一本好书，静静阅读好",score:"⭐⭐⭐⭐",hook:"免费",tip:"有咖啡区",lat:31.176500,lng:121.447500,time:60,cost:0},
+    {name:"独立咖啡馆",why:"手冲咖啡，精品豆子，品味生活好",score:"⭐⭐⭐⭐",hook:"手冲 45 元",tip:"老板很懂咖啡",lat:31.178000,lng:121.446000,time:45,cost:45},
+    {name:"西岸梦工厂",why:"水泥厂改造，工业遗迹，探索历史好",score:"⭐⭐⭐⭐",hook:"免费",tip:"周五有电影",lat:31.172000,lng:121.460000,time:45,cost:0},
+    {name:"江边步道",why:"一个人慢慢走，思绪飘荡好",score:"⭐⭐⭐⭐",hook:"免费",tip:"傍晚最美",lat:31.174500,lng:121.449500,time:30,cost:0},
+    {name:"黄昏观景点",why:"看日落最佳位置，一个人也浪漫好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"17:30 最美",lat:31.175500,lng:121.448500,time:30,cost:0}
+],
+photo:[
+    {name:"塔影空间",why:"水下倒影，刷爆朋友圈，怎么拍都美好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"穿白色衣服",lat:31.178943,lng:121.446231,time:60,cost:38},
+    {name:"龙美术馆",why:"工业风背景，怎么拍都高级好",score:"⭐⭐⭐⭐⭐",hook:"门票 8 折",tip:"周一去人少",lat:31.177234,lng:121.449123,time:90,cost:80},
+    {name:"西岸大剧院",why:"现代建筑，视觉炸裂，出片率 100%好",score:"⭐⭐⭐⭐⭐",hook:"免费参观",tip:"黄昏光线",lat:31.174567,lng:121.450234,time:45,cost:0},
+    {name:"龙华塔",why:"千年古塔，历史感，仰拍震撼好",score:"⭐⭐⭐⭐⭐",hook:"门票 20 元",tip:"9 点前人少",lat:31.180247,lng:121.444907,time:30,cost:20},
+    {name:"龙华寺红墙",why:"故宫同款红墙，汉服绝佳好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"穿汉服",lat:31.180100,lng:121.444850,time:30,cost:0},
+    {name:"西岸滨江栈道",why:"江景 + 日落，逆光剪影绝美好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"17:30 逆光",lat:31.175234,lng:121.448765,time:45,cost:0},
+    {name:"油罐艺术中心",why:"巨型油罐，超现实，广角大片好",score:"⭐⭐⭐⭐⭐",hook:"门票 100 元",tip:"带广角",lat:31.173500,lng:121.451000,time:60,cost:100},
+    {name:"西岸营地",why:"草坪 + 帐篷，户外野餐风好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带野餐道具",lat:31.173456,lng:121.451234,time:45,cost:0},
+    {name:"龙华老街牌坊",why:"老上海风情，复古滤镜好",score:"⭐⭐⭐⭐",hook:"免费",tip:"复古滤镜",lat:31.181234,lng:121.443567,time:30,cost:0},
+    {name:"塔影咖啡露台",why:"塔景 + 咖啡，俯拍绝佳好",score:"⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"二楼露台",lat:31.178950,lng:121.446240,time:30,cost:38},
+    {name:"西岸美术馆",why:"白色建筑，极简风，黑白滤镜好",score:"⭐⭐⭐⭐⭐",hook:"门票 60 元",tip:"黑白滤镜",lat:31.176543,lng:121.447654,time:60,cost:60},
+    {name:"江边芦苇丛",why:"秋冬绝美，长焦压缩感好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带长焦",lat:31.174000,lng:121.450000,time:30,cost:0}
+],
+social:[
+    {name:"龙华老街",why:"小吃聚集地，边吃边聊，热闹非凡好",score:"⭐⭐⭐⭐",hook:"小吃 9 折",tip:"周末热闹",lat:31.181234,lng:121.443567,time:60,cost:50},
+    {name:"塔影空间",why:"下午茶聊天，环境满分，拍照好看好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"提前预定",lat:31.178943,lng:121.446231,time:90,cost:68},
+    {name:"西岸营地",why:"团建游戏，飞盘桌游，互动性强好",score:"⭐⭐⭐⭐⭐",hook:"场地 30 元",tip:"周五六有活动",lat:31.173456,lng:121.451234,time:120,cost:80},
+    {name:"龙美术馆",why:"一起看展，接受艺术熏陶好",score:"⭐⭐⭐⭐⭐",hook:"门票 8 折",tip:"一起讨论",lat:31.177234,lng:121.449123,time:90,cost:80},
+    {name:"精酿酒吧",why:"聊天喝酒，氛围好，夜生活开始好",score:"⭐⭐⭐⭐",hook:"精酿 60 元",tip:"晚上热闹",lat:31.172500,lng:121.460500,time:90,cost:60},
+    {name:"西岸梦工厂",why:"周五露天电影，看电影 + 小吃好",score:"⭐⭐⭐⭐",hook:"免费",tip:"周五六晚",lat:31.172000,lng:121.460000,time:120,cost:40},
+    {name:"KTV 包房",why:"嗨唱 3 小时，释放压力好",score:"⭐⭐⭐⭐",hook:"欢唱 80 元",tip:"下午场便宜",lat:31.180000,lng:121.445000,time:180,cost:80},
+    {name:"烧烤店",why:"边吃边聊，气氛热烈，啤酒烧烤好",score:"⭐⭐⭐⭐⭐",hook:"烧烤 100 元",tip:"晚上营业",lat:31.181000,lng:121.444000,time:90,cost:100},
+    {name:"密室逃脱",why:"团队协作，刺激有趣，考验智商好",score:"⭐⭐⭐⭐⭐",hook:"密室 120 元",tip:"提前预约",lat:31.179500,lng:121.446500,time:90,cost:120},
+    {name:"深夜食堂",why:"聊天到深夜，拉面 + 小食好",score:"⭐⭐⭐⭐",hook:"宵夜 50 元",tip:"营业到凌晨 5 点",lat:31.180500,lng:121.445500,time:60,cost:50}
+],
+art:[
+    {name:"龙美术馆",why:"工业风 + 当代艺术，视觉盛宴好",score:"⭐⭐⭐⭐⭐",hook:"门票 8 折",tip:"看展 2 小时",lat:31.177234,lng:121.449123,time:120,cost:80},
+    {name:"西岸美术馆",why:"国际展览，开阔视野，语音导览好",score:"⭐⭐⭐⭐⭐",hook:"门票 60 元",tip:"学生优惠",lat:31.176543,lng:121.447654,time:90,cost:60},
+    {name:"塔影空间",why:"文艺咖啡馆，寻找灵感，写作好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"带笔记本",lat:31.178943,lng:121.446231,time:90,cost:45},
+    {name:"单向空间书店",why:"选书 + 签售会，文化聚集地好",score:"⭐⭐⭐⭐",hook:"免费",tip:"周末有活动",lat:31.176500,lng:121.447500,time:60,cost:80},
+    {name:"油罐艺术中心",why:"沉浸式艺术体验，互动性强好",score:"⭐⭐⭐⭐⭐",hook:"门票 100 元",tip:"互动展览",lat:31.173500,lng:121.451000,time:90,cost:100},
+    {name:"独立画廊",why:"青年艺术家作品，交流创作好",score:"⭐⭐⭐⭐",hook:"免费",tip:"可交流",lat:31.177000,lng:121.448000,time:45,cost:0},
+    {name:"手工艺工作室",why:"陶艺/绘画体验，亲手创作好",score:"⭐⭐⭐⭐⭐",hook:"体验 150 元",tip:"需预约",lat:31.178500,lng:121.447000,time:120,cost:150},
+    {name:"诗人咖啡馆",why:"诗歌朗诵会，文艺青年聚集好",score:"⭐⭐⭐⭐",hook:"咖啡 50 元",tip:"周五有活动",lat:31.179000,lng:121.446000,time:60,cost:50},
+    {name:"黑胶唱片店",why:"淘唱片，听音乐，品味经典好",score:"⭐⭐⭐⭐",hook:"淘碟 100 元",tip:"可试听",lat:31.180000,lng:121.445500,time:45,cost:100},
+    {name:"江边书房",why:"安静阅读写作，江景相伴好",score:"⭐⭐⭐⭐⭐",hook:"茶水 60 元",tip:"景观位",lat:31.175500,lng:121.449000,time:90,cost:60}
+],
+date:[
+    {name:"塔影空间",why:"倒影咖啡，浪漫满分，情侣套餐好",score:"⭐⭐⭐⭐⭐",hook:"套餐 88 元",tip:"黄昏最美",lat:31.178943,lng:121.446231,time:90,cost:88},
+    {name:"西岸滨江",why:"夕阳 + 江风，告白圣地好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"带外套",lat:31.175234,lng:121.448765,time:60,cost:30},
+    {name:"龙华寺",why:"一起祈福，保佑爱情，摸猫招桃花好",score:"⭐⭐⭐⭐⭐",hook:"免费领香",tip:"摸猫耳朵",lat:31.180147,lng:121.444807,time:45,cost:0},
+    {name:"龙美术馆",why:"手牵手看展，艺术约会好",score:"⭐⭐⭐⭐⭐",hook:"门票 8 折",tip:"一起讨论",lat:31.177234,lng:121.449123,time:90,cost:80},
+    {name:"西岸营地",why:"草坪野餐，亲密互动，拍照好",score:"⭐⭐⭐⭐⭐",hook:"野餐 100 元",tip:"带野餐垫",lat:31.173456,lng:121.451234,time:90,cost:100},
+    {name:"黄昏观景点",why:"牵手看日落，拍照拥抱好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"17:30 最美",lat:31.175500,lng:121.448500,time:30,cost:0},
+    {name:"法式餐厅",why:"烛光晚餐，浪漫氛围，法餐套餐好",score:"⭐⭐⭐⭐⭐",hook:"套餐 200 元",tip:"需预约",lat:31.176000,lng:121.448000,time:90,cost:200},
+    {name:"甜品店",why:"分享一份甜蜜，双人甜品好",score:"⭐⭐⭐⭐",hook:"甜品 60 元",tip:"推荐杨枝甘露",lat:31.178000,lng:121.447000,time:45,cost:60},
+    {name:"江边步道",why:"牵手漫步，说悄悄话好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"晚上人少",lat:31.174500,lng:121.449500,time:45,cost:0},
+    {name:"摩天轮",why:"高空俯瞰，浪漫时刻好",score:"⭐⭐⭐⭐⭐",hook:"门票 80 元",tip:"晚上亮灯",lat:31.173000,lng:121.452000,time:30,cost:80}
+],
+family:[
+    {name:"龙华烈士陵园",why:"爱国教育，寓教于乐，了解历史好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带孩子必去",lat:31.179532,lng:121.443876,time:45,cost:0},
+    {name:"龙华寺",why:"老人祈福，孩子看猫，全家开心好",score:"⭐⭐⭐⭐⭐",hook:"免费领香",tip:"无障碍通道",lat:31.180147,lng:121.444807,time:60,cost:0},
+    {name:"西岸滨江草坪",why:"大草坪野餐，孩子奔跑，老人休息好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"带野餐垫",lat:31.175234,lng:121.448765,time:90,cost:0},
+    {name:"儿童乐园",why:"滑梯 + 秋千 + 沙坑，孩子最爱好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"3-12 岁",lat:31.174000,lng:121.449000,time:60,cost:0},
+    {name:"亲子餐厅",why:"儿童餐 + 游乐区，解放父母好",score:"⭐⭐⭐⭐",hook:"人均 80 元",tip:"有游乐区",lat:31.175000,lng:121.448500,time:60,cost:320},
+    {name:"科技馆",why:"互动展览，涨知识，孩子喜欢好",score:"⭐⭐⭐⭐⭐",hook:"门票 40 元",tip:"6-15 岁",lat:31.176000,lng:121.447500,time:90,cost:160},
+    {name:"动物园角",why:"喂鸽子 + 看松鼠，亲近动物好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带面包",lat:31.177000,lng:121.448000,time:45,cost:0},
+    {name:"老年活动中心",why:"喝茶 + 下棋，老人休息好",score:"⭐⭐⭐⭐",hook:"茶水 20 元",tip:"老人喜欢",lat:31.178000,lng:121.447000,time:60,cost:80},
+    {name:"家庭合影点",why:"全家福最佳位置，留念好",score:"⭐⭐⭐⭐",hook:"免费",tip:"光线好",lat:31.178500,lng:121.446500,time:15,cost:0},
+    {name:"母婴室",why:"换尿布 + 喂奶，便利设施好",score:"⭐⭐⭐⭐",hook:"免费",tip:"婴幼儿",lat:31.175500,lng:121.448800,time:15,cost:0}
+],
+explore:[
+    {name:"龙华寺樱花林",why:"藏经楼后，小众秘境，3 月樱花海好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"3 月中旬",lat:31.180347,lng:121.445007,time:45,cost:0},
+    {name:"塔影空间",why:"百年建筑，故事满满，老板讲历史好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 38 元",tip:"问老板",lat:31.178943,lng:121.446231,time:60,cost:38},
+    {name:"西岸梦工厂",why:"水泥厂改造，赛博朋克，露天电影好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"周五六晚",lat:31.172000,lng:121.460000,time:60,cost:0},
+    {name:"废弃铁轨",why:"旧工厂铁轨，拍照绝美，工业风好",score:"⭐⭐⭐⭐",hook:"免费",tip:"注意安全",lat:31.171500,lng:121.461000,time:30,cost:0},
+    {name:"地下艺术空间",why:"防空洞改造，沉浸式展览好",score:"⭐⭐⭐⭐⭐",hook:"门票 60 元",tip:"很酷",lat:31.173000,lng:121.459000,time:60,cost:60},
+    {name:"老弄堂",why:"原汁原味老上海，石库门好",score:"⭐⭐⭐⭐",hook:"免费",tip:"早上逛",lat:31.181000,lng:121.443000,time:45,cost:0},
+    {name:"古井",why:"明朝古井，仍在用，看老人打水好",score:"⭐⭐⭐⭐",hook:"免费",tip:"历史遗迹",lat:31.180800,lng:121.443200,time:15,cost:0},
+    {name:"秘密花园",why:"屋顶花园，俯瞰龙华，全景好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"爬楼梯",lat:31.179500,lng:121.445500,time:30,cost:0},
+    {name:"艺术家工作室",why:"偶遇艺术家创作，交流买画好",score:"⭐⭐⭐⭐",hook:"自由",tip:"周末逛",lat:31.177500,lng:121.448500,time:45,cost:0},
+    {name:"夜间集市",why:"周五六晚，本地人聚集，小吃淘货好",score:"⭐⭐⭐⭐⭐",hook:"小吃 50 元",tip:"晚上 7 点",lat:31.172500,lng:121.460200,time:90,cost:50},
+    {name:"日出观景点",why:"看日出最佳位置，早起值得好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"5 点起床",lat:31.176000,lng:121.450000,time:45,cost:0}
+],
+food:[
+    {name:"龙华寺素斋馆",why:"百年老字号，素鸭一绝，素面好吃好",score:"⭐⭐⭐⭐⭐",hook:"素面 5 元券",tip:"11 点前",lat:31.180147,lng:121.444807,time:45,cost:50},
+    {name:"龙华老街小吃街",why:"生煎、小笼、葱油饼，小吃聚集好",score:"⭐⭐⭐⭐⭐",hook:"小吃 30 元",tip:"早上 8 点",lat:31.181234,lng:121.443567,time:60,cost:30},
+    {name:"塔影咖啡",why:"塔影拿铁，慕斯蛋糕，网红打卡好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"配蛋糕",lat:31.178943,lng:121.446231,time:45,cost:45},
+    {name:"老字号面馆",why:"葱油拌面、大排面，本帮味道好",score:"⭐⭐⭐⭐",hook:"人均 25 元",tip:"6:30 开业",lat:31.180500,lng:121.444500,time:30,cost:25},
+    {name:"本帮菜馆",why:"红烧肉、糖醋排骨，地道本帮菜好",score:"⭐⭐⭐⭐⭐",hook:"人均 80 元",tip:"必点红烧肉",lat:31.179000,lng:121.445000,time:60,cost:80},
+    {name:"火锅店",why:"老北京铜锅涮肉，冬天首选好",score:"⭐⭐⭐⭐",hook:"人均 100 元",tip:"晚上热闹",lat:31.178500,lng:121.446000,time:90,cost:100},
+    {name:"日式料理",why:"寿司、拉面、天妇罗，精致日料好",score:"⭐⭐⭐⭐⭐",hook:"人均 120 元",tip:"新鲜",lat:31.177500,lng:121.447000,time:75,cost:120},
+    {name:"甜品店",why:"杨枝甘露、双皮奶，甜蜜享受好",score:"⭐⭐⭐⭐",hook:"甜品 35 元",tip:"推荐杨枝甘露",lat:31.178000,lng:121.447000,time:30,cost:35},
+    {name:"烧烤店",why:"羊肉串、烤鸡翅，夜宵首选好",score:"⭐⭐⭐⭐",hook:"人均 70 元",tip:"晚上营业",lat:31.181000,lng:121.444000,time:60,cost:70},
+    {name:"奶茶店",why:"珍珠奶茶、水果茶，解渴神器好",score:"⭐⭐⭐⭐",hook:"奶茶 20 元",tip:"推荐珍珠",lat:31.179500,lng:121.445500,time:15,cost:20},
+    {name:"西式烘焙",why:"可颂、法棍、蛋糕，西式早餐好",score:"⭐⭐⭐⭐",hook:"面包 40 元",tip:"新鲜出炉",lat:31.177000,lng:121.448000,time:30,cost:40},
+    {name:"深夜食堂",why:"拉面、关东煮，宵夜温暖好",score:"⭐⭐⭐⭐",hook:"宵夜 45 元",tip:"营业到凌晨 5 点",lat:31.180500,lng:121.445500,time:45,cost:45}
+],
+lucky:[
+    {name:"龙华寺大雄宝殿",why:"拜佛、烧香、许愿，千年古刹最灵好",score:"⭐⭐⭐⭐⭐",hook:"免费/香 20 元",tip:"心诚则灵",lat:31.180147,lng:121.444807,time:45,cost:20},
+    {name:"龙华塔",why:"登塔祈福，步步高升，俯瞰龙华好",score:"⭐⭐⭐⭐",hook:"门票 20 元",tip:"早上空气好",lat:31.180247,lng:121.444907,time:30,cost:20},
+    {name:"许愿树",why:"投币祈福，心诚则灵，好运连连好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带 1 角硬币",lat:31.180147,lng:121.444807,time:15,cost:0},
+    {name:"福来猫",why:"摸左耳招桃花，摸右耳招财运好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"心诚",lat:31.180200,lng:121.444900,time:10,cost:0},
+    {name:"许愿墙",why:"写下愿望挂墙上，让佛祖保佑好",score:"⭐⭐⭐⭐",hook:"免费",tip:"带笔",lat:31.180300,lng:121.444600,time:10,cost:0},
+    {name:"财神殿",why:"拜财神，求财运，生意兴隆好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"初一十五",lat:31.180100,lng:121.444700,time:20,cost:0},
+    {name:"姻缘殿",why:"拜月老，求姻缘，爱情甜蜜好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"单身必去",lat:31.180050,lng:121.444650,time:20,cost:0},
+    {name:"平安符售卖处",why:"请平安符、开光，保佑平安好",score:"⭐⭐⭐⭐",hook:"30-100 元",tip:"心诚",lat:31.180150,lng:121.444850,time:15,cost:50}
+],
+fitness:[
+    {name:"西岸滨江步道",why:"5km 专业跑道，跑步首选好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"早上 6 点",lat:31.175234,lng:121.448765,time:60,cost:0},
+    {name:"龙华寺广场",why:"晨练圣地，太极、八段锦好",score:"⭐⭐⭐⭐",hook:"免费",tip:"早上 7 点",lat:31.180147,lng:121.444807,time:45,cost:0},
+    {name:"西岸营地",why:"飞盘、羽毛球，户外运动好",score:"⭐⭐⭐⭐",hook:"场地 30 元",tip:"带装备",lat:31.173456,lng:121.451234,time:60,cost:30},
+    {name:"自行车租赁点",why:"环龙华骑行 10km，风景优美好",score:"⭐⭐⭐⭐⭐",hook:"租车 30 元/时",tip:"带水",lat:31.175000,lng:121.448500,time:90,cost:30},
+    {name:"健身房",why:"跑步机、力量训练，专业器械好",score:"⭐⭐⭐⭐",hook:"单次 50 元",tip:"晚上人少",lat:31.178000,lng:121.447000,time:60,cost:50},
+    {name:"攀岩馆",why:"室内攀岩墙，挑战自我好",score:"⭐⭐⭐⭐⭐",hook:"80 元/次",tip:"需预约",lat:31.177000,lng:121.448000,time:60,cost:80},
+    {name:"瑜伽馆",why:"瑜伽课程，放松身心好",score:"⭐⭐⭐⭐",hook:"100 元/次",tip:"早上课程",lat:31.178500,lng:121.447500,time:60,cost:100},
+    {name:"篮球场",why:"3v3 半场，篮球爱好者聚集好",score:"⭐⭐⭐⭐",hook:"免费",tip:"下午 5 点",lat:31.174500,lng:121.449500,time:60,cost:0}
+],
+chill:[
+    {name:"西岸滨江草坪",why:"晒太阳，发呆，看云，无所事事好",score:"⭐⭐⭐⭐⭐",hook:"免费",tip:"带耳机",lat:31.175234,lng:121.448765,time:90,cost:0},
+    {name:"塔影空间",why:"角落位置，安静发呆，可以坐一下午好",score:"⭐⭐⭐⭐⭐",hook:"咖啡 8 折",tip:"窗边",lat:31.178943,lng:121.446231,time:120,cost:38},
+    {name:"龙华寺广场",why:"听钟声，数鸽子，心静自然凉好",score:"⭐⭐⭐⭐",hook:"免费",tip:"下午 3 点",lat:31.180147,lng:121.444807,time:45,cost:0},
+    {name:"江边长椅",why:"坐着看江景，放空自己好",score:"⭐⭐⭐⭐",hook:"免费",tip:"傍晚",lat:31.175000,lng:121.449000,time:60,cost:0},
+    {name:"足浴店",why:"足底按摩 60 分钟，放松身心好",score:"⭐⭐⭐⭐⭐",hook:"80 元/时",tip:"需预约",lat:31.179000,lng:121.445000,time:60,cost:80},
+    {name:"茶馆",why:"品茶听曲，慢生活好",score:"⭐⭐⭐⭐",hook:"茶水 40 元",tip:"下午去",lat:31.179500,lng:121.445500,time:90,cost:40},
+    {name:"书店咖啡",why:"看书 + 咖啡，静享时光好",score:"⭐⭐⭐⭐",hook:"消费入座",tip:"带书",lat:31.176500,lng:121.447500,time:90,cost:50},
+    {name:"江边冥想点",why:"冥想 + 深呼吸，身心放松好",score:"⭐⭐⭐⭐",hook:"免费",tip:"早上",lat:31.175500,lng:121.448500,time:45,cost:0}
+],
+tech:[
+    {name:"模速空间",why:"上海最大AI产业生态社区，200+企业入驻，感受创业最前线",score:"⭐⭐⭐⭐⭐",hook:"免费参观",tip:"提前预约",lat:31.169000,lng:121.453000,time:90,cost:0},
+    {name:"西岸大剧院",why:"国际级演出场馆，走在前沿艺术的路口，灵感来源好",score:"⭐⭐⭐⭐⭐",hook:"免费参观",tip:"晚上有演出",lat:31.174567,lng:121.450234,time:60,cost:0},
+    {name:"AI 夜校",why:"下班后充电学习 AI 技能，零基础入门到实战项目",score:"⭐⭐⭐⭐⭐",hook:"首课免费",tip:"周三六晚上",lat:31.168500,lng:121.452500,time:120,cost:0},
+    {name:"AI 产品体验店",why:"体验最前沿的 AI 硬件和软件产品，开拓眼界好",score:"⭐⭐⭐⭐⭐",hook:"体验免费",tip:"周末人多",lat:31.169500,lng:121.453500,time:60,cost:0},
+    {name:"西岸智塔",why:"徐汇滨江AI产业地标，俯瞰整个西岸科技走廊好",score:"⭐⭐⭐⭐",hook:"免费参观",tip:"需预约",lat:31.170000,lng:121.454000,time:45,cost:0},
+    {name:"创业者咖啡",why:"投资人和创业者扎堆的咖啡厅，随时可能撞见大咖",score:"⭐⭐⭐⭐⭐",hook:"咖啡 15 元",tip:"带名片",lat:31.169200,lng:121.452800,time:60,cost:45},
+    {name:"科技书店",why:"专注 AI/编程/商业的精品书店，充电学习的理想地好",score:"⭐⭐⭐⭐",hook:"购书 8 折",tip:"有座位",lat:31.168800,lng:121.453200,time:45,cost:0},
+    {name:"路演中心",why:"每周有创业项目路演，感受创业氛围和投资趋势好",score:"⭐⭐⭐⭐⭐",hook:"免费旁听",tip:"周三下午",lat:31.169300,lng:121.453300,time:90,cost:0},
+    {name:"AI 艺术展厅",why:"AI 生成艺术作品展览，科技与艺术的碰撞好",score:"⭐⭐⭐⭐⭐",hook:"门票 30 元",tip:"限时展览",lat:31.170500,lng:121.454500,time:45,cost:30},
+    {name:"青年公寓展示区",why:"了解徐汇区人才公寓政策，租金补贴和申请流程好",score:"⭐⭐⭐⭐",hook:"免费咨询",tip:"工作日",lat:31.169800,lng:121.453800,time:30,cost:0}
+]
+};
+
+let selectedType='medium',currentAudio=null,mapInstance=null,currentRouteData=null;
+const TYPE_CONFIG={short:{ratio:0.3,name:'精华版'},medium:{ratio:0.6,name:'丰富版'},full:{ratio:1,name:'完整版'}};
+
+function playNaturalTTS(text){
+    if(!window.speechSynthesis){showToast("浏览器不支持语音");return}
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(text);
+    utterance.lang='zh-CN';utterance.rate=1.4;utterance.pitch=1.8;
+    let voices=window.speechSynthesis.getVoices();
+    if(voices.length===0){
+        window.speechSynthesis.onvoiceschanged=()=>{
+            voices=window.speechSynthesis.getVoices();
+            const preferred=voices.find(v=>v.lang==='zh-CN');
+            if(preferred)utterance.voice=preferred
+        }
+    }
+    window.speechSynthesis.speak(utterance)
+}
+
+function playRealMusic(songUrl,songName){
+    if(currentAudio){currentAudio.pause()}
+    const audio=document.getElementById('bgAudio');
+    audio.src=songUrl;audio.play().catch(err=>showToast("🎵 请点击页面播放"));currentAudio=audio;
+    showToast(`🎵 正在播放：${songName}`)
+}
+
+function stopMusic(){
+    if(currentAudio){currentAudio.pause();currentAudio=null}
+    showToast("音乐已停止")
+}
+
+async function callAgentAPI(query,emotion){
+    await new Promise(r=>setTimeout(r,800));
+    const allPoints=ALL_POIS[emotion]||ALL_POIS.sad;
+    const config=TYPE_CONFIG[selectedType];
+    const count=Math.max(3,Math.floor(allPoints.length*config.ratio));
+    const selectedPoints=allPoints.slice(0,count);
+    const totalTime=selectedPoints.reduce((sum,p)=>sum+p.time,0)/60;
+    const totalCost=selectedPoints.reduce((sum,p)=>sum+p.cost,0);
+    const song=MUSIC_MAP[emotion]||MUSIC_MAP.sad;
+    return{theme:getTheme(emotion),match:getMatch(emotion),points:selectedPoints,totalTime:totalTime.toFixed(1),totalCost,song}
+}
+
+function getTheme(e){
+    return{sad:'治愈疗愈之旅',relax:'独自放空之旅',photo:'出片打卡之旅',social:'潮人社交之旅',art:'艺术灵感之旅',date:'浪漫约会之旅',family:'亲子家庭之旅',explore:'秘境探索之旅',food:'美食探店之旅',lucky:'祈福求运之旅',fitness:'运动活力之旅',chill:'躺平放松之旅',tech:'青年机遇探索之旅'}[e]||'自定义路线'
+}
+
+function getMatch(e){
+    return{sad:'难过的时候，让美食和猫咪治愈你',relax:'一个人，一杯咖啡，一个下午',photo:'每个角度都是大片',social:'和朋友一起，快乐加倍',art:'浸润在艺术里，灵感爆发',date:'牵手漫步，甜蜜满溢',family:'全家出游，老少皆宜',explore:'发现不一样的龙华',food:'吃遍龙华，不胖不归',lucky:'心诚则灵，好运连连',fitness:'出汗排毒，身心舒畅',chill:'什么都不做，就很美好',tech:'走出家门，感受AI时代的浪潮与机遇'}[e]||'专属你的路线'
+}
+
+function initMap(lat,lng,points){
+    if(!window.AMap){
+        document.getElementById('mapContainer').innerHTML='<div style="background:#fdf5ef;height:100%;display:flex;align-items:center;justify-content:center;color:#b77b5c">🗺️ 地图加载中...</div>';
+        return
+    }
+    if(mapInstance)mapInstance.destroy();
+    const map=new AMap.Map('mapContainer',{zoom:14,center:[lng,lat],mapStyle:'amap://styles/light'});
+    points.forEach((p,i)=>{
+        new AMap.Marker({position:[p.lng,p.lat],title:p.name,map:map,label:{content:`${i+1}. ${p.name}`,offset:new AMap.Pixel(0,-25)}})
+    });
+    if(points.length>=2){
+        new AMap.Polyline({path:points.map(p=>[p.lng,p.lat]),strokeColor:"#F9B572",strokeWeight:5,map:map})
+    }
+    mapInstance=map
+}
+
+async function generateRoute(){
+    const custom=document.getElementById('customQuery').value;
+    const active=document.querySelector('.emotion-btn.active');
+    const emotion=active?active.dataset.emotion:'sad';
+    document.getElementById('loading').style.display='block';
+    document.getElementById('routeDisplay').style.display='none';
+    const data=await callAgentAPI(custom,emotion);
+    currentRouteData=data;
+    document.getElementById('routeTheme').innerText=data.theme;
+    document.getElementById('emotionMatch').innerText=data.match;
+    document.getElementById('totalPoints').innerText=data.points.length;
+    document.getElementById('totalTime').innerText=data.totalTime;
+    document.getElementById('totalCost').innerText=data.totalCost;
+    const container=document.getElementById('routeCards');
+    container.innerHTML='';
+    data.points.forEach((poi,idx)=>{
+        const card=document.createElement('div');
+        card.className='poi-card';
+        card.onclick=()=>openPoiDetail(poi,idx);
+        card.innerHTML=`<h3>${idx+1}. ${poi.name}</h3><div class="rating">${poi.score}</div><div class="heal-text">💡 ${poi.why}</div><div class="coupon-tag">⏱️ ${poi.time}分钟 · 💰 ${poi.cost}元</div><span class="expand-hint">点击查看详情 ›</span>`;
+        container.appendChild(card)
+    });
+    initMap(data.points[0].lat,data.points[0].lng,data.points);
+    renderBusCard(emotion,data.points,data.totalTime);
+    const bgmDiv=document.getElementById('bgmCard');
+    bgmDiv.style.display='flex';
+    bgmDiv.innerHTML=`<span style="flex:1">🎵 推荐 <strong>${data.song.name}</strong></span><button onclick="playRealMusic('${data.song.url}','${data.song.name}')">▶</button><button onclick="stopMusic()" style="margin-left:8px">⏹</button>`;
+    document.getElementById('eggArea').innerHTML=`<div class="egg-item"><span>🐱 福来说：${getEgg(emotion)}</span></div>`;
+    document.getElementById('loading').style.display='none';
+    document.getElementById('routeDisplay').style.display='block';
+    playNaturalTTS(`为你推荐${data.theme}，${data.match}`)
+}
+
+// 主题巴士配置
+const BUS_THEMES={
+    sad:{name:"心灵驿站号",color:"#F9B572",slogan:"每一站都是温暖",emoji:"🚌"},
+    relax:{name:"慢时光号",color:"#7ec8a0",slogan:"慢下来，生活更美",emoji:"🚌"},
+    photo:{name:"出片专线号",color:"#ff6b9d",slogan:"下一站，朋友圈C位",emoji:"📸"},
+    social:{name:"嗨友号",color:"#ffd93d",slogan:"和朋友一起浪",emoji:"🎉"},
+    art:{name:"灵感巴士号",color:"#6c5ce7",slogan:"灵感不设限",emoji:"🎨"},
+    date:{name:"恋爱巴士号",color:"#fd79a8",slogan:"下一站，心动",emoji:"💕"},
+    family:{name:"快乐童年号",color:"#74b9ff",slogan:"全家人的冒险",emoji:"👨‍👩‍👧‍👦"},
+    explore:{name:"秘境猎人号",color:"#00b894",slogan:"未知的精彩",emoji:"🗺️"},
+    food:{name:"味蕾冒险号",color:"#e17055",slogan:"吃到扶墙出",emoji:"🍜"},
+    lucky:{name:"锦鲤号",color:"#fdcb6e",slogan:"好运连一连",emoji:"🙏"},
+    fitness:{name:"活力号",color:"#e67e22",slogan:"动起来更快乐",emoji:"🚴"},
+    chill:{name:"发呆巴士号",color:"#a29bfe",slogan:"什么都不做也很棒",emoji:"🌅"},
+    tech:{name:"未来号",color:"#00cec9",slogan:"下一站，改变世界",emoji:"🚀"}
+};
+
+function renderBusCard(emotion,points,totalTime){
+    const bus=BUS_THEMES[emotion]||BUS_THEMES.sad;
+    const stops=points.slice(0,6).map(p=>`<span class="bus-stop">${p.name}</span>`).join('<span class="bus-arrow">→</span>');
+    const isNew=emotion==='tech'?'<span class="bus-tag-new">NEW</span>':'';
+    const busDiv=document.getElementById('busCard');
+    busDiv.style.display='block';
+    busDiv.innerHTML=`
+        <div class="bus-header">
+            <span class="bus-icon">${bus.emoji}</span>
+            <span class="bus-name">${bus.name}${isNew}</span>
+            <span class="bus-slogan">"${bus.slogan}"</span>
+        </div>
+        <div class="bus-route">${stops}</div>
+        <div class="bus-info">
+            <span>📍 <b>${points.length}</b> 站</span>
+            <span>⏱️ 约 <b>${totalTime}</b> 小时</span>
+            <span>🎵 随车BGM播放中</span>
+        </div>
+        <div class="bus-footer">
+            <button class="bus-nav-btn" onclick="playNaturalTTS('欢迎乘坐${bus.name}！${bus.slogan}。本次旅途共${points.length}站，请系好安全带，准备出发~')">📢 福来播报</button>
+            <button class="bus-voice-btn" onclick="playNaturalTTS('${points.map((p,i)=>(i+1)+''+p.name).join('，下一站，')}。终点站到了，感谢乘坐${bus.name}！')">🔊 全程导览</button>
+        </div>
+    `;
+}
+
+function getEgg(e){
+    return{sad:'摸左耳招桃花，摸右耳招财运',relax:'下午 3 点最安静，适合发呆',photo:'穿白色衣服倒影最美',social:'提前预定窗边位置',art:'带笔记本找灵感',date:'黄昏时分最美',family:'有无障碍通道',explore:'问老板讲历史',food:'11 点前不排队',lucky:'带 1 角硬币',fitness:'早上 6 点人最少',chill:'带耳机更放松',tech:'带笔记本和名片，随时交流'}[e]||'旅途愉快！'
+}
+
+// POI 详情数据 — 每个景点都有独立故事
+const POI_DETAILS={
+    // ===== 核心景点 =====
+    "龙华寺":{story:"龙华寺始建于三国吴赤乌年间（公元242年），距今已有近1800年历史。相传孙权为母所建，寺名源自「弥勒降龙华树下成佛」的典故。龙华塔为上海唯一留存的古塔，是上海的标志性历史建筑之一。每逢跨年夜，「迎新春撞龙华晚钟」是上海最具仪式感的跨年方式。",crowd:["历史文化爱好者","祈福许愿","摄影爱好者"],bestTime:"全年 · 早上7-9点人最少",highlights:["千年古刹","龙华古塔","福来守护猫","素斋馆"],tips:["寺内有免费领香处","天王殿右侧有福来猫","素斋馆11点前不排队","初一十五香客较多"]},
+    "福来猫":{story:"福来是龙华寺的网红猫咪，因常年驻守在天王殿右侧石阶而得名。相传摸它的左耳能招桃花，摸右耳能招财运。它性格温顺，是游客们打卡必去的「活景点」。据说它原本是流浪猫，被寺内僧人收养后便在此安了家，已成为龙华寺最萌的守护神。",crowd:["猫奴","求好运","拍照打卡"],bestTime:"上午 · 猫咪晒太阳时最活跃",highlights:["招桃花","招财运","撸猫治愈","拍照出片"],tips:["带猫条效果更佳","不要强行抱猫","下午可能躲起来休息","猫条在入口小卖部有卖"]},
+    "龙华寺素斋馆":{story:"龙华寺素斋馆是上海百年老字号素食餐厅，以素鸭、素面闻名。这里的素鸭用豆腐皮层层叠制，口感媲美真鸭。一碗素面只需15元，是龙华最具性价比的美食。许多食客专程从市区赶来，就为这一口传承百年的味道。",crowd:["素食爱好者","美食探店","预算有限"],bestTime:"上午11点前（避开午高峰）",highlights:["招牌素鸭","素面15元","百年老字号","功德满满"],tips:["11点前到不排队","素鸭必点","素面性价比最高","建议带现金"]},
+    "塔影空间":{story:"塔影空间坐落于龙华寺旁，因能看到龙华塔在水中的倒影而得名。这是一座百年历史建筑改造的文艺咖啡馆，保留了青砖红瓦的老上海风情。二楼的露台是俯瞰龙华塔的最佳位置，清晨的光线穿过古塔洒入窗内，美得像一幅油画。",crowd:["文艺青年","约会","发呆放空"],bestTime:"下午2-5点 · 窗边光线最好",highlights:["龙华塔倒影","精品咖啡","安静角落","文创周边"],tips:["窗边位置最安静需早到","推荐塔影拿铁","带本书坐一下午","周末人多建议工作日来"]},
+    "龙华烈士陵园":{story:"龙华烈士陵园是上海最大的烈士纪念地，原名「龙华淞沪警备司令部旧址」。这里安息着数以千计为革命牺牲的先烈。1927-1937年间，这里曾是国民党关押和杀害共产党人的主要场所，柔石、胡也频等左联作家就义于此。",crowd:["爱国主义教育","历史学习","安静缅怀"],bestTime:"工作日 · 周末也有团体参观",highlights:["烈士纪念馆","历史陈列","庄严氛围","免费参观"],tips:["保持安静肃穆","周一闭馆","免费需携带身份证","建议预留1小时"]},
+    "西岸滨江":{story:"西岸滨江是上海黄浦江沿岸最美的亲水公共空间之一，全长11.4公里。由老工业码头改造而成，沿途有美术馆、艺术中心和众多咖啡馆。曾经这里是上海最重要的煤炭码头和水泥厂，如今蝶变为世界级的滨水文化走廊。",crowd:["散步跑步","情侣约会","亲子遛娃"],bestTime:"下午5:20日落时分最壮观",highlights:["江景日落","亲水步道","艺术场馆","咖啡车"],tips:["带外套江边风大","下午5:20江面最美","带耳机更享受","有公共自行车租赁"]},
+    "龙美术馆":{story:"龙美术馆由中国收藏家刘益谦、王薇夫妇创办，是中国最大的私人美术馆之一。馆体由旧煤炭码头改造，粗犷的「煤漏斗」结构与精致的艺术品形成强烈对比。标志性的旋转楼梯是全上海最出片的建筑摄影取景地之一。",crowd:["艺术爱好者","摄影打卡","周末出游"],bestTime:"周一人最少 · 周末下午最热闹",highlights:["工业风建筑","当代艺术展","建筑摄影","旋转楼梯"],tips:["周一闭馆","学生票有优惠","旋转楼梯是网红打卡点","建议预留2小时"]},
+    "西岸美术馆":{story:"西岸美术馆由法国蓬皮杜中心与上海西岸集团合作运营，展出蓬皮杜中心的馆藏杰作。纯白色几何建筑由普利兹克奖得主David Chipperfield设计，顶楼露台可以270度俯瞰黄浦江，是西岸最优雅的存在。",crowd:["国际展览","建筑设计","亲子活动"],bestTime:"工作日上午 · 周末有亲子工作坊",highlights:["蓬皮杜馆藏","白色建筑","亲子工作坊","江景露台"],tips:["学生票有优惠","顶楼露台可以看江景","周末有儿童活动","常设展+特展分开购票"]},
+    "龙华塔":{story:"龙华塔始建于公元242年，为砖木结构八角七层楼阁式塔，高40.4米，是上海唯一留存的古塔。千百年来历经多次修缮，飞檐翘角依然如故。站在塔下仰望，塔影与天空交织，仿佛穿越千年的时光隧道。",crowd:["历史爱好者","摄影","祈福"],bestTime:"早上9点前 · 逆光最美",highlights:["1800年历史","上海唯一古塔","仰拍震撼","砖木结构"],tips:["9点前人少好拍照","穿汉服更出片","注意保护文物","登塔需另购门票"]},
+    "龙华寺红墙":{story:"龙华寺的红墙是上海版的「故宫红墙」，朱红色的宫墙配上青灰色飞檐，是汉服摄影的绝佳背景。每年春天墙边的樱花盛开，花瓣飘落在红墙之上，那一刻你会忘记自己还在上海。",crowd:["汉服摄影","情侣拍照","打卡出片"],bestTime:"上午光线柔和 · 春天樱花季最佳",highlights:["故宫同款红墙","汉服绝佳背景","飞檐斗拱","樱花季限定"],tips:["穿汉服效果最好","上午光线柔和","人少时来拍","不要打扰寺庙秩序"]},
+    "龙华老街":{story:"龙华老街是上海历史最悠久的商业街之一，保留了大量明清时期的建筑风貌。这里汇集了生煎、小笼、葱油饼等上海传统小吃。据说当年乾隆下江南路过此处，品尝了龙华素面后赞不绝口，御笔亲题「天下第一面」。",crowd:["美食爱好者","老上海风情","边走边吃"],bestTime:"上午8-10点 · 小吃最新鲜",highlights:["生煎小笼","葱油饼","老上海风情","百年老店"],tips:["早上8点来最热闹","建议空腹来","带现金部分老店不支持手机支付","边走边吃约1小时"]},
+    "油罐艺术中心":{story:"油罐艺术中心由5个废弃航空储油罐改造而成，是全球少数以油罐为载体的当代艺术空间。每个油罐高12米、直径24米，站在巨大的穹顶之下仰望，仿佛置身科幻电影。这里的建筑本身就是一件巨大的艺术品。",crowd:["当代艺术","建筑爱好者","拍照打卡"],bestTime:"工作日 · 展览更新期最佳",highlights:["巨型油罐","沉浸式展览","独特空间","草坪景观"],tips:["带广角镜头","提前查展览信息","部分展览需预约","外部草坪免费开放"]},
+    "西岸营地":{story:"西岸营地是黄浦江畔最大的户外休闲空间，大草坪可以野餐、飞盘、放风筝。这里是团建活动的热门场地，经常举办户外电影、音乐节等活动。黄昏时分，坐在草坪上看着江面被夕阳染成金色，是上海最浪漫的免费体验之一。",crowd:["团建聚会","亲子户外","野餐放风"],bestTime:"周末 · 周五晚有露天电影",highlights:["大草坪","飞盘","露天电影","江景野餐"],tips:["带野餐垫","周五六有活动","防晒霜必备","有免费饮用水"]},
+    "龙华寺大雄宝殿":{story:"大雄宝殿是龙华寺的核心建筑，供奉着释迦牟尼佛。殿内香火鼎盛，是上海信众最集中的祈福场所之一。据说在这里许愿特别灵验，每逢初一十五更是香客如潮。殿前的两棵银杏树已有数百年树龄，秋天满地金黄。",crowd:["祈福许愿","佛教文化","求好运"],bestTime:"初一十五 · 早上7-8点",highlights:["佛祖金身","香火鼎盛","许愿灵验","百年银杏"],tips:["心诚则灵","免费领香在入口处","殿内不要拍照","保持安静"]},
+    "西岸滨江步道":{story:"西岸滨江步道全长5公里，是上海最适合跑步和骑行的滨江路线之一。沿途设有专业塑胶跑道，江风拂面、绿树成荫。清晨可以看到太极晨练的老人，傍晚是情侣散步的浪漫时光，夜晚则是夜跑爱好者的天堂。",crowd:["跑步爱好者","骑行","江边散步"],bestTime:"早上6-8点 · 傍晚最佳",highlights:["5km专业跑道","骑行道","江景开阔","免费开放"],tips:["早上6点人最少","带水壶","有公共自行车租赁","夜跑注意安全"]},
+    "西岸滨江草坪":{story:"西岸滨江的大草坪是上海市区内最大的一片滨江绿地，面积达数万平方米。这里可以看到黄浦江的壮阔景色，远处卢浦大桥的弧线若隐若现。冬天可以晒太阳，夏天可以吹江风，是上海人周末逃离城市压力的第一选择。",crowd:["野餐放松","亲子遛娃","放风筝"],bestTime:"下午3-6点 · 避开正午阳光",highlights:["超大面积","江景视野","放风筝","免费开放"],tips:["带野餐垫","防晒必备","有卫生间","周末人多建议早点占位"]},
+
+    // ===== 治愈系 =====
+    "猫咪咖啡馆":{story:"这家藏在龙华小巷深处的猫咪咖啡馆，养了5只性格各异的猫咪——有高冷布偶、粘人英短、还有一只三花大爷。老板是个爱猫的退休教师，她说：「每只猫都有治愈的力量，你只需要安静地坐在它们身边。」",crowd:["猫奴","疗愈放松","拍照打卡"],bestTime:"工作日下午 · 周末需等位",highlights:["5只猫咪","安静氛围","猫爪饮品","治愈空间"],tips:["周末人多建议工作日来","不要强行撸不熟的猫","点一杯猫爪拿铁超可爱","可以自带猫条"]},
+    "江边长椅":{story:"西岸滨江沿线分布着许多木质长椅，其中有一张特别的长椅，椅背上刻着：「这座城市跑得太快了，坐下来休息一下吧。」这是西岸艺术季留下的公共艺术作品，如今成了无数人放空心事的地方。",crowd:["独处放空","听歌发呆","情绪疗愈"],bestTime:"傍晚5-7点 · 夕阳西下时分",highlights:["刻字长椅","江景","安静","免费"],tips:["带耳机听歌","带纸巾（可能想哭）","不要坐太久会冷","旁边有咖啡车"]},
+    "老上海茶馆":{story:"这家茶馆藏在龙华老街的弄堂里，门面不大却别有洞天。老板是苏州评弹的老艺人，每天下午2点准时开场。一杯龙井配上吴侬软语的评弹，时光仿佛倒流回了上世纪三四十年代的老上海。",crowd:["传统文化爱好者","老人","茶客"],bestTime:"下午2点有评弹演出",highlights:["苏州评弹","老上海氛围","龙井茶","现场表演"],tips:["下午2点准时来占位","推荐碧螺春","不要大声喧哗","最低消费40元"]},
+    "许愿墙":{story:"龙华寺外的许愿墙原本只是一面普通的墙，后来游客们自发地把写着心愿的纸条贴在上面，渐渐成了一道独特的风景。墙上密密麻麻的心愿，有人求学业、有人求姻缘、有人只写了「希望妈妈身体健康」。",crowd:["许愿祈福","情感寄托","拍照留念"],bestTime:"下午光线好拍照",highlights:["万人心愿","情感共鸣","免费","仪式感"],tips:["自己带笔和纸条","写完后拍照留念","不要撕别人的愿望","新年愿望墙最壮观"]},
+
+    // ===== 散心系 =====
+    "单向空间书店":{story:"单向空间是北京知名独立书店品牌在上海的分店，坐落在西岸艺术区。这里不仅卖书，还是文化沙龙的聚集地。一整面墙的书架从地面延伸到天花板，木质书桌上永远摆着几本「店员推荐」，是安静阅读的完美避风港。",crowd:["文艺青年","阅读爱好者","写作者"],bestTime:"工作日上午 · 周末下午有沙龙",highlights:["整墙书架","店员推荐","文化沙龙","咖啡阅读"],tips:["可以只看书不买","有咖啡区可以坐","周末留意沙龙活动","收银台旁边有文创"]},
+    "独立咖啡馆":{story:"这家只有8个座位的小咖啡馆，是西岸咖啡圈里的隐藏高手。老板是前精品咖啡赛冠军，每杯手冲都像一场仪式——先闻香、再看豆、再注水，最后端上来的咖啡，味道层次分明得像一首诗。",crowd:["咖啡发烧友","独处","品鉴"],bestTime:"上午10-12点 · 新鲜烘焙时段",highlights:["冠军手冲","精品单品豆","极简装修","老板故事"],tips:["推荐埃塞俄比亚耶加雪菲","可以和老板聊咖啡","只有8个座位别怕","每周四上新豆子"]},
+    "西岸梦工厂":{story:"西岸梦工厂的前身是上海水泥厂，建于1920年代，曾是远东最大的水泥生产基地。改造后保留了巨大的料斗和传送带，粗犷的工业遗迹与现代艺术展览形成奇妙碰撞。周五晚上的露天电影是最受欢迎的免费活动。",crowd:["工业遗迹爱好者","电影爱好者","拍照"],bestTime:"周五六晚上有活动",highlights:["水泥厂改造","露天电影","工业遗迹","免费开放"],tips:["周五晚露天电影免费","带毯子坐地上","小心旧建筑棱角","可以带外食"]},
+    "江边步道":{story:"西岸的江边步道分为两层——上层是骑行道和跑步道，下层是亲水步道。傍晚时分走在下层步道上，黄浦江水近在咫尺，偶尔有驳船缓缓驶过，汽笛声在江面上回荡，城市的喧嚣仿佛被一层水雾隔绝在外。",crowd:["散步放空","情侣","摄影"],bestTime:"傍晚6-8点 · 日落蓝调时刻",highlights:["双层步道","亲水平台","驳船风景","蓝调时刻"],tips:["下层步道离水面更近","傍晚带外套","可以钓鱼（需证）","有公共厕所"]},
+    "黄昏观景点":{story:"这个隐藏在西岸中段的观景点是摄影师们的秘密基地。它面向正西方向，每天傍晚太阳都会从对岸的建筑群中缓缓落下，把整个江面染成金红色。天气好的时候，甚至能看到太阳落到卢浦大桥的弧线下方。",crowd:["摄影爱好者","情侣约会","日落控"],bestTime:"17:30-18:00 · 冬天日落更早",highlights:["正西朝向","卢浦大桥","金色江面","蓝调时刻"],tips:["17:30前到位","带相机手机都行","带外套","不要站在护栏外"]},
+
+    // ===== 打卡系 =====
+    "西岸大剧院":{story:"西岸大剧院由日本建筑大师矶崎新设计，外形如同一朵正在绽放的白色花瓣。黄昏时分，建筑的玻璃幕墙会反射天空的颜色，与江面的波光交相辉映。站在建筑前仰拍，视觉张力堪比任何一座国际大都市的地标。",crowd:["建筑摄影","现代艺术","打卡出片"],bestTime:"黄昏光线 · 亮灯后的夜景",highlights:["花瓣建筑","玻璃幕墙","灯光效果","现代设计"],tips:["黄昏前后各来一次","穿深色衣服更出片","入口处有最佳角度","外部免费参观"]},
+    "西岸滨江栈道":{story:"西岸滨江栈道是悬挑在黄浦江面上的木质栈桥，走在上面脚下就是流动的江水。傍晚时分，逆光拍摄栈道上行人的剪影，配上远处陆家嘴的天际线，是上海摄影圈公认的最佳机位之一。",crowd:["摄影爱好者","跑步","情侣"],bestTime:"17:30逆光 · 日落后蓝色时刻",highlights:["悬挑栈道","逆光剪影","陆家嘴天际线","江水脚下"],tips:["17:30到达拍逆光","人少时更好拍","注意栈道湿滑","不要翻越护栏"]},
+    "龙华老街牌坊":{story:"龙华老街的入口处矗立着一座明清风格的石牌坊，上书「龙华古寺」四个大字。牌坊上的石雕精美绝伦，有龙凤呈祥、花开富贵等传统纹样。这里也是每年春节龙华庙会的起点，届时张灯结彩、锣鼓喧天。",crowd:["历史爱好者","汉服摄影","庙会"],bestTime:"上午光线好 · 春节庙会期间",highlights:["石雕工艺","明清风格","庙会起点","复古背景"],tips:["春节来最热闹","穿汉服更搭","注意来往车辆","旁边就有小吃"]},
+    "塔影咖啡露台":{story:"塔影空间的二楼有一个小露台，这里是拍摄龙华塔的最佳角度——古塔的飞檐与咖啡杯的蒸汽同框，千年古刹与当代生活只隔一层玻璃。摄影师们把这里称为「龙华最美的一杯咖啡」。",crowd:["摄影打卡","咖啡爱好者","约会"],bestTime:"上午光线最好 · 避开正午",highlights:["龙华塔全景","咖啡+古塔同框","二楼露台","网红角度"],tips:["上午去光线柔和","点一杯拿铁拍照","露台只有几个位子","不下雨才能上露台"]},
+    "江边芦苇丛":{story:"西岸滨江有一片野生芦苇丛，每到秋冬季节，芦花随风飘舞，配上远处的城市天际线，呈现出一种独特的「荒野都市」美学。长焦镜头压缩后的画面里，芦苇、江水、摩天大楼同框，像极了电影海报。",crowd:["摄影爱好者","文艺青年","秋冬限定"],bestTime:"11-1月 · 下午侧光最佳",highlights:["芦花飘雪","城市天际线","长焦压缩","荒野美学"],tips:["秋冬去才有芦花","带长焦镜头70-200mm","下午3点侧光最好","注意不要踩进芦苇里"]},
+
+    // ===== 社交系 =====
+    "精酿酒吧":{story:"这家隐藏在西岸艺术区的精酿酒吧，是文艺圈和设计圈的「秘密据点」。吧台后面的酒头有20个，老板每个月都会引进新的限量款。墙上挂着本地艺术家的画作，角落里有一台老式点唱机，放的全是90年代的经典。",crowd:["精酿爱好者","朋友聚会","文艺圈"],bestTime:"晚上8点以后 · 周五最热闹",highlights:["20个酒头","限量款","文艺氛围","老式点唱机"],tips:["让老板推荐第一杯","周五要提前到","有老板特调","可以只喝一杯小坐"]},
+    "KTV 包房":{story:"这家KTV离龙华寺步行只要5分钟，是周边居民和朋友聚会的老地方。装修风格复古怀旧，歌单从邓丽君到周杰伦应有尽有。下午场的价格只有晚上的一半，一群人包个房嗨唱3小时，是最经济解压的方式。",crowd:["朋友聚会","公司团建","嗨唱解压"],bestTime:"下午场性价比最高",highlights:["下午场便宜","复古装修","歌单丰富"," snacks无限"],tips:["下午场2点最划算","提前打电话预定","带润喉糖","可以自带零食"]},
+    "烧烤店":{story:"这家烧烤店在龙华老街开了15年，是当地人的深夜食堂。老板是东北人，用的是炭火现烤，羊肉串肥瘦相间、烤鸡翅外焦里嫩。啤酒和烧烤的组合，是朋友间最自在的社交方式。",crowd:["朋友聚会","夜宵","肉食爱好者"],bestTime:"晚上7点以后 · 越晚越热闹",highlights:["炭火现烤","15年老店","啤酒烧烤","烟火气"],tips:["7点前去不用等位","推荐羊肉串和烤鸡翅","可以室外坐","建议AA制"]},
+    "密室逃脱":{story:"这家密室逃脱是龙华片区评分最高的，有5个主题——《民国谍影》《龙脉迷踪》《暗夜古寺》等，每个主题都有完整的剧情和专业演员NPC。特别是《暗夜古寺》主题，融入了龙华寺的历史传说，解谜过程惊心动魄。",crowd:["朋友聚会","解谜爱好者","团队建设"],bestTime:"周末 · 需提前3天预约",highlights:["5个主题","专业NPC","龙华主题","沉浸体验"],tips:["至少4人才开团","提前3天预约","穿运动鞋","怕黑慎选恐怖主题"]},
+    "深夜食堂":{story:"这家日式深夜食堂风格的餐馆，从晚上8点营业到凌晨5点。老板年轻时在日本留过学，把日本的「居酒屋文化」带了回来。一碗豚骨拉面咕嘟咕嘟冒着热气，配上一碟关东煮，就是深夜里最温暖的存在。",crowd:["夜宵爱好者","朋友聊天","加班族"],bestTime:"晚上10点以后最有氛围",highlights:["凌晨5点打烊","豚骨拉面","关东煮","日式氛围"],tips:["晚上10点后最有感觉","拉面是招牌","可以一个人来","门口有停车场"]},
+
+    // ===== 文艺系 =====
+    "独立画廊":{story:"这家独立画廊由几位年轻艺术家联合创办，专门展出上海本地青年艺术家的作品。每月更换一次展览，作品售价从几百到几万不等。许多现在已成名的艺术家，当年都是从这里迈出了第一步。",crowd:["艺术收藏","青年艺术家","文艺青年"],bestTime:"新展开幕当天 · 周末下午",highlights:["本地艺术家","可购买作品","每月换展","免费参观"],tips:["关注公众号看展览预告","可以和艺术家交流","价格透明可议价","拍照可以但不要开闪光灯"]},
+    "手工艺工作室":{story:"这家藏在老洋房里的手工艺工作室，提供陶艺、扎染、绘画等多种体验课程。陶艺老师是从景德镇请来的匠人，他会手把手教你拉坯——从一团泥巴到一个杯子的过程，让人找回童年玩泥巴的快乐。",crowd:["手工爱好者","情侣约会","亲子体验"],bestTime:"周末 · 需提前预约",highlights:["陶艺体验","景德镇匠人","作品带走","老洋房"],tips:["陶艺作品要等2周烧制","可以邮寄到家","穿不怕脏的衣服","建议2小时以上"]},
+    "诗人咖啡馆":{story:"这家咖啡馆的名字叫「白夜」，灵感来自陀思妥耶夫斯基的同名小说。每月第一个周五晚上是「诗歌开放麦」之夜，任何人都可以上台朗诵自己的诗。这里没有评判、没有门槛，只有文字和咖啡的香气。",crowd:["诗歌爱好者","文学青年","文艺社交"],bestTime:"每月第一个周五晚上",highlights:["诗歌开放麦","文学氛围","自由表达","陀思妥耶夫斯基"],tips:["每月第一个周五有活动","可以只来听不朗读","推荐手冲埃塞","座位不多早到"]},
+    "黑胶唱片店":{story:"这家黑胶唱片店是西岸唯一还在营业的实体唱片店，店里收藏了上万张黑胶唱片，从Beatles到邓丽君，从爵士到电子，应有尽有。老板是个唱片收藏狂人，每张唱片背后都有一个故事。",crowd:["音乐爱好者","黑胶收藏","文艺青年"],bestTime:"下午 · 老板有空聊天时",highlights:["上万张黑胶","试听区","老板讲故事","稀有唱片"],tips:["可以免费试听","老板懂行可以咨询","稀有唱片价格不菲","每周三上新货"]},
+    "江边书房":{story:"江边书房是西岸的一间免费公共阅读空间，落地窗外就是黄浦江的全景。书架上的书可以随意取阅，也可以把自己喜欢的书带来放在「漂流书架」上。每天下午都有人在这里安静地看书、写作，偶尔抬头看一眼江面。",crowd:["阅读爱好者","写作者","安静独处"],bestTime:"工作日上午 · 周末也有位置",highlights:["免费阅读","江景落地窗","漂流书架","安静空间"],tips:["免费开放不需要消费","可以带自己的书来","窗边位置最受欢迎","有免费WiFi"]},
+
+    // ===== 约会系 =====
+    "法式餐厅":{story:"这家法式餐厅的主厨曾在巴黎蓝带学院进修，回国后在西岸开了这家小而精的法餐馆。只有12个座位，每晚只接受6桌预订。烛光、鲜花、银质餐具，每一个细节都透着法式浪漫。招牌的惠灵顿牛排需要提前48小时预订。",crowd:["情侣约会","纪念日","求婚"],bestTime:"晚上7点 · 必须提前预订",highlights:["蓝带主厨","12个座位","惠灵顿牛排","烛光氛围"],tips:["必须提前2天预订","惠灵顿牛排要预点","着装建议smart casual","有配酒推荐"]},
+    "甜品店":{story:"这家甜品店的老板娘是个甜食狂人，曾走遍日本和法国学习甜品制作。招牌杨枝甘露用新鲜芒果手工制作，每一勺都能吃到果肉。双人甜品拼盘摆盘精致得像艺术品，让约会多了一份甜蜜仪式感。",crowd:["情侣约会","甜品控","闺蜜下午茶"],bestTime:"下午2-5点 · 甜品最新鲜",highlights:["手工甜品","杨枝甘露","双人拼盘","精致摆盘"],tips:["杨枝甘露是招牌","双人拼盘性价比最高","拍照先拍后吃","可以提前预定窗边位"]},
+    "摩天轮":{story:"这座高达108米的摩天轮是西岸的地标之一，每个座舱可以容纳4人。当摩天轮缓缓升到最高点，整个上海的夜景尽收眼底——黄浦江蜿蜒如带，陆家嘴的灯光璀璨如星。据说在最高点接吻的情侣会永远在一起。",crowd:["情侣约会","夜景摄影","浪漫体验"],bestTime:"晚上7-9点亮灯后最美",highlights:["108米高空","夜景全景","浪漫传说","4人座舱"],tips:["工作日不用排队","晚上亮灯后再上","一个舱15分钟","建议买VIP免排队票"]},
+
+    // ===== 亲子系 =====
+    "儿童乐园":{story:"西岸儿童乐园是免费开放的户外游乐场，设有滑梯、秋千、沙坑、攀爬架等设施。全部采用天然材质和柔和色彩，与周围的绿地融为一体。最特别的是一个用旧轮胎改造成的大型攀爬装置，是孩子们的最爱。",crowd:["3-12岁儿童","亲子出游","免费遛娃"],bestTime:"上午9-11点 · 避开午后阳光",highlights:["免费开放","天然材质","轮胎攀爬","沙坑"],tips:["带孩子换好运动装","自带水壶和零食","旁边就是卫生间","周末人多有保安"]},
+    "亲子餐厅":{story:"这家亲子餐厅最大的卖点是设有200平米的室内游乐区，孩子们在里面玩耍时，家长可以在旁边的座位上安心用餐。餐厅提供的儿童餐营养均衡，造型可爱，连最挑食的小朋友都无法拒绝。",crowd:["带娃家庭","解放父母","儿童派对"],bestTime:"工作日上午 · 周末需预约",highlights:["200平米游乐区","儿童营养餐","安全监控","生日派对"],tips:["周末必须预约","游乐区有年龄分区","可以办生日趴","家长不能离开视线"]},
+    "科技馆":{story:"西岸科技馆虽然规模不大，但互动性极强。最受欢迎的是「小小建筑师」体验区，孩子们可以用积木搭建自己的梦想房子，然后用VR眼镜「走进」自己的作品。每个展品都可以触摸、操作，真正做到寓教于乐。",crowd:["6-15岁青少年","科学爱好者","学校秋游"],bestTime:"工作日 · 周末有科普讲座",highlights:["VR体验","动手操作","小小建筑师","互动展览"],tips:["适合6岁以上","至少预留2小时","有科学实验表演","出口有纪念品商店"]},
+    "动物园角":{story:"西岸滨江的动物园角是一个小型宠物互动区，养了鸽子、兔子、松鼠、羊驼等温顺的小动物。孩子们可以在这里喂鸽子、看松鼠、摸羊驼，是城市孩子亲近自然的窗口。每逢周末还有小动物科普讲解。",crowd:["幼儿家庭","动物爱好者","自然教育"],bestTime:"上午动物最活跃 · 周末有讲解",highlights:["喂鸽子","看松鼠","摸羊驼","免费"],tips:["带面包喂鸽子","不要喂动物人类食物","周末10点有科普讲解","附近有洗手池"]},
+    "老年活动中心":{story:"龙华社区老年活动中心是老人们的乐园，设有棋牌室、书法教室、茶室和太极广场。每天早上7点，一群白发苍苍的老人在这里打太极拳，动作整齐划一。下午是棋牌时间，棋盘上的厮杀不比年轻人少。",crowd:["老年人","带老人出游","社区文化"],bestTime:"早上7点太极拳 · 下午棋牌",highlights:["免费开放","太极拳","书法教室","棋牌室"],tips:["老人免费进入","带老人来体验本地生活","可以参与一起下棋","茶室20元一位"]},
+    "家庭合影点":{story:"这个位于西岸滨江的家庭合影点是官方专门设置的，背景是黄浦江和远处的天际线。脚下有一块铜牌刻着「来龙华的第一张全家福」，旁边还有一个免费的拍照支架。每到周末，这里都会排起等待拍照的家庭。",crowd:["全家出游","纪念留影","节日打卡"],bestTime:"上午10点光线最好 · 周末最热闹",highlights:["免费拍照支架","江景背景","铜牌纪念","仪式感"],tips:["上午光线最好","自带三脚架效果更好","节假日人很多","可以找工作人员帮忙拍照"]},
+    "母婴室":{story:"西岸滨江的母婴室是上海评分最高的公共母婴设施之一，配有哺乳椅、尿布台、温奶器、微波炉和儿童洗手池。环境干净整洁，还有一个小型儿童游乐角，让妈妈们可以安心哺乳和休息。",crowd:["哺乳期妈妈","婴幼儿家庭","需要休息"],bestTime:"随时可用",highlights:["设备齐全","干净整洁","温奶器","儿童游乐角"],tips:["门口有指示牌","有热水供应","可以短暂休息","有纸尿裤免费取用"]},
+
+    // ===== 探索系 =====
+    "龙华寺樱花林":{story:"藏在龙华寺藏经楼后面的樱花林，是龙华最不为人知的秘境。每年3月中旬，几十株染井吉野樱同时绽放，粉色花瓣如雨般飘落在青石板路上。因为位置偏僻，知道的人不多，堪称龙华版的「秘密花园」。",crowd:["摄影爱好者","赏花","小众秘境"],bestTime:"3月中旬 · 只有两周花期",highlights:["染井吉野樱","青石板路","小众秘境","免费"],tips:["只有3月中旬有花","早上人最少","穿浅色衣服","花期只有两周别错过"]},
+    "废弃铁轨":{story:"这条铁轨是旧水泥厂的专用铁路，废弃后长满了野草和藤蔓。铁轨一直延伸到江边，尽头是一个半淹没在水中的旧码头。站在铁轨上向远处望去，工业遗迹与自然交融，是摄影爱好者心中的西岸最佳拍摄地。",crowd:["摄影爱好者","探险","工业遗迹"],bestTime:"下午光线好 · 注意安全",highlights:["旧铁轨","江边码头","野草藤蔓","工业风"],tips:["注意脚下铁轨湿滑","不要走到轨道中间","拍照注意来往人员","不要进入废弃建筑"]},
+    "地下艺术空间":{story:"这个由防空洞改造的地下艺术空间，是西岸最酷的展览场地。混凝土拱顶、昏暗的灯光、回荡的脚步声，营造出的氛围比任何装修都更有戏剧性。这里只展出实验性和沉浸式的艺术作品，每次进去都像进入另一个世界。",crowd:["当代艺术","沉浸体验","探险"],bestTime:"下午 · 光线效果最好",highlights:["防空洞改造","沉浸式展览","混凝土美学","独特氛围"],tips:["穿舒适的鞋","温度偏低带外套","部分展览有年龄限制","提前查展览信息"]},
+    "老弄堂":{story:"龙华寺背后还保留着几条原汁原味的老弄堂，石库门房子虽然斑驳却依然有人居住。穿过窄窄的弄堂，可以看到老阿姨在门口择菜、老伯伯在树下下棋、猫咪趴在窗台上晒太阳——这才是最真实的老上海生活。",crowd:["人文摄影","老上海文化","慢旅行"],bestTime:"早上8-10点 · 最有生活气息",highlights:["石库门","真实生活","老上海","人文摄影"],tips:["不要打扰居民生活","可以拍照但不要拍人特写","早上最有烟火气","弄堂路窄注意安全"]},
+    "古井":{story:"这口明朝古井位于龙华寺后门的小巷深处，至今仍在使用。每天早上都能看到附近的老居民来这里打水洗菜。井口用青石砌成，边缘被几百年的绳索磨出了深深的沟痕。据说用这口井的水泡茶，味道格外清甜。",crowd:["历史爱好者","人文摄影","文化探访"],bestTime:"早上7-8点 · 看到居民打水",highlights:["明代遗存","仍在使用","绳索磨痕","活的历史"],tips:["早上来能看到居民打水","不要往井里扔东西","可以和老人聊天","旁边有石碑介绍历史"]},
+    "秘密花园":{story:"这是一栋老旧居民楼的屋顶花园，由楼里的退休居民们自发打造。爬上6层楼梯推开门的一瞬间，满眼都是鲜花和绿植——月季、绣球、茉莉、薄荷，还有一架葡萄藤。从这里可以360度俯瞰龙华寺全景，是最高级的「隐藏观景点」。",crowd:["摄影爱好者","探索达人","植物爱好者"],bestTime:"上午光线好 · 花季4-10月",highlights:["屋顶花园","360度全景","居民自治","免费"],tips:["需要爬6层楼梯","跟居民说一声可以上去","不要摘花","上午光线最适合拍照"]},
+    "艺术家工作室":{story:"西岸艺术区聚集了大量艺术家工作室，有些是对外开放的。你可以走进去看到艺术家们正在创作——画布上未完成的作品、工作台上散落的颜料、墙上贴满的草图。如果运气好，还能和艺术家聊聊创作背后的故事。",crowd:["艺术爱好者","收藏家","文化探访"],bestTime:"周末 · 艺术家通常在",highlights:["观看创作","交流互动","购买作品","工作室氛围"],tips:["不要预约直接去","尊重艺术家工作时间","作品可以谈价格","拍照前征得同意"]},
+    "夜间集市":{story:"每周五六晚上7点开始的龙华夜间集市，是本地人才知道的秘密。这里没有游客景点的商业感，摊主都是附近的居民——阿姨卖自家腌的酱菜、大爷卖手工竹编、年轻人卖手作首饰。最有名的是一位老奶奶的馄饨摊，据说排队要等40分钟。",crowd:["本地体验","小吃爱好者","淘货"],bestTime:"周五六晚上7-10点",highlights:["本地人市集","手工馄饨","竹编工艺","真材实料"],tips:["老奶奶馄饨7点就去排","带现金部分摊位不支持手机","可以淘到有趣的小东西","9点后摊位开始收"]},
+    "日出观景点":{story:"西岸最东端有一个开阔的观景平台，是观赏黄浦江日出的最佳位置。凌晨5点，当第一缕阳光穿过陆家嘴的建筑群照射在江面上，整个世界都是金色的。虽然需要早起，但这个画面会让你觉得一切都值得。",crowd:["摄影爱好者","早起星人","浪漫体验"],bestTime:"夏天5:00 · 冬天6:30 日出前30分钟到",highlights:["黄浦江日出","陆家嘴天际线","金色江面","宁静时刻"],tips:["提前查好日出时间","夏天5点冬天6:30","带三脚架","注意保暖带外套"]},
+
+    // ===== 美食系 =====
+    "龙华老街小吃街":{story:"龙华老街小吃街是上海最有烟火气的市集之一，每天从清晨6点开始营业。这里有经营了30年的生煎老店、排队1小时的葱油饼摊、还有只在早上出摊的馄饨挑子。每一口都是正宗的上海味道。",crowd:["美食爱好者","早餐控","老上海味道"],bestTime:"早上6-8点 · 最新鲜最热闹",highlights:["30年生煎店","葱油饼","小笼包","馄饨"],tips:["空腹来边走边吃","带现金","6点来最新鲜","生煎配醋绝了"]},
+    "塔影咖啡":{story:"塔影咖啡的招牌是「塔影拿铁」——咖啡师会在拉花上画出龙华塔的轮廓。配合一快慕斯蛋糕，坐在窗边望着真实的龙华塔，喝着杯中的龙华塔，是一种有趣的「塔中塔」体验。",crowd:["咖啡爱好者","打卡拍照","约会"],bestTime:"上午 · 拉花最精致",highlights:["塔影拿铁","慕斯蛋糕","窗边看塔","网红打卡"],tips:["塔影拿铁是招牌","配慕斯蛋糕更搭","窗边位要早到","拍照先把拉花拍下来"]},
+    "老字号面馆":{story:"这家面馆在龙华已经开了40年，从最初的路边摊发展到现在的小店面。老板每天凌晨4点就开始熬汤底，用的是猪骨和老母鸡慢炖6小时。一碗葱油拌面只要12元，是周边居民的最爱早餐。",crowd:["面食爱好者","早餐","本地人推荐"],bestTime:"早上6:30-8:00 · 面条最新鲜",highlights:["40年老店","6小时熬汤","葱油拌面12元","大排面"],tips:["6:30开门第一批最新鲜","葱油拌面必点","大排面也很推荐","中午会排队"]},
+    "本帮菜馆":{story:"这家本帮菜馆的老板是上海本地人，做菜遵循「浓油赤酱」的传统。招牌红烧肉用的是五花三层的中方肉，小火慢炖3小时，入口即化。糖醋排骨外酥里嫩，连骨头都是甜的。",crowd:["本帮菜爱好者","家庭聚餐","上海味道"],bestTime:"中午11:30前 · 晚上需预订",highlights:["红烧肉","糖醋排骨","浓油赤酱","本地口味"],tips:["红烧肉必点","中午不用排队","建议4人以上点菜","有包厢需提前预订"]},
+    "火锅店":{story:"这家老北京铜锅涮肉是龙华周边最受欢迎的火锅店。用的是传统铜锅炭火，涮的是手切鲜羊肉。最正宗的吃法是一碗麻酱蘸料配上糖蒜，冬天一群人围着热气腾腾的铜锅，是北方人最温暖的上海记忆。",crowd:["火锅爱好者","冬季聚餐","北方人"],bestTime:"晚上6-9点 · 冬天最应景",highlights:["铜锅炭火","手切鲜羊肉","麻酱蘸料","糖蒜"],tips:["冬天最火要等位","手切鲜羊肉比冻卷好","麻酱可以自己调","建议4人以上"]},
+    "日式料理":{story:"这家日式料理的老板曾在东京筑地市场学习3年，对食材的讲究近乎偏执——三文鱼只选挪威空运的、大米用秋田产的越光米、芥末现磨不用管的。一口寿司入口，你会理解什么叫「食材本身的味道」。",crowd:["日料爱好者","约会","品质控"],bestTime:"晚上6-8点 · 午间有定食",highlights:["空运三文鱼","越光米","现磨芥末","Omakase"],tips:["午间定食性价比高","推荐Omakase套餐","提前一天预订包厢","有清酒推荐"]},
+    "奶茶店":{story:"这家奶茶店虽然门面不大，但在龙华口碑极好。老板坚持用鲜奶和真茶底，拒绝植脂末和香精。招牌珍珠奶茶的珍珠每天现煮，Q弹得能在嘴里跳舞。排队虽然要等15分钟，但每一口都值得。",crowd:["奶茶控","年轻人","解渴"],bestTime:"下午 · 现煮珍珠最新鲜",highlights:["鲜奶真茶","现煮珍珠","拒绝植脂末","口碑好"],tips:["招牌珍珠奶茶必点","排队约15分钟","可以少糖/去冰","会员有积分"]},
+    "西式烘焙":{story:"这家烘焙坊的面包师傅是法国人，每天凌晨3点开始揉面发酵。可颂酥皮层层分明、法棍外脆内软、还有每周限定一次的国王饼。推开店门的瞬间，黄油和面粉的香气扑面而来，是龙华最幸福的早晨味道。",crowd:["面包爱好者","早餐","法式甜点"],bestTime:"早上7-8点 · 刚出炉最新鲜",highlights:["法式可颂","国王饼限定","法国面包师","每日新鲜"],tips:["7点来最新鲜","国王饼只有周一次","法棍可以要求切半","有堂食座位"]},
+
+    // ===== 祈福系 =====
+    "许愿树":{story:"龙华寺内的许愿树是一棵已有200年树龄的古银杏。游客们将写有心愿的红丝带系在树枝上，远远望去满树红丝带随风飘扬，场面壮观。据说在树前投一枚硬币许愿，愿望更容易实现。",crowd:["祈福许愿","仪式感","拍照"],bestTime:"全年 · 新年前后最壮观",highlights:["200年古银杏","红丝带","投币许愿","满树心愿"],tips:["自带红丝带和笔","投1角硬币入树根","新年许愿最灵","不要拉扯树枝"]},
+    "财神殿":{story:"财神殿位于龙华寺的东侧，供奉着文财神比干和武财神赵公明。每逢正月初五「迎财神」的日子，这里会排起几百米的长队，鞭炮声震耳欲聋。据说在这里拜过的做生意的人，当年生意都会格外红火。",crowd:["求财运","做生意","正月初五"],bestTime:"正月初五迎财神 · 初一十五",highlights:["文武财神","迎财神","香火旺盛","求财圣地"],tips:["正月初五最灵验","带香来","可以请一个财神符","心诚则灵"]},
+    "姻缘殿":{story:"姻缘殿供奉着月老，是龙华寺最「甜蜜」的殿堂。殿内挂满了红色同心结，每对来祈福的情侣都会在这里系上一个。据说在月老面前说出心上人的名字，如果一阵风吹来，就说明姻缘将近。",crowd:["求姻缘","情侣祈福","单身"],bestTime:"情人节前后 · 七夕最灵",highlights:["月老","红色同心结","姻缘红线","情侣祈福"],tips:["单身来求姻缘最灵","情侣一起祈福","系同心结5元一个","七夕排队人很多"]},
+    "平安符售卖处":{story:"龙华寺的平安符由寺内僧人亲手制作并开光，分为平安符、学业符、健康符等多种。每个符袋上都绣着精美的佛像和经文，装在红色的锦囊里。许多家长在考试季都会来为孩子请一个学业符。",crowd:["求平安","送祝福","考试季"],bestTime:"全年 · 考试季和新年最旺",highlights:["僧人手工制作","开光加持","多种符类","红色锦囊"],tips:["30-100元价格不等","学业符考试季最火","可以请多个送人","开光后不要沾水"]},
+
+    // ===== 运动系 =====
+    "龙华寺广场":{story:"每天早上7点，龙华寺广场就会准时出现一群白发苍苍的太极拳爱好者。他们中最大的已经88岁，动作却比年轻人还标准。跟随他们练上一套八段锦，呼吸着清晨微凉的空气，是开始一天最健康的方式。",crowd:["晨练爱好者","太极","中老年"],bestTime:"每天早上7-8点",highlights:["太极拳","八段锦","免费参与","社区氛围"],tips:["7点准时开始","穿宽松运动服","可以跟在后面学","结束后可以逛龙华寺"]},
+    "自行车租赁点":{story:"西岸设有多个公共自行车租赁点，扫码即骑。从龙华寺出发，沿着滨江骑行到徐汇滨江公园，全程约10公里，沿途经过美术馆、艺术中心和江景步道。骑行过程中可以随时停下来拍照或休息，是最自由的城市探索方式。",crowd:["骑行爱好者","情侣","家庭出游"],bestTime:"上午9-11点 · 傍晚4-6点",highlights:["10公里滨江路线","扫码即骑","沿途艺术馆","自由灵活"],tips:["下载App扫码租车","前30分钟免费","带水壶","沿途有多处停放点"]},
+    "健身房":{story:"这家24小时营业的健身房就在西岸步行5分钟的距离，器械区有氧区齐全。最特别的是它的落地窗直面黄浦江，跑步的时候看着江面和远处的天际线，让枯燥的有氧运动也变成了一种享受。",crowd:["健身爱好者","出差人士","自律青年"],bestTime:"晚上8-10点 · 人最少",highlights:["24小时营业","江景落地窗","器械齐全","淋浴设施"],tips:["单次50元","有月卡优惠","晚上8点后人少","自带毛巾和水"]},
+    "攀岩馆":{story:"这家室内攀岩馆有20多条不同难度的线路，从入门的V0到挑战极限的V8都有。最受欢迎的是一面15米高的模拟岩壁，上面还原了真实户外攀岩的手点和脚点。教练都是国家级运动员退役，安全又专业。",crowd:["攀岩爱好者","团建","挑战自我"],bestTime:"工作日下午 · 周末需预约",highlights:["20+线路","15米高墙","专业教练","安全设施"],tips:["新手有教练带","穿运动鞋去","提前预约周末时段","恐高慎选高墙"]},
+    "瑜伽馆":{story:"这家瑜伽馆的教室有一整面落地窗对着黄浦江，做瑜伽的时候可以看着江面和天空。主修的是流瑜伽和阿斯汤加，每节课90分钟。清晨的日出瑜伽课是最受欢迎的——在朝阳中做第一个拜日式，感觉整个人都被净化了。",crowd:["瑜伽爱好者","减压放松","女性"],bestTime:"早上7点日出课 · 晚上8点冥想课",highlights:["江景教室","流瑜伽","日出课程","冥想课"],tips:["自带瑜伽垫有优惠","早上日出课需提前预约","第一次来提前15分钟","有淋浴更衣"]},
+    "篮球场":{story:"西岸滨江有一个免费的户外篮球场，地面是标准塑胶材质，配有照明灯。每天下午5点以后，附近的篮球爱好者就会自发组队打3v3半场赛。气氛热烈但友好，水平参差但热情不减。",crowd:["篮球爱好者","运动社交","年轻人"],bestTime:"下午5-8点 · 夏天最热闹",highlights:["免费","塑胶地面","夜间照明","3v3半场"],tips:["自带篮球","下午5点后人最多","可以临时组队","有饮水处"]},
+
+    // ===== 躺平系 =====
+    "龙华寺广场":{story:"龙华寺广场在午后人少的时候特别安静。找个台阶坐下，听寺里的钟声悠远地传来，看鸽子在广场上踱步，什么都不做也不想，就是发呆。老和尚说过：「不是在修行，就是在发呆，这两者没什么区别。」",crowd:["发呆放空","冥想","精神充电"],bestTime:"下午3-4点 · 人最少最安静",highlights:["钟声悠远","鸽子踱步","台阶发呆","免费"],tips:["下午3点后人最少","带个坐垫更舒服","不要大声说话","发呆不是浪费时间"]},
+    "江边长椅":{story:"西岸滨江最不缺的就是长椅，每一张的位置和角度都不同，看到的风景也不同。有一张长椅正对着江面最宽处，坐上去可以看到整条黄浦江。什么都不用想，就看水、看船、看天，让大脑彻底放空。",crowd:["独处放空","听歌发呆","情绪疗愈"],bestTime:"傍晚5-7点 · 夕阳西下时分",highlights:["刻字长椅","江景","安静","免费"],tips:["带耳机听歌","带纸巾（可能想哭）","不要坐太久会冷","旁边有咖啡车"]},
+    "足浴店":{story:"这家足浴店在龙华开了8年，技师手法专业到位。60分钟的足底按摩从脚底到小腿一路按遍，按完之后感觉整个人都轻了10斤。最推荐的是「养生草本泡脚+按摩」套餐，先泡后按，疲惫感一扫而空。",crowd:["疲劳上班族","足疗爱好者","放松"],bestTime:"下午-晚上 · 提前预约",highlights:["60分钟按摩","草本泡脚","专业技师","8年老店"],tips:["提前打电话预约","推荐养生套餐","按完多喝温水","有免费茶水零食"]},
+    "茶馆":{story:"龙华老街上的这家茶馆虽然不大，但五脏俱全——龙井、碧螺春、铁观音、普洱，品种齐全。最难得的是老板会在你品茶时轻声讲解茶的知识，从产区到工艺，从闻香到品鉴。来这里不是喝茶，是「懂茶」。",crowd:["茶文化爱好者","安静社交","商务洽谈"],bestTime:"下午2-5点 · 最适合慢品",highlights:["专业茶艺","品种齐全","茶知识讲解","安静环境"],tips:["推荐先喝龙井再喝普洱","老板懂茶可以多问","可以自己带茶叶","最低消费40元"]},
+    "书店咖啡":{story:"西岸滨江的书店咖啡是「可以坐一整天」的那种地方。一整面落地窗对着江面，书架上混杂着小说、散文、摄影集和独立杂志。点一杯美式、挑一本书、窝在沙发上，时间就这样安静地流走了。",crowd:["阅读爱好者","独处","文艺青年"],bestTime:"工作日 · 周末下午需要等位",highlights:["江景落地窗","混搭书架","沙发座位","安静氛围"],tips:["工作日来不用等位","消费入座建议点一杯","沙发位最受欢迎","可以带自己的书"]},
+    "江边冥想点":{story:"西岸滨江有一处安静的角落，地上画着一个简易的冥想圆圈，旁边有一块木牌写着「停下来，深呼吸」。这里是西岸最安静的地方，只能听到江水和远处船只的声音。每天清晨，都有人在这里练习正念冥想。",crowd:["冥想爱好者","正念练习","减压"],bestTime:"早上6-8点 · 人最少空气最新鲜",highlights:["冥想圆圈","正念练习","江声白噪音","免费"],tips:["早上人最少","穿舒适的衣物","可以带冥想垫","关闭手机提醒"]},
+
+    // ===== 青年机遇探索系 =====
+    "模速空间":{story:"模速空间是上海市徐汇区重点打造的AI产业生态社区，坐落于西岸滨江核心区域。这里汇聚了200+家AI创业企业，涵盖大模型、自动驾驶、机器人、智慧医疗等前沿赛道。走进模速空间，你能感受到扑面而来的创业气息——开放工位上键盘声此起彼伏，路演厅里创业者在向投资人激情展示，咖啡厅里两个人正在讨论下一个独角兽的点子。徐汇区为入驻企业提供最高500万的创业补贴和3年免租政策，是上海AI创业最热门的「根据地」。",crowd:["创业者","求职者","投资人","大学生"],bestTime:"工作日 10:00-17:00 · 周三有路演",highlights:["200+AI企业","创业补贴政策","免费参观","投资人活动"],tips:["提前在官网预约参观","周三下午有创业路演","带名片随时交流","关注公众号看活动日历"]},
+    "西岸大剧院":{story:"西岸大剧院由日本建筑大师矶崎新设计，外形如同一朵正在绽放的白色花瓣，是西岸文化走廊的标志性建筑。内部设有1200座的大剧场和400座的实验剧场，全年上演歌剧、话剧、音乐剧和舞蹈演出。这里不仅是一座剧院，更是感受前沿艺术和科技融合的场所——许多国际演出团队都会在这里首演最新作品。",crowd:["演出爱好者","文艺青年","建筑摄影","约会"],bestTime:"晚上有演出时最热闹 · 外部全天可参观",highlights:["矶崎新设计","1200座大剧场","国际演出","建筑美学"],tips:["演出票建议提前2周买","外部参观免费","拍照最佳时间是黄昏","有地下停车场"]},
+    "AI 夜校":{story:"AI夜校是徐汇区推出的公益性技能培训项目，每周三和周六晚上开课。课程涵盖ChatGPT实战、AI绘画、Python编程、商业分析等实用技能，零基础也能学。最有意思的是学员来自各行各业——有外卖小哥想学AI接单，有阿姨想用AI给孙子画画，有创业者来学Prompt工程优化业务流程。这里没有学历门槛，只有对知识的渴望。",crowd:["想学AI的人","转行者","创业者","大学生"],bestTime:"周三/周六 19:00-21:00",highlights:["免费课程","零基础友好","实用技能","跨行业交流"],tips:["首课免费试听","需提前报名","自带笔记本电脑","可以加同学群持续交流"]},
+    "AI 产品体验店":{story:"这家体验店汇集了国内最前沿的AI硬件和软件产品——AI写作助手、AI翻译耳机、智能录音笔、AI健身镜、AI眼镜……你可以亲手试用每一款产品，还能和产品经理面对面交流。最酷的是一面「AI未来墙」，实时展示这些产品如何改变不同行业：医疗诊断、自动驾驶、教育培训、创意设计……来这里逛一圈，你会对AI的未来有一个全新的认知。",crowd:["科技爱好者","产品经理","投资人","学生"],bestTime:"周末人最多 · 工作日体验更从容",highlights:["最新AI产品","免费体验","产品经理交流","AI未来墙"],tips:["免费体验不需要消费","有些产品可以深度试用","可以和店员聊产品细节","关注新品发布时间"]},
+    "西岸智塔":{story:"西岸智塔是徐汇滨江AI产业的旗舰地标建筑，高200米，是整个西岸科技走廊的最高点。塔内入驻了多家头部AI企业的研发中心，以及一个对外开放的AI科技展厅。站在顶楼360度观景平台，可以俯瞰整个西岸滨江——一边是黄浦江的壮阔江景，一边是密密麻麻的科技企业办公楼群。这里就是徐汇AI产业的「指挥中心」。",crowd:["商务考察","科技爱好者","建筑摄影"],bestTime:"工作日 · 需预约",highlights:["200米地标","AI科技展厅","360度观景","头部企业研发中心"],tips:["需要提前预约","顶楼观景台有开放时间","展厅有免费讲解","带身份证登记"]},
+    "创业者咖啡":{story:"这家被创投圈称为「西岸VC据点」的咖啡厅，是模速空间周边最有故事的角落。墙上挂满了创业公司的Logo——其中有些已经成了独角兽。每天中午到下午，这里的每一张桌子都可能在进行一场改变行业格局的对话。来这里点一杯美式，竖起耳朵听隔壁桌的讨论，你就能捕捉到最新的行业风向和创业趋势。",crowd:["创业者","投资人","产品经理","学生"],bestTime:"工作日中午到下午 · 周末人少",highlights:["创投圈据点","免费WiFi","行业交流","偶遇大咖"],tips:["带名片随时交流","工作日中午最热闹","咖啡性价比很高","可以在这里约谈项目"]},
+    "科技书店":{story:"这家专注AI/编程/商业的精品书店，是模速空间创业者们最常去的「充电站」。书架上的分类很有特色——不是按文学/历史/科学来分，而是按「创业起步」「AI入门」「增长黑客」「产品设计」「融资指南」来分。店门口有一个免费书架，上面放着其他创业者看完后捐赠的书，扉页上经常写着鼓励的话和联系方式——也许下一个合伙人就这样找到了。",crowd:["创业者","程序员","产品经理","终身学习者"],bestTime:"工作日全天 · 周末有读书会",highlights:["AI/创业专题","免费漂流书架","购书8折","读书会"],tips:["免费漂流书架可以取书也可以放书","购书8折会员","周末有创业者读书会","有安静阅读区"]},
+    "路演中心":{story:"模速空间的路演中心每周三下午固定举办创业项目路演，向所有公众免费开放。每个项目15分钟展示+15分钟投资人问答。来这里不仅能看到最新的创业项目——从AI写诗到机器人送餐、从数字人到元宇宙社交——更能近距离感受投资人的提问角度和判断逻辑。即使你暂时不创业，这里的思维碰撞也值得一看。",crowd:["创业者","投资人","大学生","产品经理"],bestTime:"每周三 14:00-17:00",highlights:["免费旁听","真实项目路演","投资人互动","行业趋势"],tips:["周三下午准时到场","可以提问互动","带名片可能加到微信","关注公众号看预告"]},
+    "AI 艺术展厅":{story:"这个限时展览的AI艺术展厅，展示了AI与艺术融合的最新成果——AI生成的油画、AI作曲的音乐、AI编舞的舞蹈视频、AI设计的服装……每一件作品都在挑战「什么是创作」的边界。最震撼的是一个互动装置：你站在摄像头前，AI会实时捕捉你的表情和姿态，生成一幅专属于你的AI肖像画。",crowd:["艺术爱好者","科技爱好者","年轻人","约会"],bestTime:"限时展览期间 · 上午人少",highlights:["AI生成艺术","互动装置","科技与艺术碰撞","限时展览"],tips:["30元门票性价比很高","上午来不用排队","带手机拍照","互动装置排队约10分钟"]},
+    "青年公寓展示区":{story:"徐汇区为吸引青年人才推出了一系列人才公寓政策，这个展示区就是政策咨询的线下窗口。在这里你可以了解到：哪些区域有人才公寓、租金补贴标准（最高补贴50%）、申请条件、排队周期等。展示区旁边还有样板间可以参观——精装修、带健身房和公共厨房的青年社区，月租最低只要1500元。对于想来上海打拼的年轻人，这里是第一站。",crowd:["来沪青年","应届毕业生","租房需求","人才引进"],bestTime:"工作日 9:00-17:00",highlights:["人才公寓政策","租金补贴咨询","样板间参观","免费服务"],tips:["带身份证和学历证书","可以现场登记排队","了解补贴申请时间节点","关注各区政策差异"]}
+    }
+};
+
+function openPoiDetail(poi,idx){
+    const detail=POI_DETAILS[poi.name]||{};
+    const story=detail.story||`${poi.name}位于龙华核心区域，是龙华·灵境向导精心推荐的必去之地。这里的独特氛围让你感受到不一样的龙华魅力。`;
+    const crowd=(detail.crowd||["所有人群"]).map(c=>`<span class="sheet-tag">${c}</span>`).join('');
+    const highlights=(detail.highlights||[poi.hook]).map(h=>`<span class="sheet-tag highlight">${h}</span>`).join('');
+    const tips=(detail.tips||[poi.tip]).map(t=>`<li style="margin-bottom:4px">${t}</li>`).join('');
+    const bestTime=detail.bestTime||'随时可去';
+    const costText=poi.cost===0?'免费':`约${poi.cost}元`;
+    const modal=document.getElementById('poiModal');
+    modal.innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closePoiDetail()">
+        <div class="modal-sheet">
+            <div class="sheet-header" style="position:relative">
+                <div class="sheet-handle"></div>
+                <button class="close-btn" onclick="closePoiDetail()">✕</button>
+                <h2>${idx+1}. ${poi.name}</h2>
+                <div class="sheet-rating">${poi.score} · ${bestTime}</div>
+            </div>
+            <div class="sheet-body">
+                <div class="sheet-section">
+                    <div class="section-label">💡 推荐理由</div>
+                    <div class="section-content">${poi.why}</div>
+                </div>
+                <div class="sheet-info-grid">
+                    <div class="sheet-info-item">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-value">${poi.time}分钟</div>
+                        <div class="info-label">建议停留</div>
+                    </div>
+                    <div class="sheet-info-item">
+                        <div class="info-icon">💰</div>
+                        <div class="info-value">${costText}</div>
+                        <div class="info-label">预计花费</div>
+                    </div>
+                </div>
+                <div class="sheet-section">
+                    <div class="section-label">📖 故事背景</div>
+                    <div class="sheet-story">${story}</div>
+                </div>
+                <div class="sheet-section">
+                    <div class="section-label">✨ 亮点标签</div>
+                    <div class="sheet-tags">${highlights}</div>
+                </div>
+                <div class="sheet-section">
+                    <div class="section-label">👥 适合人群</div>
+                    <div class="sheet-tags">${crowd}</div>
+                </div>
+                <div class="sheet-section">
+                    <div class="section-label">🎫 优惠</div>
+                    <div class="section-content" style="color:#E87A5D;font-weight:500">${poi.hook}</div>
+                </div>
+                <div class="sheet-section">
+                    <div class="section-label">📌 实用贴士</div>
+                    <ul style="padding-left:18px;font-size:0.85rem;color:#6b5a4e;line-height:1.7">${tips}</ul>
+                </div>
+                <div class="sheet-actions">
+                    <button class="nav-btn-action" onclick="navigateTo(${poi.lat},${poi.lng},'${poi.name}')">🗺️ 导航前往</button>
+                    <button class="voice-btn-action" onclick="playNaturalTTS('${poi.why}')">🔊 语音播报</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    document.body.style.overflow='hidden';
+}
+
+function closePoiDetail(){
+    document.getElementById('poiModal').innerHTML='';
+    document.body.style.overflow='';
+}
+
+function navigateTo(lat,lng,name){
+    if(window.AMap){
+        window.open(`https://uri.amap.com/navigation?to=${lng},${lat},${name}&mode=bus&callnative=0`,'_blank');
+    }else{
+        showToast('地图加载中，请稍后再试');
+    }
+}
+
+function showToast(msg){
+    const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500)
+}
+
+// 偏好设置保存与加载
+function savePreference(key, value) {
+    const prefs = JSON.parse(localStorage.getItem('pathjoy_preferences') || '{}');
+    prefs[key] = value;
+    localStorage.setItem('pathjoy_preferences', JSON.stringify(prefs));
+    console.log('✅ 偏好已保存', key, value);
+}
+
+function loadPreferences() {
+    const prefs = JSON.parse(localStorage.getItem('pathjoy_preferences') || '{}');
+    if (prefs.emotion) {
+        const emotionBtn = document.querySelector(`.emotion-btn[data-emotion="${prefs.emotion}"]`);
+        if (emotionBtn) {
+            document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+            emotionBtn.classList.add('active');
+            console.log('✅ 已加载情绪偏好', prefs.emotion);
+        }
+    }
+    if (prefs.type) {
+        const typeBtn = document.querySelector(`.type-btn[data-type="${prefs.type}"]`);
+        if (typeBtn) {
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            typeBtn.classList.add('active');
+            selectedType = prefs.type;
+            document.getElementById('selectedTypeDisplay').textContent = TYPE_CONFIG[prefs.type].name;
+            console.log('✅ 已加载类型偏好', prefs.type);
+        }
+    }
+}
+
+function getPreference(key, defaultValue) {
+    const prefs = JSON.parse(localStorage.getItem('pathjoy_preferences') || '{}');
+    return prefs[key] || defaultValue;
+}
+
+function clearPreferences() {
+    localStorage.removeItem('pathjoy_preferences');
+    showToast('🔄 偏好设置已重置');
+    location.reload();
+}
+
+function bindEvents(){
+    document.querySelectorAll('.emotion-btn').forEach(btn=>btn.addEventListener('click',function(){
+        document.querySelectorAll('.emotion-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        const emotion=this.dataset.emotion;
+        showToast(`已选择：${this.querySelector('.label').textContent}`);
+        savePreference('emotion',emotion)
+    }));
+    document.getElementById('generateBtn').addEventListener('click',generateRoute);
+    document.querySelector('.emotion-btn')?.classList.add('active');
+    document.querySelectorAll('.type-btn').forEach(btn=>btn.addEventListener('click',function(){
+        document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        selectedType=this.dataset.type;
+        const typeName=TYPE_CONFIG[selectedType].name;
+        showToast(`已切换：${typeName}`);
+        document.getElementById('selectedTypeDisplay').textContent=typeName;
+        savePreference('type',selectedType)
+    }));
+    document.getElementById('customQuery').addEventListener('keypress',e=>{if(e.key==='Enter')generateRoute()});
+    loadPreferences()
+}
+bindEvents();
+window.addEventListener('load',()=>setTimeout(()=>showToast("🐉 欢迎来到龙华·灵境向导！"),500));
+</script>
+</body>
+</html>

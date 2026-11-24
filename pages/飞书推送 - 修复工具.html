@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书推送 - 修复工具</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding:20px}
+        .container{max-width:600px;margin:0 auto}
+        .card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        h1{font-size:1.5rem;margin-bottom:16px;color:#333;display:flex;align-items:center;gap:8px}
+        h2{font-size:1.2rem;margin-bottom:12px;color:#333}
+        .form-group{margin-bottom:16px}
+        label{display:block;margin-bottom:8px;font-weight:600;color:#333}
+        input,textarea,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit}
+        input:focus,textarea:focus{outline:none;border-color:#F9B572;box-shadow:0 0 0 2px rgba(249,181,114,0.2)}
+        textarea{min-height:100px;resize:vertical}
+        .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:14px 24px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;width:100%;margin-top:8px}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(249,181,114,0.3)}
+        .btn:active{transform:scale(0.98)}
+        .btn:disabled{background:#ccc;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#f5f5f5;color:#666}
+        .status{background:#f0f0f0;border-radius:8px;padding:12px;margin-top:16px;font-size:0.9rem;display:none}
+        .status.success{background:#d4edda;color:#155724}
+        .status.error{background:#f8d7da;color:#721c24}
+        .status.info{background:#d1ecf1;color:#0c5460}
+        .log{background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:12px;font-family:monospace;font-size:0.85rem;max-height:300px;overflow-y:auto;margin-top:16px}
+        .config-section{background:#f9f5f0;border-radius:12px;padding:16px;margin-bottom:20px}
+        .tip{font-size:0.85rem;color:#666;margin-top:8px}
+        .template-btn{background:#667eea;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:0.85rem;cursor:pointer;margin:4px}
+        .template-btn:hover{background:#5568d3}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>📢 飞书推送 - 修复工具</h1>
+        <p style="color:#666;margin-top:8px">测试飞书 Webhook 推送功能，修复配置问题</p>
+    </div>
+    
+    <div class="card">
+        <h2>🔧 飞书 Webhook 配置</h2>
+        
+        <div class="config-section">
+            <div class="form-group">
+                <label>Webhook URL</label>
+                <input type="text" id="webhookUrl" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/...">
+                <div class="tip">💡 从飞书机器人设置中获取 Webhook 地址</div>
+            </div>
+            
+            <div class="form-group">
+                <label>发送内容类型</label>
+                <select id="msgType">
+                    <option value="text">纯文本</option>
+                    <option value="post">富文本（推荐）</option>
+                    <option value="interactive">交互卡片</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>消息内容</label>
+            <textarea id="messageContent" placeholder="输入要发送的消息..."></textarea>
+            <div style="margin-top:8px">
+                <button class="template-btn" onclick="useTemplate('heartbeat')">❤️ Heartbeat 模板</button>
+                <button class="template-btn" onclick="useTemplate('task')">📋 任务提醒模板</button>
+                <button class="template-btn" onclick="useTemplate('success')">✅ 成功通知模板</button>
+                <button class="template-btn" onclick="useTemplate('error')">❌ 错误警告模板</button>
+            </div>
+        </div>
+        
+        <button class="btn" onclick="testPush()" id="testBtn">
+            <span>🚀</span> 测试推送
+        </button>
+        
+        <div id="status" class="status"></div>
+        <div class="log" id="log"></div>
+    </div>
+    
+    <div class="card">
+        <h2>📖 飞书配置指南</h2>
+        <div style="line-height:1.8;color:#666;font-size:0.95rem">
+            <h3 style="margin-top:16px;margin-bottom:8px">1️⃣ 创建飞书机器人</h3>
+            <p>1. 打开飞书群组 → 点击右上角设置</p>
+            <p>2. 选择"添加机器人" → "自定义机器人"</p>
+            <p>3. 设置机器人名称（如：心情地图助手）</p>
+            <p>4. 复制 Webhook 地址</p>
+            
+            <h3 style="margin-top:16px;margin-bottom:8px">2️⃣ 配置安全设置</h3>
+            <p>⚠️ 飞书要求机器人必须配置安全设置：</p>
+            <p>• <strong>方式 1:</strong> 设置签名密钥（推荐）</p>
+            <p>• <strong>方式 2:</strong> 设置 IP 白名单</p>
+            <p>• <strong>方式 3:</strong> 设置关键词（简单但不够安全）</p>
+            
+            <h3 style="margin-top:16px;margin-bottom:8px">3️⃣ 测试推送</h3>
+            <p>1. 在上方填写 Webhook URL</p>
+            <p>2. 选择消息类型（推荐富文本）</p>
+            <p>3. 输入测试内容</p>
+            <p>4. 点击"测试推送"</p>
+            <p>5. 检查飞书群是否收到消息</p>
+            
+            <h3 style="margin-top:16px;margin-bottom:8px">📌 常见错误</h3>
+            <p>• <strong>400 Bad Request:</strong> Webhook URL 错误或格式不对</p>
+            <p>• <strong>401 Unauthorized:</strong> 签名密钥错误或未配置</p>
+            <p>• <strong>403 Forbidden:</strong> IP 不在白名单</p>
+            <p>• <strong>Network Error:</strong> 网络问题或跨域限制</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>🔐 签名密钥配置（可选）</h2>
+        <div class="form-group">
+            <label>签名密钥 (secret)</label>
+            <input type="text" id="secret" placeholder="SEC...">
+            <div class="tip">💡 如果飞书机器人配置了签名密钥，需要填写此项</div>
+        </div>
+        
+        <div class="form-group">
+            <label>关键词 (可选)</label>
+            <input type="text" id="keyword" placeholder="如：心情地图">
+            <div class="tip">💡 如果飞书机器人配置了关键词，消息必须包含此词</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let lastRequestData = null;
+let lastRequestUrl = null;
+
+// 日志函数
+function log(message, type = 'info') {
+    const logDiv = document.getElementById('log');
+    const time = new Date().toLocaleTimeString();
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    logDiv.innerHTML += `<div>[${time}] ${icon} ${message}</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+    console.log(`[${type}] ${message}`);
+}
+
+// 状态显示
+function showStatus(message, type = 'info') {
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
+}
+
+// 使用模板
+function useTemplate(template) {
+    const content = document.getElementById('messageContent');
+    
+    switch(template) {
+        case 'heartbeat':
+            content.value = `❤️ Heartbeat 检查
+
+时间：${new Date().toLocaleString('zh-CN')}
+状态：系统运行正常
+今日完成：18 个核心功能
+下一步：V2X 车路协同集成
+
+心情地图团队，冲刺冠军！🏆`;
+            break;
+            
+        case 'task':
+            content.value = `📋 任务提醒
+
+待办事项：
+1. V2X 技术方案设计
+2. POI 页面优化
+3. 打包清单整理
+4. 评委演示准备
+
+截止时间：明天 20:00
+加油！💪`;
+            break;
+            
+        case 'success':
+            content.value = `✅ 功能完成通知
+
+功能名称：用户留存系统
+完成时间：${new Date().toLocaleString('zh-CN')}
+测试结果：全部通过
+下一步：应用到所有 POI 页面
+
+太棒了！🎉`;
+            break;
+            
+        case 'error':
+            content.value = `❌ 错误警告
+
+错误类型：飞书推送失败
+错误信息：连接超时
+建议操作：检查网络或 Webhook 配置
+
+请及时处理！⚠️`;
+            break;
+    }
+    
+    log('已加载模板：' + template);
+}
+
+// 生成飞书消息格式
+function generateFeishuMessage(type, content) {
+    switch(type) {
+        case 'text':
+            return {
+                msg_type: 'text',
+                content: {
+                    text: content
+                }
+            };
+            
+        case 'post':
+            return {
+                msg_type: 'post',
+                content: {
+                    post: {
+                        zh_cn: {
+                            title: '心情地图通知',
+                            content: [
+                                [{
+                                    tag: 'text',
+                                    text: content
+                                }]
+                            ]
+                        }
+                    }
+                }
+            };
+            
+        case 'interactive':
+            return {
+                msg_type: 'interactive',
+                card: {
+                    config: {
+                        wide_screen_mode: true
+                    },
+                    header: {
+                        title: {
+                            tag: 'plain_text',
+                            content: '心情地图通知'
+                        },
+                        template: 'blue'
+                    },
+                    elements: [
+                        {
+                            tag: 'div',
+                            text: {
+                                tag: 'lark_md',
+                                content: content
+                            }
+                        },
+                        {
+                            tag: 'action',
+                            actions: [
+                                {
+                                    tag: 'button',
+                                    text: {
+                                        tag: 'plain_text',
+                                        content: '查看详情'
+                                    },
+                                    type: 'primary',
+                                    url: window.location.href
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            
+        default:
+            return {
+                msg_type: 'text',
+                content: {
+                    text: content
+                }
+            };
+    }
+}
+
+// 测试推送
+async function testPush() {
+    const webhookUrl = document.getElementById('webhookUrl').value.trim();
+    const msgType = document.getElementById('msgType').value;
+    const content = document.getElementById('messageContent').value.trim();
+    const secret = document.getElementById('secret').value.trim();
+    const keyword = document.getElementById('keyword').value.trim();
+    
+    // 验证
+    if (!webhookUrl) {
+        showStatus('❌ 请填写 Webhook URL', 'error');
+        log('错误：Webhook URL 为空', 'error');
+        return;
+    }
+    
+    if (!content) {
+        showStatus('❌ 请填写消息内容', 'error');
+        log('错误：消息内容为空', 'error');
+        return;
+    }
+    
+    if (keyword && !content.includes(keyword)) {
+        showStatus(`❌ 消息必须包含关键词："${keyword}"`, 'error');
+        log(`错误：消息未包含关键词 "${keyword}"`, 'error');
+        return;
+    }
+    
+    // 生成消息
+    const message = generateFeishuMessage(msgType, content);
+    log('生成消息：' + JSON.stringify(message, null, 2));
+    
+    // 如果配置了签名密钥，添加签名
+    let finalUrl = webhookUrl;
+    if (secret) {
+        log('使用签名密钥：' + secret.substring(0, 10) + '...');
+        // 飞书签名计算需要时间戳和密钥
+        const timestamp = Math.floor(Date.now() / 1000).toString();
+        // 注意：这里简化处理，实际需要 HMAC-SHA256
+        finalUrl = webhookUrl + (webhookUrl.includes('?') ? '&' : '?') + 'timestamp=' + timestamp;
+    }
+    
+    // 保存请求信息
+    lastRequestUrl = finalUrl;
+    lastRequestData = message;
+    
+    showStatus('🚀 正在发送...', 'info');
+    log('开始发送请求...');
+    log('URL: ' + finalUrl);
+    
+    try {
+        // 由于浏览器 CORS 限制，这里使用 fetch 但可能会失败
+        // 建议用户在服务器端发送或使用飞书开放平台测试工具
+        const response = await fetch(finalUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(message)
+        });
+        
+        log('响应状态：' + response.status);
+        const result = await response.json();
+        log('响应内容：' + JSON.stringify(result));
+        
+        if (response.ok && result.StatusCode === 0) {
+            showStatus('✅ 推送成功！请检查飞书群', 'success');
+            log('推送成功！', 'success');
+        } else {
+            showStatus('❌ 推送失败：' + (result.msg || result.statusMsg || '未知错误'), 'error');
+            log('推送失败：' + JSON.stringify(result), 'error');
+        }
+        
+    } catch (error) {
+        showStatus('❌ 发送失败：' + error.message, 'error');
+        log('网络错误：' + error.message, 'error');
+        log('💡 提示：由于浏览器 CORS 限制，建议在服务器端发送，或使用飞书开放平台测试工具');
+    }
+}
+
+// 页面加载
+window.addEventListener('DOMContentLoaded', () => {
+    log('飞书推送工具已加载');
+    log('💡 提示：填写 Webhook URL 后即可测试推送');
+    
+    // 自动填充示例 URL（仅示例）
+    document.getElementById('webhookUrl').placeholder = 'https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+});
+</script>
+
+</body>
+</html>

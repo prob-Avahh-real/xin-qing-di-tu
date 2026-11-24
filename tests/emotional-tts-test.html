@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 生动情感语音测试</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(180deg,#1a1a2e,#2d1b4e);color:white;min-height:100vh;padding:40px 20px}
+        .container{max-width:1000px;margin:0 auto}
+        h1{font-size:2.5rem;margin-bottom:12px;text-align:center;background:linear-gradient(135deg,#F9B572,#E87A5D);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subtitle{text-align:center;opacity:0.8;margin-bottom:50px;font-size:1.1rem}
+        .emotion-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:50px}
+        .emotion-card{background:rgba(255,255,255,0.1);border-radius:24px;padding:24px;cursor:pointer;transition:all 0.3s;border:2px solid transparent;position:relative;overflow:hidden}
+        .emotion-card:hover{background:rgba(255,255,255,0.15);transform:translateY(-4px);border-color:rgba(249,181,114,0.5)}
+        .emotion-card.playing{border-color:#F9B572;background:rgba(249,181,114,0.2)}
+        .emotion-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(90deg,#F9B572,#E87A5D)}
+        .emotion-card .icon{font-size:3rem;margin-bottom:12px;display:block}
+        .emotion-card .name{font-weight:600;font-size:1.2rem;margin-bottom:8px}
+        .emotion-card .desc{opacity:0.7;font-size:0.85rem;margin-bottom:12px;line-height:1.5}
+        .emotion-card .preview{background:rgba(0,0,0,0.2);padding:12px;border-radius:12px;font-size:0.8rem;opacity:0.9}
+        .emotion-card .settings{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1)}
+        .emotion-card .setting-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.75rem}
+        .emotion-card .setting-label{opacity:0.8}
+        .emotion-card .setting-value{background:rgba(249,181,114,0.2);padding:4px 8px;border-radius:8px;font-weight:600}
+        .test-section{background:rgba(255,255,255,0.05);border-radius:24px;padding:28px;margin-bottom:30px}
+        .test-section h2{font-size:1.5rem;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+        .test-textarea{width:100%;min-height:120px;background:rgba(0,0,0,0.3);border:2px solid rgba(249,181,114,0.3);border-radius:16px;padding:16px;color:white;font-size:1rem;resize:vertical;margin-bottom:16px}
+        .test-textarea:focus{outline:none;border-color:#F9B572;background:rgba(0,0,0,0.4)}
+        .test-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+        .test-btn{background:#F9B572;color:white;border:none;padding:14px 28px;border-radius:20px;font-weight:600;cursor:pointer;transition:all 0.2s;font-size:1rem;display:flex;align-items:center;gap:8px}
+        .test-btn:hover{background:#E87A5D;transform:scale(1.05)}
+        .test-btn:active{transform:scale(0.98)}
+        .test-btn.secondary{background:rgba(255,255,255,0.1)}
+        .test-btn.secondary:hover{background:rgba(255,255,255,0.2)}
+        .test-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+        .checkbox-group{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+        .checkbox-item{display:flex;align-items:center;gap:8px;cursor:pointer}
+        .checkbox-item input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
+        .checkbox-item label{cursor:pointer;font-size:0.95rem}
+        .log-area{background:rgba(0,0,0,0.3);border-radius:16px;padding:16px;font-family:monospace;font-size:0.85rem;max-height:300px;overflow-y:auto}
+        .log-entry{margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.05);border-radius:8px}
+        .log-entry.success{border-left:3px solid #10b981}
+        .log-entry.error{border-left:3px solid #ef4444}
+        .log-entry.info{border-left:3px solid #3b82f6}
+        .player-status{position:fixed;top:20px;right:20px;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);padding:16px 24px;border-radius:20px;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+        .player-status.show{display:block;animation:slideIn 0.3s ease-out}
+        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        .player-status .status-icon{font-size:1.5rem;margin-right:12px}
+        .player-status .status-text{font-weight:600}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎭 生动情感语音测试</h1>
+    <p class="subtitle">12 种情感语调 + 智能断句 + 音效，让语音像真人一样生动</p>
+    
+    <!-- 情感选择 -->
+    <div class="emotion-grid" id="emotionGrid"></div>
+    
+    <!-- 自定义测试 -->
+    <div class="test-section">
+        <h2>🎤 自定义语音测试</h2>
+        <textarea class="test-textarea" id="customText" placeholder="输入你想测试的文本...">我知道你很难过。让福来抱抱你。摸摸它的耳朵，感受这份温暖。一切都会好起来的。</textarea>
+        
+        <div class="checkbox-group">
+            <label class="checkbox-item">
+                <input type="checkbox" id="withEffects" checked>
+                <label for="withEffects">🎵 播放音效</label>
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="withPrefix" checked>
+                <label for="withPrefix">💬 添加语气词</label>
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="smartSplit" checked>
+                <label for="smartSplit">✂️ 智能断句</label>
+            </label>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" id="playCustomBtn">▶️ 播放自定义</button>
+            <button class="test-btn secondary" id="testAllBtn">🧪 测试所有情感</button>
+            <button class="test-btn secondary" id="stopBtn">⏹️ 停止播放</button>
+        </div>
+        
+        <div class="log-area" id="logArea">等待测试...</div>
+    </div>
+</div>
+
+<!-- 播放状态 -->
+<div class="player-status" id="playerStatus">
+    <span class="status-icon">🎵</span>
+    <span class="status-text" id="statusText">正在播放...</span>
+</div>
+
+<script>
+// 情感配置
+const EMOTION_PROFILES = {
+    sad: {icon:'😔', name:'EMO 治愈', desc:'温柔缓慢，像安慰朋友', rate:0.75, pitch:0.95, volume:0.8, pauses:800, preview:'嗯... 我知道你很难过。让福来抱抱你。'},
+    relax: {icon:'😌', name:'散心放松', desc:'平缓舒适，让人放松', rate:0.8, pitch:1.0, volume:0.75, pauses:600, preview:'呼～ 慢慢走，静静听。这里很安静。'},
+    photo: {icon:'📸', name:'拍照打卡', desc:'欢快兴奋，充满活力', rate:1.0, pitch:1.2, volume:0.9, pauses:400, preview:'哇！这里超美的！怎么拍都好看！'},
+    social: {icon:'👫', name:'聚会玩乐', desc:'热闹活泼，气氛担当', rate:1.05, pitch:1.25, volume:0.95, pauses:350, preview:'嘿！朋友们一起来玩呀！'},
+    art: {icon:'🎨', name:'文艺之旅', desc:'知性优雅，富有内涵', rate:0.85, pitch:1.05, volume:0.8, pauses:700, preview:'你看，这个建筑很有故事。'},
+    date: {icon:'💕', name:'约会浪漫', desc:'温柔甜蜜，充满爱意', rate:0.78, pitch:1.15, volume:0.75, pauses:750, preview:'亲爱的，这里的夕阳真美。'},
+    family: {icon:'👨‍👩‍👧', name:'亲子游', desc:'活泼亲切，适合家庭', rate:0.9, pitch:1.2, volume:0.85, pauses:500, preview:'小朋友们，快来看看这个！'},
+    food: {icon:'🍜', name:'美食探索', desc:'兴奋期待，让人流口水', rate:0.95, pitch:1.18, volume:0.9, pauses:450, preview:'哇塞！这个超好吃的！'},
+    pray: {icon:'🙏', name:'祈福许愿', desc:'庄重虔诚，心灵净化', rate:0.7, pitch:0.9, volume:0.7, pauses:1000, preview:'阿弥陀佛，心诚则灵。'},
+    sport: {icon:'⚽', name:'运动健身', desc:'活力激励，充满能量', rate:1.1, pitch:1.3, volume:1.0, pauses:300, preview:'加油！你可以的！'},
+    lazy: {icon:'🛋️', name:'躺平休闲', desc:'慵懒随意，慢节奏', rate:0.75, pitch:0.95, volume:0.7, pauses:900, preview:'嗯～ 就这样躺着很舒服。'},
+    explore: {icon:'🔍', name:'探索发现', desc:'好奇期待，充满惊喜', rate:0.9, pitch:1.15, volume:0.85, pauses:550, preview:'你知道吗？这里有个秘密哦。'}
+};
+
+let currentAudio = null;
+let isPlaying = false;
+let audioContext = null;
+
+// 初始化情感网格
+function initEmotionGrid() {
+    const grid = document.getElementById('emotionGrid');
+    grid.innerHTML = Object.entries(EMOTION_PROFILES).map(([emotion, data]) => `
+        <div class="emotion-card" data-emotion="${emotion}">
+            <span class="icon">${data.icon}</span>
+            <div class="name">${data.name}</div>
+            <div class="desc">${data.desc}</div>
+            <div class="preview">"${data.preview}"</div>
+            <div class="settings">
+                <div class="setting-row">
+                    <span class="setting-label">语速</span>
+                    <span class="setting-value">${data.rate.toFixed(2)}x</span>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">音调</span>
+                    <span class="setting-value">${data.pitch.toFixed(2)}</span>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">音量</span>
+                    <span class="setting-value">${Math.round(data.volume * 100)}%</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // 添加点击事件
+    grid.querySelectorAll('.emotion-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const emotion = this.getAttribute('data-emotion');
+            playEmotion(emotion);
+        });
+    });
+}
+
+// 播放音效
+function playSoundEffect(effectName) {
+    try {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        const effects = {
+            ding: [523.25, 659.25, 783.99],
+            sparkle: [880, 987.77, 1046.50, 1174.66],
+            soft: [440, 523.25]
+        };
+        
+        const frequencies = effects[effectName] || effects.soft;
+        const now = audioContext.currentTime;
+        
+        frequencies.forEach((freq, index) => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = freq;
+            oscillator.type = 'sine';
+            
+            const startTime = now + index * 0.15;
+            gainNode.gain.setValueAtTime(0.1, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+            
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.3);
+        });
+        
+        return true;
+    } catch (err) {
+        console.warn('音效播放失败:', err);
+        return false;
+    }
+}
+
+// 智能断句
+function smartSplit(text) {
+    const sentences = text.split(/([。！？!?])/g)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    
+    const result = [];
+    for (let i = 0; i < sentences.length; i += 2) {
+        const sentence = sentences[i] + (sentences[i+1] || '');
+        if (sentence.length > 0) {
+            result.push(sentence);
+        }
+    }
+    return result;
+}
+
+// 添加情感前缀
+function addEmotionPrefix(text, emotion) {
+    const prefixes = {
+        sad: '嗯... ',
+        relax: '呼～ ',
+        photo: '哇！',
+        social: '嘿！',
+        art: '你看，',
+        date: '亲爱的，',
+        family: '小朋友们，',
+        food: '哇塞！',
+        pray: '阿弥陀佛，',
+        sport: '加油！',
+        lazy: '嗯～',
+        explore: '你知道吗？'
+    };
+    return (prefixes[emotion] || '') + text;
+}
+
+// 播放情感语音
+function playEmotion(emotion) {
+    const data = EMOTION_PROFILES[emotion];
+    if (!data) return;
+    
+    const withEffects = document.getElementById('withEffects').checked;
+    const withPrefix = document.getElementById('withPrefix').checked;
+    const useSmartSplit = document.getElementById('smartSplit').checked;
+    
+    // 播放开场音效
+    if (withEffects) {
+        playSoundEffect('ding');
+    }
+    
+    // 获取文本
+    let text = data.preview;
+    if (withPrefix) {
+        text = addEmotionPrefix(text, emotion);
+    }
+    
+    // 显示播放状态
+    showPlayerStatus(`正在播放：${data.name}`);
+    log(`🎵 开始播放 ${data.name}`, 'info');
+    
+    // 播放
+    const synthesis = window.speechSynthesis;
+    
+    if (useSmartSplit) {
+        const sentences = smartSplit(text);
+        let delay = 0;
+        
+        sentences.forEach((sentence, index) => {
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(sentence);
+                utterance.lang = 'zh-CN';
+                utterance.rate = data.rate;
+                utterance.pitch = data.pitch;
+                utterance.volume = data.volume;
+                
+                // 选择语音
+                const voices = synthesis.getVoices();
+                const preferredVoice = voices.find(v => 
+                    v.lang === 'zh-CN' && 
+                    (v.name.includes('Tingting') || v.name.includes('Xiaoxiao'))
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                synthesis.speak(utterance);
+                log(`  → 播放第${index+1}句：${sentence.substring(0, 20)}...`, 'info');
+            }, delay);
+            
+            delay += sentence.length * 100 + data.pauses;
+        });
+        
+        setTimeout(() => {
+            hidePlayerStatus();
+            log(`✅ ${data.name} 播放完成`, 'success');
+        }, delay);
+    } else {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.rate = data.rate;
+        utterance.pitch = data.pitch;
+        utterance.volume = data.volume;
+        
+        const voices = synthesis.getVoices();
+        const preferredVoice = voices.find(v => 
+            v.lang === 'zh-CN' && 
+            (v.name.includes('Tingting') || v.name.includes('Xiaoxiao'))
+        );
+        
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+        
+        utterance.onend = () => {
+            hidePlayerStatus();
+            log(`✅ ${data.name} 播放完成`, 'success');
+        };
+        
+        synthesis.speak(utterance);
+    }
+}
+
+// 播放自定义文本
+function playCustomText() {
+    const text = document.getElementById('customText').value;
+    if (!text.trim()) {
+        log('❌ 请输入文本', 'error');
+        return;
+    }
+    
+    // 使用 relax 情感播放
+    playEmotion('relax');
+}
+
+// 测试所有情感
+function testAllEmotions() {
+    const emotions = Object.keys(EMOTION_PROFILES);
+    let delay = 0;
+    
+    const btn = document.getElementById('testAllBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 测试中...';
+    
+    log('🧪 开始测试所有情感...', 'info');
+    
+    emotions.forEach((emotion, index) => {
+        setTimeout(() => {
+            log(`\n--- 测试 ${index+1}/${emotions.length}: ${EMOTION_PROFILES[emotion].name} ---`, 'info');
+            playEmotion(emotion);
+        }, delay);
+        
+        delay += 5000; // 每个情感 5 秒
+    });
+    
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '🧪 测试所有情感';
+        log('\n✨ 所有情感测试完成！', 'success');
+    }, delay);
+}
+
+// 停止播放
+function stopAll() {
+    window.speechSynthesis.cancel();
+    hidePlayerStatus();
+    log('⏹️ 已停止播放', 'info');
+}
+
+// 日志
+function log(message, type = 'info') {
+    const logArea = document.getElementById('logArea');
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[${time}] ${message}`;
+    logArea.insertBefore(entry, logArea.firstChild);
+    
+    // 限制日志数量
+    while (logArea.children.length > 50) {
+        logArea.removeChild(logArea.lastChild);
+    }
+}
+
+// 显示播放状态
+function showPlayerStatus(text) {
+    const status = document.getElementById('playerStatus');
+    document.getElementById('statusText').textContent = text;
+    status.classList.add('show');
+}
+
+// 隐藏播放状态
+function hidePlayerStatus() {
+    document.getElementById('playerStatus').classList.remove('show');
+}
+
+// 绑定事件
+document.getElementById('playCustomBtn').addEventListener('click', playCustomText);
+document.getElementById('testAllBtn').addEventListener('click', testAllEmotions);
+document.getElementById('stopBtn').addEventListener('click', stopAll);
+
+// 初始化
+initEmotionGrid();
+log('🎭 生动情感语音测试已就绪', 'success');
+log('💡 点击情感卡片或播放自定义文本', 'info');
+</script>
+</body>
+</html>

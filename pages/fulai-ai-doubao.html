@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 福来猫 AI（豆包 API 版）</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:800px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:20px}
+        header h1{font-size:2rem;margin-bottom:10px}
+        .chat-box{height:400px;border:1px solid #e0e0e0;border-radius:12px;padding:15px;overflow-y:auto;margin-bottom:15px;background:#f9f9f9}
+        .chat-message{margin-bottom:15px}
+        .chat-message.user{text-align:right}
+        .chat-message.assistant{text-align:left}
+        .chat-bubble{display:inline-block;padding:10px 15px;border-radius:18px;max-width:80%}
+        .user .chat-bubble{background:#667eea;color:white}
+        .assistant .chat-bubble{background:#e0e0e0;color:#333}
+        .chat-input{display:flex;gap:10px}
+        .chat-input input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:24px;font-size:1rem}
+        .chat-input button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:24px;font-size:1rem;cursor:pointer}
+        .chat-input button:disabled{opacity:0.6;cursor:not-allowed}
+        .config-panel{background:white;padding:20px;border-radius:12px;margin-top:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .config-panel h3{margin-bottom:15px;color:#333}
+        .config-group{margin-bottom:15px}
+        .config-group label{display:block;font-size:0.9rem;color:#666;margin-bottom:5px}
+        .config-group input{width:100%;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.9rem}
+        .config-group input:focus{outline:none;border-color:#667eea}
+        .api-key-warning{background:#fffbe6;border:1px solid #ffe58f;padding:10px;border-radius:8px;font-size:0.85rem;color:#b77b5c;margin-bottom:15px}
+        .loading{display:inline-block;width:20px;height:20px;border:3px solid #e0e0e0;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+        .mode-switch{display:flex;gap:10px;margin-bottom:15px}
+        .mode-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer}
+        .mode-btn.active{background:#667eea;color:white}
+        .mode-btn:not(.active){background:#f5f5f5;color:#666}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🐱 福来猫 AI</h1>
+        <p style="opacity:0.9">豆包 API vs 本地模拟 对比测试</p>
+    </header>
+
+    <div class="mode-switch">
+        <button class="mode-btn active" onclick="switchMode('doubao')">🤖 豆包 AI（真实）</button>
+        <button class="mode-btn" onclick="switchMode('local')">💬 本地模拟（关键词）</button>
+    </div>
+
+    <div class="chat-box" id="chatBox">
+        <div class="chat-message assistant">
+            <div class="chat-bubble">喵～我是福来，你的心情守护猫！今天有什么可以帮你的吗？🐱</div>
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入你的问题，如：我失恋了很难过，有什么推荐？" onkeypress="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()" id="sendBtn">发送</button>
+    </div>
+
+    <div class="config-panel">
+        <h3>⚙️ API 配置</h3>
+        <div class="api-key-warning" id="apiKeyWarning" style="display:none">
+            ⚠️ 未配置豆包 API Key，将使用本地模拟模式
+        </div>
+        <div class="config-group">
+            <label>豆包 API Key</label>
+            <input type="text" id="apiKey" placeholder="请输入豆包 API Key（可选）">
+            <p style="font-size:0.8rem;color:#999;margin-top:5px">
+                💡 不填则使用本地模拟模式 | 
+                <a href="https://www.volcengine.com/docs/82379" target="_blank" style="color:#667eea">获取 API Key</a>
+            </p>
+        </div>
+        <div class="config-group">
+            <label>系统提示词（福来猫角色设定）</label>
+            <input type="text" id="systemPrompt" value="你是福来，一只温暖治愈的心情守护猫。你用喵星人的语气说话，喜欢用 emoji，擅长共情和安慰用户。你会根据用户的情绪推荐龙华地区的景点。">
+        </div>
+        <div class="config-group">
+            <label>豆包 API 地址</label>
+            <input type="text" id="apiEndpoint" value="https://ark.cn-beijing.volces.com/api/v3/chat/completions">
+        </div>
+        <div class="config-group">
+            <label>模型</label>
+            <input type="text" id="modelName" value="doubao-pro-32k">
+        </div>
+    </div>
+</div>
+
+<script>
+let currentMode = 'doubao';
+
+// 切换模式
+function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const warning = document.getElementById('apiKeyWarning');
+    if (mode === 'doubao' && !document.getElementById('apiKey').value) {
+        warning.style.display = 'block';
+    } else {
+        warning.style.display = 'none';
+    }
+}
+
+// 发送消息
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    // 添加用户消息
+    addChatMessage('user', message);
+    input.value = '';
+    
+    // 显示正在输入
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.innerHTML = '<span class="loading"></span>';
+    sendBtn.disabled = true;
+    
+    try {
+        let reply;
+        
+        if (currentMode === 'doubao') {
+            // 调用豆包 AI API
+            reply = await callDoubaoAPI(message);
+        } else {
+            // 本地模拟
+            await new Promise(r => setTimeout(r, 1000));
+            reply = generateLocalReply(message);
+        }
+        
+        addChatMessage('assistant', reply);
+    } catch (error) {
+        addChatMessage('assistant', `❌ 出错啦：${error.message}（自动切换到本地模式）`);
+        currentMode = 'local';
+        switchMode('local');
+        const localReply = generateLocalReply(message);
+        addChatMessage('assistant', localReply);
+    }
+    
+    sendBtn.innerHTML = '发送';
+    sendBtn.disabled = false;
+}
+
+// 调用豆包 API
+async function callDoubaoAPI(message) {
+    const apiKey = document.getElementById('apiKey').value;
+    const systemPrompt = document.getElementById('systemPrompt').value;
+    const endpoint = document.getElementById('apiEndpoint').value;
+    const model = document.getElementById('modelName').value;
+    
+    if (!apiKey) {
+        throw new Error('请先配置 API Key');
+    }
+    
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: 'system',
+                    content: systemPrompt
+                },
+                {
+                    role: 'user',
+                    content: message
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 500
+        })
+    });
+    
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `API 错误：${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.choices[0].message.content;
+}
+
+// 本地模拟回复
+function generateLocalReply(message) {
+    const responses = {
+        '难过': '喵～抱抱你！难过的时候就来龙华寺走走吧，听听钟声，心会静很多哦～🐱',
+        '伤心': '喵～抱抱你！难过的时候就来龙华寺走走吧，听听钟声，心会静很多哦～🐱',
+        '失恋': '失恋真的好痛苦...但你会遇到更好的人！先去塔影空间喝杯咖啡，让自己冷静一下好吗？☕️',
+        '压力': '压力大就来西岸滨江跑跑步吧！出出汗，心情会好很多～我陪你一起去！🏃',
+        '焦虑': '焦虑的时候，深呼吸～去龙华寺听听钟声，或者在西岸吹吹江风，都会好起来的 🌊',
+        '无聊': '无聊？那来探索龙华的秘境吧！樱花林、西岸梦中心，保证让你眼前一亮！✨',
+        '开心': '太棒啦！开心的时候更要好好庆祝～去龙华老街吃顿好吃的吧！🍜',
+        '生气': '别生气啦～生气容易长皱纹哦！去福来石摸摸猫耳朵，心情会好很多～🐱',
+        '累': '累了吗？找个舒服的角落休息一下～塔影空间的咖啡，西岸的草坪，都很适合放空哦 ☕️',
+        '孤独': '一个人的时候，我陪着你呢！一起去散散步吧，龙华寺的猫咪们也很欢迎你哦～🐱',
+        '默认': '喵～我是福来，你的心情守护猫！有什么我可以帮你的吗？🐱'
+    };
+    
+    for (const keyword in responses) {
+        if (message.includes(keyword)) {
+            return responses[keyword];
+        }
+    }
+    return responses['默认'];
+}
+
+// 添加聊天消息
+function addChatMessage(role, text) {
+    const chatBox = document.getElementById('chatBox');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+    messageDiv.innerHTML = `<div class="chat-bubble">${text}</div>`;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    const apiKey = document.getElementById('apiKey').value;
+    if (!apiKey) {
+        document.getElementById('apiKeyWarning').style.display = 'block';
+    }
+});
+</script>
+</body>
+</html>

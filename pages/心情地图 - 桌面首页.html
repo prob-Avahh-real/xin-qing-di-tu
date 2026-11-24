@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>心情地图 - 今天是什么心情，就去哪里玩</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(145deg, #fff9f5 0%, #fef4ed 50%, #fde8d8 100%);
+            color: #3a2c2a;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* 顶部欢迎区 - 被关注的感觉 */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 24px 40px;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, -20px); }
+        }
+
+        .welcome-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        }
+
+        .welcome-text p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 300;
+            margin-bottom: 24px;
+        }
+
+        .user-name {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* 大图标功能网格 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 28px;
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(249,181,114,0.1) 0%, rgba(232,122,93,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(249,181,114,0.2);
+            border-color: #F9B572;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .feature-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-desc {
+            font-size: 0.85rem;
+            color: #999;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 次要功能 - 小按钮 */
+        .quick-actions {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 32px;
+        }
+
+        .quick-actions h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .quick-btn {
+            background: #f9f5f0;
+            border: none;
+            padding: 16px 8px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-btn:hover {
+            background: linear-gradient(135deg, #F9B572 0%, #E87A5D 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(249,181,114,0.3);
+        }
+
+        .quick-btn .icon {
+            font-size: 1.8rem;
+        }
+
+        .quick-btn .label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* 今日推荐 */
+        .daily-recommend {
+            background: linear-gradient(135deg, #F9B572 0%, #E87A5D 100%);
+            border-radius: 28px;
+            padding: 24px;
+            color: white;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 24px rgba(249,181,114,0.3);
+        }
+
+        .daily-recommend h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .daily-recommend p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .daily-btn {
+            background: white;
+            color: #E87A5D;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .daily-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.3);
+        }
+
+        /* 底部信息 */
+        .footer-info {
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            padding: 20px;
+        }
+
+        .footer-info p {
+            margin-bottom: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #F9B572;
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .welcome-text h1 {
+                font-size: 1.8rem;
+            }
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .feature-card {
+                padding: 20px 16px;
+            }
+            .feature-icon {
+                font-size: 2.8rem;
+            }
+            .quick-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部欢迎区 - 让用户有被关注的感觉 -->
+<div class="welcome-section fade-in">
+    <div class="welcome-text">
+        <h1>✨ 欢迎回来</h1>
+        <p>今天是什么心情，就去哪里玩</p>
+        <div class="user-name">👤 王者归来</div>
+    </div>
+</div>
+
+<!-- 主要内容 -->
+<div class="main-content">
+
+    <!-- 主要功能 - 大图标 -->
+    <div class="feature-grid fade-in">
+        <div class="feature-card" onclick="openFeature('routes')">
+            <div class="feature-icon">🗺️</div>
+            <div class="feature-title">心情路线</div>
+            <div class="feature-desc">AI 生成专属路线</div>
+        </div>
+
+        <div class="feature-card" onclick="openFeature('tickets')">
+            <div class="feature-icon">🎫</div>
+            <div class="feature-title">门票预订</div>
+            <div class="feature-desc">官方优惠扫码入园</div>
+        </div>
+
+        <div class="feature-card" onclick="openFeature('mall')">
+            <div class="feature-icon">🎁</div>
+            <div class="feature-title">积分商城</div>
+            <div class="feature-desc">兑换惊喜好礼</div>
+        </div>
+
+        <div class="feature-card" onclick="openFeature('wish')">
+            <div class="feature-icon">🌟</div>
+            <div class="feature-title">许愿池</div>
+            <div class="feature-desc">写下你的心愿</div>
+        </div>
+    </div>
+
+    <!-- 今日推荐 -->
+    <div class="daily-recommend fade-in">
+        <h3>🌤️ 今日推荐</h3>
+        <p><strong>治愈系路线</strong> · 龙华寺静心之旅</p>
+        <p>适合一个人散心，听龙龙讲故事，撸猫咪福来，感受千年古刹的宁静。</p>
+        <button class="daily-btn" onclick="openFeature('routes')">
+            <span>🚀</span> 立即出发
+        </button>
+    </div>
+
+    <!-- 次要功能 - 小按钮 -->
+    <div class="quick-actions fade-in">
+        <h3><span>⚡</span> 快捷功能</h3>
+        <div class="quick-grid">
+            <button class="quick-btn" onclick="openFeature('knowledge')">
+                <span class="icon">📚</span>
+                <span class="label">知识库</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('parking')">
+                <span class="icon">🅿️</span>
+                <span class="label">停车</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('merchant')">
+                <span class="icon">🏪</span>
+                <span class="label">商户入驻</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('admin')">
+                <span class="icon">👨‍💼</span>
+                <span class="label">管理后台</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('ar')">
+                <span class="icon">🔍</span>
+                <span class="label">AR 印章</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('danmu')">
+                <span class="icon">💬</span>
+                <span class="label">弹幕</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('video')">
+                <span class="icon">🎬</span>
+                <span class="label">抖音</span>
+            </button>
+
+            <button class="quick-btn" onclick="openFeature('settings')">
+                <span class="icon">⚙️</span>
+                <span class="label">设置</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="footer-info fade-in">
+        <p>📍 上海市徐汇区龙华街道</p>
+        <div class="footer-links">
+            <a href="#" onclick="alert('关于我们')">关于</a>
+            <a href="#" onclick="alert('使用帮助')">帮助</a>
+            <a href="#" onclick="alert('隐私政策')">隐私</a>
+            <a href="#" onclick="alert('联系我们')">联系</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// 功能跳转
+function openFeature(feature) {
+    const featureMap = {
+        'routes': {
+            name: '心情路线',
+            url: 'business-pro-rich-routes.html'
+        },
+        'tickets': {
+            name: '门票预订',
+            url: '门票预订 - 完整版.html'
+        },
+        'mall': {
+            name: '积分商城',
+            url: 'points-mall-app.html'
+        },
+        'wish': {
+            name: '许愿池',
+            url: 'wishing-pool.html'
+        },
+        'knowledge': {
+            name: '知识库',
+            url: 'knowledge-base-enhanced.html'
+        },
+        'parking': {
+            name: '停车引导',
+            url: '停车引导 - 极简版.html'
+        },
+        'merchant': {
+            name: '商户入驻',
+            url: 'merchant-partnership.html'
+        },
+        'admin': {
+            name: '管理后台',
+            url: 'admin-dashboard.html'
+        },
+        'ar': {
+            name: 'AR 印章',
+            url: '接福来 - 小游戏.html'
+        },
+        'danmu': {
+            name: '弹幕互动',
+            url: 'poi-detail.html'
+        },
+        'video': {
+            name: '抖音视频',
+            action: 'alert("抖音功能开发中...")'
+        },
+        'settings': {
+            name: '设置',
+            action: 'alert("设置功能开发中...")'
+        }
+    };
+
+    const target = featureMap[feature];
+    if (!target) {
+        alert('功能开发中...');
+        return;
+    }
+
+    // 显示加载提示
+    showToast('🚀 打开' + target.name + '...');
+
+    // 跳转
+    setTimeout(() => {
+        if (target.url) {
+            window.open(target.url, '_blank');
+        } else if (target.action) {
+            eval(target.action);
+        }
+    }, 800);
+}
+
+// Toast 提示
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.85);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        animation: fadeIn 0.3s;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+// 页面加载欢迎语
+window.addEventListener('load', () => {
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+    console.log(`✨ ${greeting}！心情地图已就绪`);
+});
+</script>
+
+</body>
+</html>

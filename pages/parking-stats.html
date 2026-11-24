@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🅿️ 龙华地区 - 停车位地图统计器</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;padding:20px}
+        .container{max-width:1400px;margin:0 auto}
+        header{text-align:center;margin-bottom:20px}
+        header h1{font-size:2rem;color:#333;margin-bottom:10px}
+        header p{color:#666}
+        .dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+        .stat-card{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .stat-card .label{font-size:0.85rem;color:#999;margin-bottom:8px}
+        .stat-card .value{font-size:2rem;font-weight:700;color:#333}
+        .stat-card .trend{font-size:0.85rem;margin-top:8px}
+        .stat-card .trend.up{color:#52c41a}
+        .stat-card .trend.down{color:#f5222d}
+        .stat-card.available .value{color:#52c41a}
+        .stat-card.occupied .value{color:#f5222d}
+        .stat-card.full .value{color:#faad14}
+        .main-content{display:grid;grid-template-columns:1fr 400px;gap:20px}
+        .map-section{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        #mapContainer{width:100%;height:600px}
+        .sidebar{display:flex;flex-direction:column;gap:15px}
+        .filter-card{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .filter-card h3{font-size:1.1rem;margin-bottom:15px;color:#333}
+        .filter-group{margin-bottom:15px}
+        .filter-group label{display:block;font-size:0.9rem;color:#666;margin-bottom:8px}
+        .filter-group select,.filter-group input{width:100%;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.9rem}
+        .filter-group select:focus,.filter-group input:focus{outline:none;border-color:#667eea}
+        .parking-list{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-height:400px;overflow-y:auto}
+        .parking-item{padding:15px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:10px;cursor:pointer;transition:all 0.2s}
+        .parking-item:hover{border-color:#667eea;background:#f9f9ff}
+        .parking-item.selected{border-color:#667eea;background:#f0f4ff}
+        .parking-item .name{font-size:1rem;font-weight:600;color:#333;margin-bottom:5px}
+        .parking-item .address{font-size:0.85rem;color:#999;margin-bottom:8px}
+        .parking-item .stats{display:flex;gap:15px}
+        .parking-item .stat{font-size:0.85rem}
+        .parking-item .stat .label{color:#999}
+        .parking-item .stat .value{font-weight:600}
+        .parking-item .stat.available .value{color:#52c41a}
+        .parking-item .status{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-top:8px}
+        .status-available{background:#f6ffed;color:#52c41a}
+        .status-crowded{background:#fffbe6;color:#faad14}
+        .status-full{background:#fff2f0;color:#f5222d}
+        .detail-panel{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .detail-panel h3{font-size:1.1rem;margin-bottom:15px;color:#333}
+        .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0}
+        .detail-row:last-child{border-bottom:none}
+        .detail-row .label{color:#666}
+        .detail-row .value{font-weight:600;color:#333}
+        .chart-section{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-top:20px}
+        .chart-section h3{font-size:1.1rem;margin-bottom:15px;color:#333}
+        .chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+        .chart-item{background:#f9f9f9;padding:15px;border-radius:8px}
+        .chart-item .title{font-size:0.9rem;color:#666;margin-bottom:10px}
+        .bar-chart{height:150px;display:flex;align-items:flex-end;gap:8px;padding:10px 0}
+        .bar{flex:1;background:linear-gradient(180deg,#667eea,#764ba2);border-radius:4px 4px 0 0;position:relative;min-width:30px}
+        .bar .label{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);font-size:0.75rem;color:#666;white-space:nowrap}
+        .bar .value{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.8rem;font-weight:600;color:#333}
+        .legend{display:flex;gap:15px;margin-top:30px;justify-content:center}
+        .legend-item{display:flex;align-items:center;gap:8px;font-size:0.85rem}
+        .legend-dot{width:12px;height:12px;border-radius:3px}
+        .legend-dot.available{background:#52c41a}
+        .legend-dot.occupied{background:#faad14}
+        .legend-dot.full{background:#f5222d}
+        @media (max-width: 1200px){
+            .dashboard{grid-template-columns:repeat(2,1fr)}
+            .main-content{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🅿️ 龙华地区 - 停车位地图统计器</h1>
+        <p>实时停车位监控 | 智能统计 | 可视化分析</p>
+    </header>
+
+    <!-- 统计看板 -->
+    <div class="dashboard">
+        <div class="stat-card available">
+            <div class="label">总停车位</div>
+            <div class="value" id="totalSpaces">0</div>
+            <div class="trend up">📊 龙华地区</div>
+        </div>
+        <div class="stat-card available">
+            <div class="label">空闲车位</div>
+            <div class="value" id="availableSpaces">0</div>
+            <div class="trend up" id="availableTrend">📈 充足</div>
+        </div>
+        <div class="stat-card occupied">
+            <div class="label">已使用</div>
+            <div class="value" id="occupiedSpaces">0</div>
+            <div class="trend" id="occupiedTrend">使用率 0%</div>
+        </div>
+        <div class="stat-card full">
+            <div class="label">已满载</div>
+            <div class="value" id="fullLots">0</div>
+            <div class="trend down">⚠️ 停车场</div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 地图区域 -->
+        <div class="map-section">
+            <div id="mapContainer"></div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <!-- 筛选器 -->
+            <div class="filter-card">
+                <h3>🔍 筛选条件</h3>
+                <div class="filter-group">
+                    <label>状态筛选</label>
+                    <select id="statusFilter" onchange="filterParking()">
+                        <option value="all">全部</option>
+                        <option value="available">空闲充足</option>
+                        <option value="crowded">较为紧张</option>
+                        <option value="full">已满载</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>类型筛选</label>
+                    <select id="typeFilter" onchange="filterParking()">
+                        <option value="all">全部</option>
+                        <option value="public">公共停车场</option>
+                        <option value="roadside">路边停车</option>
+                        <option value="mall">商场配套</option>
+                        <option value="temple">寺庙配套</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>搜索名称</label>
+                    <input type="text" id="searchInput" placeholder="输入停车场名称" oninput="filterParking()">
+                </div>
+            </div>
+
+            <!-- 停车场列表 -->
+            <div class="parking-list" id="parkingList">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情面板 -->
+    <div class="detail-panel" id="detailPanel" style="display:none;margin-top:20px;">
+        <h3>📍 <span id="detailName">停车场详情</span></h3>
+        <div class="detail-row">
+            <span class="label">地址</span>
+            <span class="value" id="detailAddress">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">总车位</span>
+            <span class="value" id="detailTotal">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">空闲车位</span>
+            <span class="value" id="detailAvailable" style="color:#52c41a">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">使用率</span>
+            <span class="value" id="detailRate">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">收费标准</span>
+            <span class="value" id="detailPrice">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">营业时间</span>
+            <span class="value" id="detailHours">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">联系电话</span>
+            <span class="value" id="detailPhone">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">状态</span>
+            <span class="value" id="detailStatus">-</span>
+        </div>
+    </div>
+
+    <!-- 图表分析 -->
+    <div class="chart-section">
+        <h3>📊 停车位分布统计</h3>
+        <div class="chart-grid">
+            <div>
+                <div class="title">各区域停车位总数</div>
+                <div class="bar-chart" id="areaChart">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+            <div>
+                <div class="title">各类型停车场分布</div>
+                <div class="bar-chart" id="typeChart">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot available"></div>空闲充足</div>
+            <div class="legend-item"><div class="legend-dot occupied"></div>较为紧张</div>
+            <div class="legend-item"><div class="legend-dot full"></div>已满载</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 龙华地区停车场数据
+const PARKING_DATA = [
+    {
+        id: 'p001',
+        name: '龙华寺停车场',
+        address: '龙华路 2853 号',
+        lat: 31.180147,
+        lng: 121.444807,
+        total: 150,
+        available: 45,
+        type: 'temple',
+        price: '10 元/小时',
+        hours: '7:00-17:00',
+        phone: '021-64567890'
+    },
+    {
+        id: 'p002',
+        name: '龙华烈士陵园停车场',
+        address: '龙华西路 180 号',
+        lat: 31.179532,
+        lng: 121.443876,
+        total: 80,
+        available: 62,
+        type: 'public',
+        price: '免费',
+        hours: '8:00-16:30',
+        phone: '021-64561234'
+    },
+    {
+        id: 'p003',
+        name: '龙华老街停车场',
+        address: '龙华路 2790 号',
+        lat: 31.181234,
+        lng: 121.443567,
+        total: 120,
+        available: 8,
+        type: 'public',
+        price: '8 元/小时',
+        hours: '24 小时',
+        phone: '021-64562345'
+    },
+    {
+        id: 'p004',
+        name: '塔影空间地下车库',
+        address: '云锦路 701 号',
+        lat: 31.178943,
+        lng: 121.446231,
+        total: 200,
+        available: 135,
+        type: 'mall',
+        price: '15 元/小时',
+        hours: '9:00-21:00',
+        phone: '021-64563456'
+    },
+    {
+        id: 'p005',
+        name: '龙美术馆停车场',
+        address: '龙腾大道 3398 号',
+        lat: 31.177234,
+        lng: 121.449123,
+        total: 100,
+        available: 3,
+        type: 'public',
+        price: '12 元/小时',
+        hours: '10:00-18:00',
+        phone: '021-64564567'
+    },
+    {
+        id: 'p006',
+        name: '西岸滨江公园停车场',
+        address: '龙腾大道 2290 号',
+        lat: 31.175234,
+        lng: 121.448765,
+        total: 180,
+        available: 92,
+        type: 'public',
+        price: '10 元/小时',
+        hours: '6:00-22:00',
+        phone: '021-64565678'
+    },
+    {
+        id: 'p007',
+        name: '西岸大剧院停车场',
+        address: '龙腾大道 2290 号',
+        lat: 31.174567,
+        lng: 121.450234,
+        total: 250,
+        available: 180,
+        type: 'mall',
+        price: '15 元/小时',
+        hours: '9:00-22:00',
+        phone: '021-64566789'
+    },
+    {
+        id: 'p008',
+        name: '西岸梦中心停车场',
+        address: '云锦路 800 号',
+        lat: 31.172000,
+        lng: 121.460000,
+        total: 300,
+        available: 15,
+        type: 'mall',
+        price: '12 元/小时',
+        hours: '10:00-22:00',
+        phone: '021-64567891'
+    },
+    {
+        id: 'p009',
+        name: '龙华西路路边停车',
+        address: '龙华西路近龙水北路',
+        lat: 31.182345,
+        lng: 121.442345,
+        total: 50,
+        available: 28,
+        type: 'roadside',
+        price: '6 元/小时',
+        hours: '7:00-19:00',
+        phone: '-'
+    },
+    {
+        id: 'p010',
+        name: '云锦路路边停车',
+        address: '云锦路近龙耀路',
+        lat: 31.176789,
+        lng: 121.447890,
+        total: 60,
+        available: 5,
+        type: 'roadside',
+        price: '6 元/小时',
+        hours: '7:00-19:00',
+        phone: '-'
+    },
+    {
+        id: 'p011',
+        name: '西岸美术馆停车场',
+        address: '龙腾大道 2777 号',
+        lat: 31.176543,
+        lng: 121.447654,
+        total: 150,
+        available: 78,
+        type: 'public',
+        price: '12 元/小时',
+        hours: '10:00-18:00',
+        phone: '021-64568912'
+    },
+    {
+        id: 'p012',
+        name: '龙华寺樱花林临时停车场',
+        address: '龙华寺藏经楼后',
+        lat: 31.180347,
+        lng: 121.445007,
+        total: 40,
+        available: 0,
+        type: 'temple',
+        price: '免费',
+        hours: '季节性开放',
+        phone: '021-64567890'
+    }
+];
+
+let map;
+let markers = [];
+let selectedParking = null;
+
+// 初始化地图
+function initMap() {
+    map = new AMap.Map('mapContainer', {
+        zoom: 15,
+        center: [121.444807, 31.180147],
+        mapStyle: 'amap://styles/light'
+    });
+
+    // 添加所有停车场标记
+    PARKING_DATA.forEach(parking => {
+        addMarker(parking);
+    });
+}
+
+// 添加标记
+function addMarker(parking) {
+    const status = getParkingStatus(parking);
+    const color = status === 'available' ? '#52c41a' : status === 'crowded' ? '#faad14' : '#f5222d';
+    
+    const marker = new AMap.Marker({
+        position: [parking.lng, parking.lat],
+        title: parking.name,
+        map: map,
+        label: {
+            content: `<div style="background:${color};color:white;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;">${parking.name}</div>`,
+            offset: new AMap.Pixel(-50, -35)
+        }
+    });
+
+    marker.on('click', () => {
+        selectParking(parking);
+    });
+
+    markers.push(marker);
+}
+
+// 获取停车场状态
+function getParkingStatus(parking) {
+    const rate = (parking.total - parking.available) / parking.total;
+    if (rate >= 0.95) return 'full';
+    if (rate >= 0.7) return 'crowded';
+    return 'available';
+}
+
+// 选择停车场
+function selectParking(parking) {
+    selectedParking = parking;
+    
+    // 更新列表高亮
+    document.querySelectorAll('.parking-item').forEach(item => {
+        item.classList.remove('selected');
+        if (item.dataset.id === parking.id) {
+            item.classList.add('selected');
+        }
+    });
+
+    // 显示详情
+    showDetail(parking);
+}
+
+// 显示详情
+function showDetail(parking) {
+    const panel = document.getElementById('detailPanel');
+    panel.style.display = 'block';
+    
+    const rate = ((parking.total - parking.available) / parking.total * 100).toFixed(1);
+    const status = getParkingStatus(parking);
+    
+    document.getElementById('detailName').textContent = parking.name;
+    document.getElementById('detailAddress').textContent = parking.address;
+    document.getElementById('detailTotal').textContent = parking.total;
+    document.getElementById('detailAvailable').textContent = parking.available;
+    document.getElementById('detailRate').textContent = rate + '%';
+    document.getElementById('detailPrice').textContent = parking.price;
+    document.getElementById('detailHours').textContent = parking.hours;
+    document.getElementById('detailPhone').textContent = parking.phone;
+    
+    const statusMap = {
+        'available': {text: '空闲充足', class: 'status-available'},
+        'crowded': {text: '较为紧张', class: 'status-crowded'},
+        'full': {text: '已满载', class: 'status-full'}
+    };
+    document.getElementById('detailStatus').innerHTML = `<span class="status ${statusMap[status].class}">${statusMap[status].text}</span>`;
+    
+    panel.scrollIntoView({behavior: 'smooth'});
+}
+
+// 筛选停车场
+function filterParking() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+    
+    const listContainer = document.getElementById('parkingList');
+    listContainer.innerHTML = '';
+    
+    PARKING_DATA.forEach(parking => {
+        // 筛选条件
+        const status = getParkingStatus(parking);
+        if (statusFilter !== 'all' && status !== statusFilter) return;
+        if (typeFilter !== 'all' && parking.type !== typeFilter) return;
+        if (searchText && !parking.name.toLowerCase().includes(searchText)) return;
+        
+        // 创建列表项
+        const item = createParkingItem(parking);
+        listContainer.appendChild(item);
+    });
+}
+
+// 创建停车场列表项
+function createParkingItem(parking) {
+    const item = document.createElement('div');
+    item.className = 'parking-item';
+    item.dataset.id = parking.id;
+    
+    const status = getParkingStatus(parking);
+    const rate = ((parking.total - parking.available) / parking.total * 100).toFixed(0);
+    const statusMap = {
+        'available': {text: '空闲充足', class: 'status-available'},
+        'crowded': {text: '较为紧张', class: 'status-crowded'},
+        'full': {text: '已满载', class: 'status-full'}
+    };
+    
+    item.innerHTML = `
+        <div class="name">${parking.name}</div>
+        <div class="address">📍 ${parking.address}</div>
+        <div class="stats">
+            <span class="stat">
+                <span class="label">总车位</span>
+                <span class="value">${parking.total}</span>
+            </span>
+            <span class="stat available">
+                <span class="label">空闲</span>
+                <span class="value">${parking.available}</span>
+            </span>
+            <span class="stat">
+                <span class="label">使用率</span>
+                <span class="value">${rate}%</span>
+            </span>
+        </div>
+        <span class="status ${statusMap[status].class}">${statusMap[status].text}</span>
+    `;
+    
+    item.addEventListener('click', () => {
+        selectParking(parking);
+        map.setZoom(16, true);
+        map.setCenter([parking.lng, parking.lat], true);
+    });
+    
+    return item;
+}
+
+// 更新统计看板
+function updateStats() {
+    const total = PARKING_DATA.reduce((sum, p) => sum + p.total, 0);
+    const available = PARKING_DATA.reduce((sum, p) => sum + p.available, 0);
+    const occupied = total - available;
+    const fullCount = PARKING_DATA.filter(p => getParkingStatus(p) === 'full').length;
+    const rate = (occupied / total * 100).toFixed(1);
+    
+    document.getElementById('totalSpaces').textContent = total;
+    document.getElementById('availableSpaces').textContent = available;
+    document.getElementById('occupiedSpaces').textContent = occupied;
+    document.getElementById('fullLots').textContent = fullCount;
+    document.getElementById('occupiedTrend').textContent = `使用率 ${rate}%`;
+    
+    if (available > total * 0.3) {
+        document.getElementById('availableTrend').innerHTML = '📈 充足';
+        document.getElementById('availableTrend').className = 'trend up';
+    } else if (available > total * 0.1) {
+        document.getElementById('availableTrend').innerHTML = '⚠️ 紧张';
+        document.getElementById('availableTrend').className = 'trend';
+    } else {
+        document.getElementById('availableTrend').innerHTML = '🔴 不足';
+        document.getElementById('availableTrend').className = 'trend down';
+    }
+}
+
+// 生成图表
+function generateCharts() {
+    // 区域统计
+    const areas = {
+        '龙华寺': 0,
+        '西岸': 0,
+        '龙华老街': 0,
+        '其他': 0
+    };
+    
+    PARKING_DATA.forEach(p => {
+        if (p.name.includes('龙华寺')) areas['龙华寺'] += p.total;
+        else if (p.name.includes('西岸')) areas['西岸'] += p.total;
+        else if (p.name.includes('老街')) areas['龙华老街'] += p.total;
+        else areas['其他'] += p.total;
+    });
+    
+    const areaChart = document.getElementById('areaChart');
+    areaChart.innerHTML = generateBarChart(areas);
+    
+    // 类型统计
+    const types = {
+        '公共': 0,
+        '商场': 0,
+        '寺庙': 0,
+        '路边': 0
+    };
+    
+    PARKING_DATA.forEach(p => {
+        if (p.type === 'public') types['公共'] += p.total;
+        else if (p.type === 'mall') types['商场'] += p.total;
+        else if (p.type === 'temple') types['寺庙'] += p.total;
+        else if (p.type === 'roadside') types['路边'] += p.total;
+    });
+    
+    const typeChart = document.getElementById('typeChart');
+    typeChart.innerHTML = generateBarChart(types);
+}
+
+// 生成柱状图
+function generateBarChart(data) {
+    const maxValue = Math.max(...Object.values(data));
+    return Object.entries(data).map(([label, value]) => {
+        const height = (value / maxValue * 100).toFixed(0);
+        return `
+            <div class="bar" style="height: ${height}%">
+                <span class="value">${value}</span>
+                <span class="label">${label}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    initMap();
+    filterParking();
+    updateStats();
+    generateCharts();
+});
+</script>
+</body>
+</html>

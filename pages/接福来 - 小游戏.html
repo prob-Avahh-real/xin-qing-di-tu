@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接福来 - 心情地图小游戏</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+        .game-container{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-width:400px;width:95%}
+        .header{text-align:center;margin-bottom:20px}
+        .header h1{font-size:1.8rem;margin-bottom:10px;color:#F9B572}
+        .score-board{display:flex;justify-content:space-around;background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin-bottom:15px}
+        .score-item{text-align:center}
+        .score-item .label{font-size:0.75rem;opacity:0.8;margin-bottom:5px}
+        .score-item .number{font-size:1.5rem;font-weight:700;color:#F9B572}
+        #gameCanvas{background:linear-gradient(180deg,#0f0f2d,#1a1a3e);border-radius:12px;border:2px solid rgba(249,181,114,0.3);display:block;margin:0 auto;touch-action:none}
+        .controls{margin-top:15px;display:flex;gap:10px;justify-content:center}
+        .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:12px 24px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,122,93,0.4)}
+        .btn:active{transform:translateY(0)}
+        .btn.secondary{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)}
+        .instructions{margin-top:15px;background:rgba(0,0,0,0.2);padding:12px;border-radius:12px;font-size:0.85rem;line-height:1.6}
+        .instructions h3{font-size:0.95rem;margin-bottom:8px;color:#F9B572}
+        .game-over{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.95);padding:30px;border-radius:20px;text-align:center;display:none;z-index:100}
+        .game-over h2{font-size:2rem;margin-bottom:10px;color:#F9B572}
+        .game-over p{font-size:1.1rem;margin-bottom:20px}
+        @media (max-width:400px){.game-container{padding:15px}#gameCanvas{width:100%;height:400px}}
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="header">
+        <h1>🐱 接福来</h1>
+    </div>
+    <div class="score-board">
+        <div class="score-item">
+            <div class="label">得分</div>
+            <div class="number" id="score">0</div>
+        </div>
+        <div class="score-item">
+            <div class="label">生命</div>
+            <div class="number" id="lives">❤️❤️❤️</div>
+        </div>
+        <div class="score-item">
+            <div class="label">最高分</div>
+            <div class="number" id="highScore">0</div>
+        </div>
+    </div>
+    <canvas id="gameCanvas" width="360" height="500"></canvas>
+    <div class="controls">
+        <button class="btn" id="startBtn" onclick="startGame()">▶ 开始游戏</button>
+        <button class="btn secondary" onclick="toggleSound()">🔊 <span id="soundText">音效开</span></button>
+    </div>
+    <div class="instructions">
+        <h3>🎮 游戏规则</h3>
+        <p>1️⃣ 左右移动接住福来猫</p>
+        <p>2️⃣ 避开黑色炸弹💣</p>
+        <p>3️⃣ 接住金色彩蛋🥚得双倍分</p>
+        <p>4️⃣ 生命归零游戏结束</p>
+    </div>
+</div>
+
+<div class="game-over" id="gameOver">
+    <h2>游戏结束</h2>
+    <p>得分：<span id="finalScore">0</span></p>
+    <button class="btn" onclick="startGame()">🔄 再来一次</button>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let gameRunning = false;
+let score = 0;
+let lives = 3;
+let highScore = localStorage.getItem('jiela_highscore') || 0;
+document.getElementById('highScore').textContent = highScore;
+
+// 玩家
+const player = {x:160, y:450, width:60, height:40, speed:8};
+let keys = {};
+
+// 掉落物
+let items = [];
+let spawnRate = 60;
+let frameCount = 0;
+
+// 音效
+let soundEnabled = true;
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+    if (!soundEnabled) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    if (type === 'catch') {
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'bomb') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'bonus') {
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+}
+
+// 控制
+document.addEventListener('keydown', (e) => {keys[e.key] = true;});
+document.addEventListener('keyup', (e) => {keys[e.key] = false;});
+
+// 触摸控制
+let touchStartX = 0;
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+});
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touchX = e.touches[0].clientX;
+    const diff = touchX - touchStartX;
+    player.x += diff * 0.5;
+    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+    touchStartX = touchX;
+});
+
+function update() {
+    if (!gameRunning) return;
+    if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
+    if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
+    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+    
+    frameCount++;
+    if (frameCount % spawnRate === 0) {
+        const type = Math.random();
+        let itemType, points;
+        if (type < 0.7) {itemType = 'fulai'; points = 10;}
+        else if (type < 0.9) {itemType = 'bomb'; points = 0;}
+        else {itemType = 'bonus'; points = 20;}
+        
+        items.push({
+            x: Math.random() * (canvas.width - 40),
+            y: -40,
+            width: 40,
+            height: 40,
+            speed: 3 + Math.random() * 2,
+            type: itemType,
+            points: points,
+            emoji: itemType === 'fulai' ? '🐱' : itemType === 'bomb' ? '💣' : '🥚'
+        });
+    }
+    
+    items.forEach((item, index) => {
+        item.y += item.speed;
+        if (item.y > canvas.height) {
+            items.splice(index, 1);
+        }
+        if (collision(player, item)) {
+            if (item.type === 'bomb') {
+                lives--;
+                playSound('bomb');
+                document.getElementById('lives').textContent = '❤️'.repeat(lives);
+                if (lives <= 0) gameOver();
+            } else {
+                score += item.points;
+                playSound(item.type === 'bonus' ? 'bonus' : 'catch');
+                document.getElementById('score').textContent = score;
+            }
+            items.splice(index, 1);
+        }
+    });
+    
+    if (frameCount % 600 === 0 && spawnRate > 20) spawnRate -= 5;
+}
+
+function collision(a, b) {
+    return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#1a1a3e';
+    for (let i = 0; i < 5; i++) {
+        ctx.fillRect(0, i * 100, canvas.width, 1);
+    }
+    ctx.font = '40px Arial';
+    ctx.fillText('😺', player.x, player.y + 35);
+    
+    items.forEach(item => {
+        ctx.font = '35px Arial';
+        ctx.fillText(item.emoji, item.x, item.y + 35);
+    });
+    
+    requestAnimationFrame(() => {update(); draw();});
+}
+
+function startGame() {
+    gameRunning = true;
+    score = 0;
+    lives = 3;
+    items = [];
+    spawnRate = 60;
+    frameCount = 0;
+    player.x = 160;
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = '❤️❤️❤️';
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('startBtn').textContent = '🔄 重新开始';
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function gameOver() {
+    gameRunning = false;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('jiela_highscore', highScore);
+        document.getElementById('highScore').textContent = highScore;
+    }
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('gameOver').style.display = 'block';
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    document.getElementById('soundText').textContent = soundEnabled ? '音效开' : '音效关';
+}
+
+draw();
+</script>
+</body>
+</html>

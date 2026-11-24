@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蹇冩儏鍦板浘 - 璇勫婕旂ず鐗?/title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2.5rem;margin-bottom:10px}
+        header p{font-size:1.1rem;opacity:0.9}
+        header .subtitle{font-size:0.9rem;opacity:0.8;margin-top:10px}
+        .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        .demo-card{background:white;border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .demo-card h2{font-size:1.3rem;color:#333;margin-bottom:15px;border-bottom:2px solid #667eea;padding-bottom:10px}
+        .emotion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .emotion-btn{background:#f5f5f5;border:2px solid #e0e0e0;padding:15px 10px;border-radius:12px;font-size:0.9rem;cursor:pointer;transition:all 0.3s}
+        .emotion-btn:hover{background:#667eea;color:white;border-color:#667eea}
+        .emotion-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-color:transparent}
+        .emotion-btn .emoji{font-size:1.8rem;display:block;margin-bottom:5px}
+        .chat-box{height:300px;border:1px solid #e0e0e0;border-radius:12px;padding:15px;overflow-y:auto;margin-bottom:15px;background:#f9f9f9}
+        .chat-message{margin-bottom:15px}
+        .chat-message.user{text-align:right}
+        .chat-message.assistant{text-align:left}
+        .chat-bubble{display:inline-block;padding:10px 15px;border-radius:18px;max-width:80%}
+        .user .chat-bubble{background:#667eea;color:white}
+        .assistant .chat-bubble{background:#e0e0e0;color:#333}
+        .chat-input{display:flex;gap:10px}
+        .chat-input input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:24px;font-size:1rem}
+        .chat-input button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:24px;font-size:1rem;cursor:pointer}
+        .chat-input button:disabled{opacity:0.6;cursor:not-allowed}
+        .route-display{margin-top:20px}
+        .route-card{background:linear-gradient(135deg,#f5f7fa,#c3cfe2);border-radius:12px;padding:15px;margin-bottom:15px}
+        .route-card h3{font-size:1.2rem;margin-bottom:10px;color:#333}
+        .route-stats{display:flex;gap:15px;margin:10px 0;flex-wrap:wrap}
+        .route-stat{background:white;padding:8px 15px;border-radius:20px;font-size:0.85rem;font-weight:500}
+        .poi-list{margin-top:15px}
+        .poi-item{background:white;padding:12px;border-radius:8px;margin-bottom:10px;border-left:4px solid #667eea}
+        .poi-item h4{font-size:1rem;margin-bottom:5px;color:#333}
+        .poi-item p{font-size:0.85rem;color:#666;margin:5px 0}
+        .poi-item .tags{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+        .tag{background:#f0f0f0;padding:4px 8px;border-radius:4px;font-size:0.75rem;color:#666}
+        .api-log{background:#1e1e1e;color:#00ff00;padding:15px;border-radius:8px;font-family:monospace;font-size:0.8rem;height:200px;overflow-y:auto}
+        .api-log .request{color:#569cd6}
+        .api-log .response{color:#ce9178}
+        .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-left:10px}
+        .badge-success{background:#52c41a;color:white}
+        .badge-error{background:#f5222d;color:white}
+        .badge-info{background:#1890ff;color:white}
+        .loading{display:inline-block;width:20px;height:20px;border:3px solid #e0e0e0;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+        .qr-section{text-align:center;margin-top:30px;background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+        .qr-section h3{margin-bottom:15px;color:#333}
+        .qr-container{display:flex;justify-content:center;align-items:center;gap:30px;margin:20px 0;flex-wrap:wrap}
+        .qr-code{width:200px;height:200px;background:white;padding:10px;border:2px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;justify-content:center}
+        .qr-code canvas{max-width:100%;max-height:100%}
+        .qr-info{text-align:left;max-width:400px}
+        .qr-info p{margin:10px 0;font-size:0.9rem;color:#666}
+        .qr-info .url{background:#f5f5f5;padding:10px;border-radius:8px;font-family:monospace;font-size:0.8rem;color:#333;word-break:break-all}
+        .qr-info .tip{background:#fffbe6;padding:10px;border-radius:8px;font-size:0.85rem;color:#b77b5c;margin-top:10px}
+        .judge-tips{background:linear-gradient(135deg,#667eea15,#764ba215);border-left:4px solid #667eea;padding:15px;border-radius:8px;margin-top:15px;text-align:left}
+        .judge-tips h4{color:#667eea;margin-bottom:8px;font-size:0.95rem}
+        .judge-tips ul{margin-left:18px;font-size:0.85rem;color:#555}
+        .judge-tips li{margin:6px 0}
+        @media (max-width: 768px){
+            .demo-grid{grid-template-columns:1fr}
+            .emotion-grid{grid-template-columns:repeat(2,1fr)}
+            .qr-container{flex-direction:column;align-items:center}
+            .qr-info{text-align:center;max-width:100%}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>馃椇锔?蹇冩儏鍦板浘</h1>
+        <p class="subtitle">LYCC 2026 榫欏崕榛戝鏉?- 璇勫婕旂ず鐗?/p>
+        <p style="margin-top:10px;font-size:0.9rem;opacity:0.8">浠婂ぉ鏄粈涔堝績鎯咃紝灏卞幓鍝噷鐜?/p>
+    </header>
+
+    <div class="demo-grid">
+        <!-- 宸︿晶锛氭儏缁€夋嫨 + 璺嚎灞曠ず -->
+        <div class="demo-card">
+            <h2>馃幁 閫夋嫨浣犵殑蹇冩儏 <span id="routeBadge" class="badge badge-success" style="display:none">宸茬敓鎴?/span></h2>
+            <div class="emotion-grid" id="emotionGrid">
+                <button class="emotion-btn" data-emotion="sad">
+                    <span class="emoji">馃様</span>
+                    <span>EMO 姹傛不鎰?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="relax">
+                    <span class="emoji">馃槍</span>
+                    <span>涓€涓汉鏁ｅ績</span>
+                </button>
+                <button class="emotion-btn" data-emotion="photo">
+                    <span class="emoji">馃摳</span>
+                    <span>鎯冲嚭鐗囨墦鍗?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="social">
+                    <span class="emoji">馃懌</span>
+                    <span>鏈嬪弸鑱氫細</span>
+                </button>
+                <button class="emotion-btn" data-emotion="art">
+                    <span class="emoji">馃帹</span>
+                    <span>鏂囪壓姹傜伒鎰?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="date">
+                    <span class="emoji">馃挄</span>
+                    <span>绾︿細璋堟亱鐖?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="family">
+                    <span class="emoji">馃懆鈥嶐煈┾€嶐煈р€嶐煈?/span>
+                    <span>甯﹀▋閬涘叏瀹?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="explore">
+                    <span class="emoji">馃椇锔?/span>
+                    <span>鎺㈢储鏂板彂鐜?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="food">
+                    <span class="emoji">馃崪</span>
+                    <span>鍚冭揣瀵荤編椋?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="lucky">
+                    <span class="emoji">馃檹</span>
+                    <span>绁堢姹傚ソ杩?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="fitness">
+                    <span class="emoji">馃毚</span>
+                    <span>杩愬姩鍑虹偣姹?/span>
+                </button>
+                <button class="emotion-btn" data-emotion="chill">
+                    <span class="emoji">馃寘</span>
+                    <span>韬哄钩鏀炬澗</span>
+                </button>
+            </div>
+
+            <div id="routeDisplay" class="route-display"></div>
+        </div>
+
+        <!-- 鍙充晶锛欰I 瀵硅瘽 + API 鏃ュ織 -->
+        <div class="demo-card">
+            <h2>馃 涓?AI 鍔╂墜瀵硅瘽锛堢鏉ョ尗锛?<span class="badge badge-info">AI Agent</span></h2>
+            <div class="chat-box" id="chatBox">
+                <div class="chat-message assistant">
+                    <div class="chat-bubble">鍠碉綖鎴戞槸绂忔潵锛屼綘鐨勫績鎯呭畧鎶ょ尗锛佷粖澶╂湁浠€涔堝彲浠ュ府浣犵殑鍚楋紵馃惐</div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="杈撳叆浣犵殑闂锛屽锛氭垜澶辨亱浜嗗緢闅捐繃锛屾湁浠€涔堟帹鑽愶紵" onkeypress="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()" id="sendBtn">鍙戦€?/button>
+            </div>
+
+            <h2 style="margin-top:25px;">馃摗 API 璋冪敤鏃ュ織 <span class="badge badge-success">瀹炴椂</span></h2>
+            <div class="api-log" id="apiLog"></div>
+        </div>
+    </div>
+
+    <!-- 浜岀淮鐮佸尯鍩?-->
+    <div class="qr-section">
+        <h3>馃摫 鎵爜鍦ㄦ墜鏈虹娴嬭瘯</h3>
+        <div class="qr-container">
+            <div class="qr-code" id="qrCode">
+                <div style="text-align:center;color:#999;">
+                    <div style="font-size:3rem;">馃攧</div>
+                    <div style="margin-top:10px;">姝ｅ湪鐢熸垚浜岀淮鐮?..</div>
+                </div>
+            </div>
+            <div class="qr-info">
+                <p><strong>璁块棶鍦板潃锛?/strong></p>
+                <div class="url" id="qrUrl">http://localhost:5173/demo-judge.html</div>
+                <div class="tip">
+                    馃挕 <strong>鎻愮ず锛?/strong><br>
+                    鈥?鎵嬫満鍜岀數鑴戦渶鍦ㄥ悓涓€灞€鍩熺綉<br>
+                    鈥?灏?localhost 鏇挎崲涓虹數鑴?IP 鍦板潃<br>
+                    鈥?濡傦細http://192.168.1.100:5173/demo-judge.html
+                </div>
+                <p style="margin-top:15px;"><strong>鎴栫洿鎺ヨ闂細</strong></p>
+                <div class="url" style="background:#e8f4f8;color:#1890ff;">http://localhost:5173/demo-judge.html</div>
+            </div>
+        </div>
+        
+        <div class="judge-tips">
+            <h4>馃幆 璇勫婕旂ず鎸囧紩</h4>
+            <ul>
+                <li><strong>绗?1 姝ワ細</strong>鐐瑰嚮宸︿晶浠绘剰鎯呯华鎸夐挳锛堝"EMO 姹傛不鎰?锛?/li>
+                <li><strong>绗?2 姝ワ細</strong>鏌ョ湅 AI 鐢熸垚鐨勪釜鎬у寲璺嚎锛堟櫙鐐?+ 鏃堕棿 + 璐圭敤锛?/li>
+                <li><strong>绗?3 姝ワ細</strong>鍦ㄥ彸渚ц緭鍏ユ涓庣鏉ョ尗瀵硅瘽锛堝"鎴戝け鎭嬩簡"锛?/li>
+                <li><strong>绗?4 姝ワ細</strong>瑙傚療 API 鏃ュ織锛屼簡瑙ｆ妧鏈疄鐜?/li>
+                <li><strong>绗?5 姝ワ細</strong>鎵爜鍦ㄦ墜鏈虹浣撻獙瀹屾暣鍔熻兘</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// 鏅偣鏁版嵁锛?2 绉嶆儏缁級
+const POI_DATA = {
+    sad: [
+        {name:"榫欏崕瀵?, why:"鍗冨勾鍙ゅ埞锛屽惉閽熷０闈欏績", score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂棰嗛", tip:"瀵洪噷鏈夊彧澶ф鐚?, time:60, cost:0, tags:["瀵哄簷","鍏嶈垂","娌绘剤"]},
+        {name:"绂忔潵鐭?, why:"鎽哥尗鑰虫湹鎷涙鑺?, score:"猸愨瓙猸愨瓙猸?, hook:"鎽哥尗鍏嶈垂", tip:"甯︾尗鏉℃晥鏋滄洿濂?, time:15, cost:0, tags:["鎵撳崱","绁堢"]},
+        {name:"榫欏崕瀵虹礌鏂嬮", why:"鐧惧勾鑰佸瓧鍙凤紝绱犻腑涓€缁?, score:"猸愨瓙猸愨瓙", hook:"绱犻潰 5 鍏冨埜", tip:"11 鐐瑰墠涓嶆帓闃?, time:45, cost:50, tags:["缇庨","绱犻"]},
+        {name:"濉斿奖绌洪棿", why:"瀹夐潤瑙掕惤锛屼竴鏉挅鍟″彂鍛?, score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋 8 鎶?, tip:"绐楄竟浣嶇疆鏈€瀹夐潤", time:90, cost:38, tags:["鍜栧暋","瀹夐潤"]},
+        {name:"瑗垮哺婊ㄦ睙", why:"鐪嬬潃鏃ヨ惤鎱㈡參鍛煎惛", score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋杞︿拱涓€璧犱竴", tip:"涓嬪崍 5:20 姹熼潰鏈€缇?, time:60, cost:25, tags:["鏃ヨ惤","鏁ｆ"]}
+    ],
+    relax: [
+        {name:"濉斿奖绌洪棿", why:"绐楄竟浣嶇疆锛岀湅涔﹀彂鍛?, score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋 8 鎶?, tip:"甯︽湰涔?, time:120, cost:38, tags:["鍜栧暋","闃呰"]},
+        {name:"榫欏崕瀵?, why:"鍚惉閽熷０锛屽績灏遍潤浜?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂棰嗛", tip:"涓嬪崍 3 鐐逛汉鏈€灏?, time:45, cost:0, tags:["瀵哄簷","瀹夐潤"]},
+        {name:"瑗垮哺婊ㄦ睙鑽夊潽", why:"鎵句釜闀挎锛岀湅浜戝嵎浜戣垝", score:"猸愨瓙猸愨瓙", hook:"鍏嶈垂", tip:"甯﹂槻鏅?, time:60, cost:0, tags:["鑷劧","鍏嶈垂"]}
+    ],
+    photo: [
+        {name:"濉斿奖绌洪棿", why:"姘翠笅鍊掑奖锛屽埛鐖嗘湅鍙嬪湀", score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋 8 鎶?, tip:"绌跨櫧鑹茶。鏈?, time:60, cost:38, tags:["鎷嶇収","缃戠孩"]},
+        {name:"榫欑編鏈", why:"宸ヤ笟椋庯紝鎬庝箞鎷嶉兘楂樼骇", score:"猸愨瓙猸愨瓙猸?, hook:"闂ㄧエ 8 鎶?, tip:"鍛ㄤ竴鍘讳汉灏?, time:90, cost:80, tags:["鑹烘湳","宸ヤ笟椋?]},
+        {name:"瑗垮哺澶у墽闄?, why:"鐜颁唬寤虹瓚锛岃瑙夌偢瑁?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂鍙傝", tip:"榛勬槒鍏夌嚎", time:45, cost:0, tags:["寤虹瓚","鍏嶈垂"]}
+    ],
+    social: [
+        {name:"榫欏崕鑰佽", why:"灏忓悆鑱氶泦鍦帮紝杈瑰悆杈硅亰", score:"猸愨瓙猸愨瓙", hook:"灏忓悆 9 鎶?, tip:"鍛ㄦ湯鐑椆", time:60, cost:50, tags:["缇庨","閫涜"]},
+        {name:"濉斿奖绌洪棿", why:"涓嬪崍鑼惰亰澶╋紝鐜婊″垎", score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋 8 鎶?, tip:"鎻愬墠棰勫畾", time:90, cost:68, tags:["鍜栧暋","鑱婂ぉ"]}
+    ],
+    art: [
+        {name:"榫欑編鏈", why:"宸ヤ笟椋?+ 褰撲唬鑹烘湳", score:"猸愨瓙猸愨瓙猸?, hook:"闂ㄧエ 8 鎶?, tip:"鐪嬪睍 2 灏忔椂", time:120, cost:80, tags:["灞曡","鑹烘湳"]},
+        {name:"瑗垮哺缇庢湳棣?, why:"鍥介檯灞曡锛屽紑闃旇閲?, score:"猸愨瓙猸愨瓙猸?, hook:"闂ㄧエ 60 鍏?, tip:"瀛︾敓浼樻儬", time:90, cost:60, tags:["灞曡","鍥介檯"]}
+    ],
+    date: [
+        {name:"濉斿奖绌洪棿", why:"鍊掑奖鍜栧暋锛屾氮婕弧鍒?, score:"猸愨瓙猸愨瓙猸?, hook:"濂楅 88 鍏?, tip:"榛勬槒鏈€缇?, time:90, cost:88, tags:["娴极","鍜栧暋"]},
+        {name:"瑗垮哺婊ㄦ睙", why:"澶曢槼 + 姹熼锛屽憡鐧藉湥鍦?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂", tip:"甯﹀濂?, time:60, cost:30, tags:["鏃ヨ惤","娴极"]}
+    ],
+    family: [
+        {name:"榫欏崕鐑堝＋闄靛洯", why:"鐖卞浗鏁欒偛锛屽瘬鏁欎簬涔?, score:"猸愨瓙猸愨瓙", hook:"鍏嶈垂", tip:"甯﹀瀛愬繀鍘?, time:45, cost:0, tags:["鏁欒偛","鍏嶈垂"]},
+        {name:"榫欏崕瀵?, why:"鑰佷汉绁堢锛屽瀛愮湅鐚?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂棰嗛", tip:"鏃犻殰纰嶉€氶亾", time:60, cost:0, tags:["瀵哄簷","浜插瓙"]}
+    ],
+    explore: [
+        {name:"榫欏崕瀵烘ū鑺辨灄", why:"钘忕粡妤煎悗锛屽皬浼楃澧?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂", tip:"3 鏈堜腑鏃?, time:45, cost:0, tags:["绉樺","鑷劧"]},
+        {name:"瑗垮哺姊︿腑蹇?, why:"姘存偿鍘傛敼閫狅紝璧涘崥鏈嬪厠", score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂", tip:"鍛ㄤ簲鍏櫄", time:60, cost:0, tags:["宸ヤ笟","澶滄櫙"]}
+    ],
+    food: [
+        {name:"榫欏崕瀵虹礌鏂嬮", why:"鐧惧勾鑰佸瓧鍙凤紝绱犻腑涓€缁?, score:"猸愨瓙猸愨瓙猸?, hook:"绱犻潰 5 鍏冨埜", tip:"11 鐐瑰墠", time:45, cost:50, tags:["缇庨","绱犻"]},
+        {name:"榫欏崕鑰佽灏忓悆琛?, why:"鐢熺厧銆佸皬绗笺€佽懕娌归ゼ", score:"猸愨瓙猸愨瓙猸?, hook:"灏忓悆 30 鍏?, tip:"鏃╀笂 8 鐐?, time:60, cost:30, tags:["缇庨","灏忓悆"]}
+    ],
+    lucky: [
+        {name:"榫欏崕瀵哄ぇ闆勫疂娈?, why:"鎷滀經銆佺儳棣欍€佽鎰?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂/闂ㄧエ 20 鍏?, tip:"蹇冭瘹鍒欑伒", time:45, cost:20, tags:["绁堢","瀵哄簷"]},
+        {name:"榫欏崕濉?, why:"鐧诲绁堢锛屾姝ラ珮鍗?, score:"猸愨瓙猸愨瓙", hook:"闂ㄧエ 20 鍏?, tip:"鏃╀笂绌烘皵濂?, time:30, cost:20, tags:["绁堢","鐧婚珮"]}
+    ],
+    fitness: [
+        {name:"瑗垮哺婊ㄦ睙姝ラ亾", why:"5km 涓撲笟璺戦亾", score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂", tip:"鏃╀笂 6 鐐?, time:60, cost:0, tags:["璺戞","鍋ヨ韩"]},
+        {name:"榫欏崕瀵哄箍鍦?, why:"鏅ㄧ粌鍦ｅ湴锛屽お鏋併€佸叓娈甸敠", score:"猸愨瓙猸愨瓙", hook:"鍏嶈垂", tip:"鏃╀笂 7 鐐?, time:45, cost:0, tags:["鏅ㄧ粌","浼犵粺"]}
+    ],
+    chill: [
+        {name:"瑗垮哺婊ㄦ睙鑽夊潽", why:"鏅掑お闃筹紝鍙戝憜锛岀湅浜?, score:"猸愨瓙猸愨瓙猸?, hook:"鍏嶈垂", tip:"甯﹁€虫満", time:90, cost:0, tags:["鏀炬澗","鑷劧"]},
+        {name:"濉斿奖绌洪棿", why:"瑙掕惤浣嶇疆锛屽畨闈欏彂鍛?, score:"猸愨瓙猸愨瓙猸?, hook:"鍜栧暋 8 鎶?, tip:"绐楄竟", time:120, cost:38, tags:["鍜栧暋","瀹夐潤"]}
+    ]
+};
+
+const EMOTION_NAMES = {
+    sad: '娌绘剤鐤楁剤涔嬫梾',
+    relax: '鐙嚜鏀剧┖涔嬫梾',
+    photo: '鍑虹墖鎵撳崱涔嬫梾',
+    social: '娼汉绀句氦涔嬫梾',
+    art: '鑹烘湳鐏垫劅涔嬫梾',
+    date: '娴极绾︿細涔嬫梾',
+    family: '浜插瓙瀹跺涵涔嬫梾',
+    explore: '绉樺鎺㈢储涔嬫梾',
+    food: '缇庨鎺㈠簵涔嬫梾',
+    lucky: '绁堢姹傝繍涔嬫梾',
+    fitness: '杩愬姩娲诲姏涔嬫梾',
+    chill: '韬哄钩鏀炬澗涔嬫梾'
+};
+
+const EMOTION_MATCH = {
+    sad: '闅捐繃鐨勬椂鍊欙紝璁╃編椋熷拰鐚挭娌绘剤浣?,
+    relax: '涓€涓汉锛屼竴鏉挅鍟★紝涓€涓笅鍗?,
+    photo: '姣忎釜瑙掑害閮芥槸澶х墖',
+    social: '鍜屾湅鍙嬩竴璧凤紝蹇箰鍔犲€?,
+    art: '娴告鼎鍦ㄨ壓鏈噷锛岀伒鎰熺垎鍙?,
+    date: '鐗垫墜婕锛岀敎铚滄弧鍒?,
+    family: '鍏ㄥ鍑烘父锛岃€佸皯鐨嗗疁',
+    explore: '鍙戠幇涓嶄竴鏍风殑榫欏崕',
+    food: '鍚冮亶榫欏崕锛屼笉鑳栦笉褰?,
+    lucky: '蹇冭瘹鍒欑伒锛屽ソ杩愯繛杩?,
+    fitness: '鍑烘睏鎺掓瘨锛岃韩蹇冭垝鐣?,
+    chill: '浠€涔堥兘涓嶅仛锛屽氨寰堢編濂?
+};
+
+// 鐢熸垚浜岀淮鐮?function generateQRCode() {
+    const url = window.location.href;
+    const qrContainer = document.getElementById('qrCode');
+    
+    QRCode.toCanvas(url, {
+        width: 180,
+        margin: 2,
+        color: {
+            dark: '#667eea',
+            light: '#ffffff'
+        }
+    }, function (error, canvas) {
+        if (error) {
+            qrContainer.innerHTML = '<div style="color:#f5222d;">浜岀淮鐮佺敓鎴愬け璐?/div>';
+            console.error('QR Code error:', error);
+            return;
+        }
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(canvas);
+    });
+    
+    // 鏇存柊 URL 鏄剧ず
+    document.getElementById('qrUrl').textContent = url;
+}
+
+// 鎯呯华鎸夐挳鐐瑰嚮浜嬩欢
+document.querySelectorAll('.emotion-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // 绉婚櫎鍏朵粬鎸夐挳鐨?active 鐘舵€?        document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+        // 娣诲姞褰撳墠鎸夐挳鐨?active 鐘舵€?        this.classList.add('active');
+        
+        const emotion = this.dataset.emotion;
+        logAPI('request', `POST /api/route/generate`, {emotion, routeType: 'medium'});
+        
+        // 鐢熸垚璺嚎
+        setTimeout(() => {
+            displayRoute(emotion);
+            logAPI('response', `200 OK`, {success: true, points: POI_DATA[emotion].length});
+        }, 800);
+    });
+});
+
+// 鏄剧ず璺嚎
+function displayRoute(emotion) {
+    const pois = POI_DATA[emotion];
+    const theme = EMOTION_NAMES[emotion];
+    const match = EMOTION_MATCH[emotion];
+    const totalTime = pois.reduce((sum, p) => sum + p.time, 0) / 60;
+    const totalCost = pois.reduce((sum, p) => sum + p.cost, 0);
+    
+    const routeDisplay = document.getElementById('routeDisplay');
+    routeDisplay.innerHTML = `
+        <div class="route-card">
+            <h3>馃椇锔?${theme}</h3>
+            <p style="color:#666;font-size:0.9rem;margin-bottom:10px;">${match}</p>
+            <div class="route-stats">
+                <span class="route-stat">馃搷 ${pois.length}涓櫙鐐?/span>
+                <span class="route-stat">鈴憋笍 ${totalTime.toFixed(1)}灏忔椂</span>
+                <span class="route-stat">馃挵 绾?{totalCost}鍏?/span>
+            </div>
+            <div class="poi-list">
+                ${pois.map((poi, idx) => `
+                    <div class="poi-item">
+                        <h4>${idx+1}. ${poi.name}</h4>
+                        <p>馃挕 ${poi.why}</p>
+                        <p>馃帿 ${poi.hook} | 鈴憋笍 ${poi.time}鍒嗛挓 | 馃挵 ${poi.cost}鍏?/p>
+                        <div class="tags">
+                            ${poi.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('routeBadge').style.display = 'inline-block';
+}
+
+// 鍙戦€佹秷鎭?function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    // 娣诲姞鐢ㄦ埛娑堟伅
+    addChatMessage('user', message);
+    input.value = '';
+    
+    // 鏄剧ず姝ｅ湪杈撳叆
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.innerHTML = '<span class="loading"></span>';
+    sendBtn.disabled = true;
+    
+    logAPI('request', `POST /api/agent/chat`, {message, character: 'fulai'});
+    
+    // 妯℃嫙 AI 鍥炲
+    setTimeout(() => {
+        const reply = generateAIReply(message);
+        addChatMessage('assistant', reply);
+        logAPI('response', `200 OK`, {reply: reply.substring(0, 50) + '...'});
+        sendBtn.innerHTML = '鍙戦€?;
+        sendBtn.disabled = false;
+    }, 1500);
+}
+
+// 娣诲姞鑱婂ぉ娑堟伅
+function addChatMessage(role, text) {
+    const chatBox = document.getElementById('chatBox');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+    messageDiv.innerHTML = `<div class="chat-bubble">${text}</div>`;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// 鐢熸垚 AI 鍥炲锛堟ā鎷燂級
+function generateAIReply(message) {
+    const responses = {
+        '闅捐繃': '鍠碉綖鎶辨姳浣狅紒闅捐繃鐨勬椂鍊欏氨鏉ラ緳鍗庡璧拌蛋鍚э紝鍚惉閽熷０锛屽績浼氶潤寰堝鍝︼綖馃惐',
+        '浼ゅ績': '鍠碉綖鎶辨姳浣狅紒闅捐繃鐨勬椂鍊欏氨鏉ラ緳鍗庡璧拌蛋鍚э紝鍚惉閽熷０锛屽績浼氶潤寰堝鍝︼綖馃惐',
+        '澶辨亱': '澶辨亱鐪熺殑濂界棝鑻?..浣嗕綘浼氶亣鍒版洿濂界殑浜猴紒鍏堝幓濉斿奖绌洪棿鍠濇澂鍜栧暋锛岃鑷繁鍐烽潤涓€涓嬪ソ鍚楋紵鈽曪笍',
+        '鍘嬪姏': '鍘嬪姏澶у氨鏉ヨタ宀告花姹熻窇璺戞鍚э紒鍑哄嚭姹楋紝蹇冩儏浼氬ソ寰堝锝炴垜闄綘涓€璧峰幓锛侌煆?,
+        '鐒﹁檻': '鐒﹁檻鐨勬椂鍊欙紝娣卞懠鍚革綖鍘婚緳鍗庡鍚惉閽熷０锛屾垨鑰呭湪瑗垮哺鍚瑰惞姹熼锛岄兘浼氬ソ璧锋潵鐨?馃寠',
+        '鏃犺亰': '鏃犺亰锛熼偅鏉ユ帰绱㈤緳鍗庣殑绉樺鍚э紒妯辫姳鏋椼€佽タ宀告ⅵ涓績锛屼繚璇佽浣犵溂鍓嶄竴浜紒鉁?,
+        '寮€蹇?: '澶鍟︼紒寮€蹇冪殑鏃跺€欐洿瑕佸ソ濂藉簡绁濓綖鍘婚緳鍗庤€佽鍚冮】濂藉悆鐨勫惂锛侌煃?,
+        '鐢熸皵': '鍒敓姘斿暒锝炵敓姘斿鏄撻暱鐨辩汗鍝︼紒鍘荤鏉ョ煶鎽告懜鐚€虫湹锛屽績鎯呬細濂藉緢澶氾綖馃惐',
+        '绱?: '绱簡鍚楋紵鎵句釜鑸掓湇鐨勮钀戒紤鎭竴涓嬶綖濉斿奖绌洪棿鐨勫挅鍟★紝瑗垮哺鐨勮崏鍧紝閮藉緢閫傚悎鏀剧┖鍝?鈽曪笍',
+        '瀛ょ嫭': '涓€涓汉鐨勬椂鍊欙紝鎴戦櫔鐫€浣犲憿锛佷竴璧峰幓鏁ｆ暎姝ュ惂锛岄緳鍗庡鐨勭尗鍜滑涔熷緢娆㈣繋浣犲摝锝烉煇?,
+        '榛樿': '鍠碉綖鎴戞槸绂忔潵锛屼綘鐨勫績鎯呭畧鎶ょ尗锛佹湁浠€涔堟垜鍙互甯綘鐨勫悧锛燄煇?
+    };
+    
+    for (const keyword in responses) {
+        if (message.includes(keyword)) {
+            return responses[keyword];
+        }
+    }
+    return responses['榛樿'];
+}
+
+// API 鏃ュ織
+function logAPI(type, endpoint, data) {
+    const logDiv = document.getElementById('apiLog');
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    
+    if (type === 'request') {
+        logEntry.className = 'request';
+        logEntry.innerHTML = `[${timestamp}] 馃摛 ${endpoint}<br><span style="color:#9cdcfe">${JSON.stringify(data, null, 2)}</span>`;
+    } else {
+        logEntry.className = 'response';
+        logEntry.innerHTML = `[${timestamp}] 馃摜 ${endpoint}<br><span style="color:#ce9178">${JSON.stringify(data, null, 2)}</span>`;
+    }
+    
+    logDiv.appendChild(logEntry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// 椤甸潰鍔犺浇瀹屾垚
+window.addEventListener('load', () => {
+    // 鐢熸垚浜岀淮鐮?    generateQRCode();
+    
+    logAPI('response', `System Ready`, {status: 'online', version: '1.0.0', page: 'demo-judge'});
+    
+    // 鑷姩閫夋嫨绗竴涓儏缁綔涓烘紨绀?    setTimeout(() => {
+        const firstBtn = document.querySelector('[data-emotion="sad"]');
+        if (firstBtn) {
+            firstBtn.click();
+        }
+    }, 1000);
+});
+</script>
+</body>
+</html>

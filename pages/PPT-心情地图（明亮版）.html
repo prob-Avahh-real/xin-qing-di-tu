@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 3 分钟路演 PPT（明亮版）</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f0f2f5;overflow:hidden}
+        .ppt-container{width:100vw;height:100vh;position:relative}
+        .slide{position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:linear-gradient(135deg,#ffffff,#f9f9f9);padding:60px 80px}
+        .slide.active{display:block}
+        .slide-number{position:absolute;bottom:30px;right:40px;font-size:14px;color:#999}
+        .header{text-align:center;margin-bottom:40px}
+        .header h1{font-size:48px;color:#E87A5D;margin-bottom:10px;text-shadow:1px 1px 2px rgba(0,0,0,0.1)}
+        .header .subtitle{font-size:24px;color:#333}
+        .header .meta{font-size:14px;color:#666;margin-top:15px}
+        .content{display:flex;flex-direction:column;justify-content:center;height:calc(100% - 200px)}
+        .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:40px}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+        .card{background:white;padding:30px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);border:1px solid #e8e8e8}
+        .card h3{font-size:20px;color:#E87A5D;margin-bottom:15px}
+        .card p{font-size:16px;color:#333;line-height:1.6}
+        .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+        .stat-card{text-align:center;padding:30px;background:linear-gradient(135deg,#FFF5F0,#FFE8E0);border-radius:15px}
+        .stat-card .number{font-size:48px;font-weight:700;color:#E87A5D;margin-bottom:10px}
+        .stat-card .label{font-size:16px;color:#666}
+        .comparison-table{width:100%;border-collapse:collapse;margin:30px 0}
+        .comparison-table th,.comparison-table td{padding:15px;text-align:left;border-bottom:1px solid #e8e8e8;font-size:16px;color:#333}
+        .comparison-table th{background:#FFF5F0;color:#E87A5D;font-weight:600}
+        .comparison-table tr:hover{background:#f9f9f9}
+        .quote{background:linear-gradient(135deg,#FFF5F0,#FFE8E0);border-left:4px solid #E87A5D;padding:30px;margin:30px 0;border-radius:0 12px 12px 0}
+        .quote p{font-size:20px;line-height:1.8;color:#333}
+        .timeline{position:relative;padding:20px 0}
+        .timeline-item{display:flex;gap:30px;margin-bottom:25px;padding-bottom:25px;border-bottom:1px solid #e8e8e8}
+        .timeline-item .time{font-size:18px;font-weight:700;color:#E87A5D;min-width:120px}
+        .timeline-item .content{flex:1}
+        .timeline-item .content h3{font-size:18px;color:#333;margin-bottom:5px}
+        .timeline-item .content p{font-size:14px;color:#666}
+        .bullet-list{list-style:none;margin:20px 0}
+        .bullet-list li{font-size:18px;color:#333;margin-bottom:15px;padding-left:30px;position:relative}
+        .bullet-list li::before{content:'✅';position:absolute;left:0}
+        .highlight{background:#FFF5F0;padding:5px 12px;border-radius:8px;font-weight:600;color:#E87A5D}
+        .controls{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:1000}
+        .btn{background:linear-gradient(135deg,#E87A5D,#F9B572);color:white;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(232,122,93,0.3)}
+        .btn:hover{background:linear-gradient(135deg,#F9B572,#E87A5D);transform:translateY(-2px);box-shadow:0 6px 16px rgba(232,122,93,0.4)}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:#e8e8e8;z-index:1001}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#E87A5D,#F9B572);transition:width 0.3s}
+        @media print{.controls,.progress-bar{display:none}.slide{page-break-after:always;background:white!important}}
+    </style>
+</head>
+<body>
+<div class="ppt-container">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    
+    <!-- Slide 1: 封面 -->
+    <div class="slide active" data-slide="1">
+        <div class="content">
+            <div class="header">
+                <h1>🗺️ 心情地图</h1>
+                <div class="subtitle">今天是什么心情，就去哪里玩</div>
+                <div class="meta">LYCC 2026 龙华·黑客松 · Track 3.2 青年出行新体验</div>
+            </div>
+        </div>
+        <div class="slide-number">1 / 10</div>
+    </div>
+
+    <!-- Slide 2: 痛点 -->
+    <div class="slide" data-slide="2">
+        <div class="header">
+            <h2>😔 用户痛点</h2>
+        </div>
+        <div class="content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>❌ 选择困难</h3>
+                    <p>想去玩，但不知道去哪里，浪费大量时间纠结</p>
+                </div>
+                <div class="card">
+                    <h3>❌ 走马观花</h3>
+                    <p>到了景点拍个照就走，缺乏深度体验</p>
+                </div>
+                <div class="card">
+                    <h3>❌ 孤独感强</h3>
+                    <p>一个人出行没人讲解，缺乏陪伴感</p>
+                </div>
+            </div>
+            <div class="quote" style="margin-top:30px">
+                <p><strong>核心问题：</strong>传统 APP 只推荐"去哪里"，不关心"什么心情去"</p>
+            </div>
+        </div>
+        <div class="slide-number">2 / 10</div>
+    </div>
+
+    <!-- Slide 3: 解决方案 -->
+    <div class="slide" data-slide="3">
+        <div class="header">
+            <h2>💡 解决方案</h2>
+        </div>
+        <div class="content">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="number">12</div>
+                    <div class="label">情绪类型</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">120+</div>
+                    <div class="label">精选景点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">8-12</div>
+                    <div class="label">个景点/路线</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">100%</div>
+                    <div class="label">完成度</div>
+                </div>
+            </div>
+            <div class="quote" style="margin-top:30px">
+                <p><strong>Slogan：</strong>今天是什么心情，就去哪里玩</p>
+                <p><strong>定位：</strong>情感出行指南 × AI 个性化 × 在地文化</p>
+            </div>
+        </div>
+        <div class="slide-number">3 / 10</div>
+    </div>
+
+    <!-- Slide 4: 12 种情绪 -->
+    <div class="slide" data-slide="4">
+        <div class="header">
+            <h2>🎭 12 种情绪路线</h2>
+        </div>
+        <div class="content">
+            <div class="grid-3">
+                <div class="card"><h3>EMO 治愈</h3><p>安静、治愈、心灵慰藉</p></div>
+                <div class="card"><h3>散心</h3><p>放松、散步、放空自己</p></div>
+                <div class="card"><h3>拍照</h3><p>打卡、出片、美照圣地</p></div>
+                <div class="card"><h3>聚会</h3><p>朋友、团建、集体活动</p></div>
+                <div class="card"><h3>文艺</h3><p>展览、书店、文化氛围</p></div>
+                <div class="card"><h3>约会</h3><p>浪漫、私密、情侣专属</p></div>
+                <div class="card"><h3>亲子</h3><p>遛娃、互动、寓教于乐</p></div>
+                <div class="card"><h3>美食</h3><p>探店、小吃、特色餐厅</p></div>
+                <div class="card"><h3>祈福</h3><p>寺庙、祈福、心灵寄托</p></div>
+                <div class="card"><h3>运动</h3><p>徒步、骑行、户外活动</p></div>
+                <div class="card"><h3>躺平</h3><p>休闲、慵懒、慢节奏</p></div>
+                <div class="card"><h3>探索</h3><p>新奇、小众、未知惊喜</p></div>
+            </div>
+        </div>
+        <div class="slide-number">4 / 10</div>
+    </div>
+
+    <!-- Slide 5: 游戏化体验 -->
+    <div class="slide" data-slide="5">
+        <div class="header">
+            <h2>🎁 游戏化体验</h2>
+        </div>
+        <div class="content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🎮 积分系统</h3>
+                    <ul class="bullet-list">
+                        <li>完整路线打卡 +100</li>
+                        <li>分享打卡 +50</li>
+                        <li>寻找彩蛋 +80</li>
+                        <li>连续签到 7 天 +150</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🎪 兑换奖励</h3>
+                    <ul class="bullet-list">
+                        <li>福来公仔 200 积分</li>
+                        <li>纪念徽章 300 积分</li>
+                        <li>庙会体验券 500 积分</li>
+                        <li>公益捐赠 10 积分起</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="quote" style="margin-top:20px">
+                <p><strong>仪式感：</strong>5 月 1 日龙华庙会日统一兑换</p>
+            </div>
+        </div>
+        <div class="slide-number">5 / 10</div>
+    </div>
+
+    <!-- Slide 6: 特色功能 -->
+    <div class="slide" data-slide="6">
+        <div class="header">
+            <h2>🌊 特色功能</h2>
+        </div>
+        <div class="content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🌊 许愿池</h3>
+                    <ul class="bullet-list">
+                        <li>5 种漂流瓶样式</li>
+                        <li>自定义开启日期</li>
+                        <li>邮件提醒</li>
+                        <li>倒计时期待感</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>📚 知识库</h3>
+                    <ul class="bullet-list">
+                        <li>6 大分类：历史/人文/美食/拍照/彩蛋/活动</li>
+                        <li>18 张真实龙华照片</li>
+                        <li>专业内容审核</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">6 / 10</div>
+    </div>
+
+    <!-- Slide 7: 商业模式 -->
+    <div class="slide" data-slide="7">
+        <div class="header">
+            <h2>💰 商业模式</h2>
+        </div>
+        <div class="content">
+            <div class="quote">
+                <p><strong>定位：</strong>公益文化平台（文化传承 + 公益支持 + 精神价值）</p>
+            </div>
+            <div class="grid-3">
+                <div class="card">
+                    <h3>🙏 功德主计划</h3>
+                    <p>30% · 自愿捐赠<br>月度公示使用情况</p>
+                </div>
+                <div class="card">
+                    <h3>🎨 文创产品</h3>
+                    <p>25% · IP 衍生品<br>福来公仔/徽章/明信片</p>
+                </div>
+                <div class="card">
+                    <h3>🍜 深度体验</h3>
+                    <p>20% · 文化体验<br>素斋/禅修/手工艺</p>
+                </div>
+                <div class="card">
+                    <h3>🏢 企业定制</h3>
+                    <p>15% · B 端服务<br>团建路线/活动定制</p>
+                </div>
+                <div class="card">
+                    <h3>💎 会员服务</h3>
+                    <p>10% · VIP 增值<br>专属路线/优先报名</p>
+                </div>
+                <div class="card" style="background:#FFF0F0;border:1px solid #ffcccc">
+                    <h3 style="color:#ff5757">⚠️ 重要说明</h3>
+                    <p>平台≠寺庙<br>不参与宗教功能<br>所有消费自愿</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">7 / 10</div>
+    </div>
+
+    <!-- Slide 8: 竞争优势 -->
+    <div class="slide" data-slide="8">
+        <div class="header">
+            <h2>🏆 竞争优势</h2>
+        </div>
+        <div class="content">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>平台</th>
+                        <th>定位</th>
+                        <th>情感维度</th>
+                        <th>文化深度</th>
+                        <th>个性化</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>高德地图</td><td>工具导航</td><td>❌</td><td>⭐⭐</td><td>❌</td></tr>
+                    <tr><td>马蜂窝</td><td>旅游攻略</td><td>❌</td><td>⭐⭐⭐</td><td>⭐⭐</td></tr>
+                    <tr><td>小红书</td><td>种草社区</td><td>⭐</td><td>⭐</td><td>⭐⭐</td></tr>
+                    <tr style="background:#FFF5F0;font-weight:600"><td>心情地图</td><td>情感出行</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:20px">
+                <strong style="font-size:18px;color:#E87A5D">核心优势：</strong>
+                <ul class="bullet-list" style="margin-top:15px">
+                    <li>首创情感维度出行</li>
+                    <li>AI 个性化推荐</li>
+                    <li>深耕在地文化</li>
+                    <li>游戏化设计提升粘性</li>
+                    <li>公益定位建立信任</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-number">8 / 10</div>
+    </div>
+
+    <!-- Slide 9: 时间规划 -->
+    <div class="slide" data-slide="9">
+        <div class="header">
+            <h2>📅 时间规划</h2>
+        </div>
+        <div class="content">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="time">4/23 09:00</div>
+                    <div class="content">
+                        <h3>🚩 黑客松开始</h3>
+                        <p>需求分析 + 产品设计</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">4/24 20:00</div>
+                    <div class="content">
+                        <h3>✅ 项目完成 100%</h3>
+                        <p>7 大功能模块全部完成</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">4/25 20:00</div>
+                    <div class="content">
+                        <h3>⏰ 提交截止</h3>
+                        <p>飞书表单提交作品</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">4/26 10:30</div>
+                    <div class="content">
+                        <h3>🎤 路演讲演</h3>
+                        <p>西岸智塔 5 楼，3 分钟演示</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">5/01</div>
+                    <div class="content">
+                        <h3>🎋 龙华庙会</h3>
+                        <p>积分兑换截止</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">9 / 10</div>
+    </div>
+
+    <!-- Slide 10: 愿景 -->
+    <div class="slide" data-slide="10">
+        <div class="content">
+            <div class="header">
+                <h1>🌟 愿景</h1>
+            </div>
+            <div style="text-align:center">
+                <p style="font-size:28px;margin-bottom:30px;color:#333">我们不只是做一个 APP</p>
+                <p style="font-size:32px;font-weight:700;color:#E87A5D;margin-bottom:40px">我们是在创造一种新的出行方式</p>
+                <div class="grid-3" style="margin-bottom:40px">
+                    <div class="card">
+                        <h3>✅ 让科技有人文温度</h3>
+                    </div>
+                    <div class="card">
+                        <h3>✅ 让出行有情感连接</h3>
+                    </div>
+                    <div class="card">
+                        <h3>✅ 让文化有年轻表达</h3>
+                    </div>
+                </div>
+                <div style="background:linear-gradient(135deg,#FFF5F0,#FFE8E0);padding:40px;border-radius:20px">
+                    <h2 style="font-size:36px;margin-bottom:10px;color:#E87A5D">🗺️ 心情地图</h2>
+                    <p style="font-size:24px;margin-bottom:10px;color:#333">陪你走过每一种心情</p>
+                    <p style="font-size:14px;color:#999">LYCC 2026 龙华·黑客松</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">10 / 10</div>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="btn" onclick="prevSlide()">◀ 上一页</button>
+    <button class="btn" onclick="nextSlide()">下一页 ▶</button>
+    <button class="btn" onclick="toggleFullscreen()">⛶ 全屏</button>
+</div>
+
+<script>
+let currentSlide = 1;
+const totalSlides = 10;
+
+function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.querySelector(`.slide[data-slide="${n}"]`).classList.add('active');
+    document.getElementById('progressFill').style.width = ((n - 1) / (totalSlides - 1) * 100) + '%';
+}
+
+function nextSlide() {
+    if (currentSlide < totalSlides) {
+        currentSlide++;
+        showSlide(currentSlide);
+    }
+}
+
+function prevSlide() {
+    if (currentSlide > 1) {
+        currentSlide--;
+        showSlide(currentSlide);
+    }
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+});
+
+showSlide(1);
+console.log('🗺️ 心情地图 PPT（明亮版）已加载');
+console.log('📊 共 10 页幻灯片');
+console.log('⏱️ 建议演讲时间：3 分钟');
+console.log('💡 快捷键：←/→ 翻页 | F 全屏 | ESC 退出');
+</script>
+</body>
+</html>

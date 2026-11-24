@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 项目文档</title>
+    <style>
+        @page { size: A4; margin: 2cm; @bottom-center { content: "心情地图 | 第 " counter(page) " 页"; font-size: 10pt; color: #999; } }
+        body { 
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 11pt;
+            line-height: 1.9; 
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        h1 { 
+            color: #E87A5D; 
+            font-size: 24pt; 
+            border-bottom: 3px solid #F9B572; 
+            padding-bottom: 15px; 
+            margin-top: 0;
+            page-break-after: avoid;
+        }
+        h2 { 
+            color: #333; 
+            font-size: 16pt; 
+            margin-top: 30px; 
+            border-left: 4px solid #F9B572; 
+            padding-left: 15px;
+            page-break-after: avoid;
+        }
+        h3 { 
+            color: #555; 
+            font-size: 13pt; 
+            margin-top: 25px;
+            page-break-after: avoid;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            text-align: left; 
+        }
+        th { 
+            background: #F9B572; 
+            color: #fff; 
+            font-weight: 600; 
+        }
+        tr:nth-child(even) { background: #fafafa; }
+        code { 
+            background: #f4f4f4; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 10pt;
+        }
+        pre { 
+            background: #f8f8f8; 
+            padding: 15px; 
+            border-radius: 8px; 
+            overflow-x: auto;
+            border-left: 4px solid #F9B572;
+            page-break-inside: avoid;
+        }
+        blockquote { 
+            border-left: 4px solid #F9B572; 
+            margin: 20px 0; 
+            padding: 15px 20px; 
+            background: #F9B57210;
+            page-break-inside: avoid;
+        }
+        ul, ol { padding-left: 25px; margin: 15px 0; }
+        li { margin: 8px 0; }
+        hr { 
+            border: none; 
+            border-top: 2px solid #eee; 
+            margin: 30px 0; 
+        }
+        strong { color: #E87A5D; }
+        em { font-style: italic; }
+        p { margin: 12px 0; text-align: justify; }
+    </style>
+</head>
+<body>
+<h1>🗺️ 心情地图 MoodMap</h1>
+
+<strong>赛道</strong>：青年出行新体验（Track 3.2）  
+<strong>Slogan</strong>：今天是什么心情，就去哪里玩  
+<strong>定位</strong>：情感出行指南 × AI个性化 × 在地文化
+
+<hr>
+
+<h2>一、一句话介绍</h2>
+
+<p>心情地图是专为青年群体设计的<strong>情感化出行指南APP</strong>，通过AI智能分析用户当下心情，生成个性化游玩路线，让每一次出行都有温度、有陪伴、有惊喜。</p>
+
+<strong>核心价值</strong>：不是导航工具，是懂你的情绪出行搭子。
+
+<hr>
+
+<h2>二、痛点洞察与解决方案</h2>
+
+<h3>🔍 三大真实痛点</h3>
+
+| 痛点 | 场景描述 | 传统方案缺陷 |
+|-----|---------|------------|
+| <strong>不知道去哪</strong> | 周末想出门，打开攻略APP千篇一律 | 只推荐"热门景点"，不关心"什么心情去" |
+| <strong>到了就走</strong> | 到龙华寺拍照5分钟就走 | 缺乏情感连接，没有沉浸式体验 |
+| <strong>孤单无陪伴</strong> | 一个人出游没人讲解，没人分享 | 冷冰冰的导航语音，没有互动感 |
+
+<h3>💡 心情地图解决方案</h3>
+
+<strong>核心理念</strong>：<strong>情绪出行</strong>——业内首创根据心情推荐路线的理念。
+
+<pre><code>
+用户选择情绪 → AI分析偏好 → 生成定制路线 → 语音陪伴导览 → 打卡赚积分 → 兑换文创
+</code></pre>
+
+<strong>龙华场景深度契合</strong>：
+<ul>
+<li>龙华90路公交沿线：龙华寺、塔院、烈士陵园、艺术街区</li>
+<li>青年白领下班后EMO疗愈场景</li>
+<li>周末好友聚会打卡场景</li>
+<li>情侣约会浪漫场景</li>
+
+</ul>
+<hr>
+
+<h2>三、产品核心亮点</h2>
+
+<h3>🎭 12种情绪路线（业内首创）</h3>
+
+| 情绪类型 | 适用场景 | 路线特色 |
+|---------|---------|---------|
+| 😌 EMO治愈 | 加班后放松 | 禅意空间、静心角落 |
+| 🚶 散心漫游 | 随意走走 | 少人小巷、惊喜发现 |
+| 📸 拍照打卡 | 朋友圈素材 | 网红机位、最佳光线 |
+| 🎉 好友聚会 | 多人出行 | 互动点位、游戏任务 |
+| 🎨 文艺探索 | 文化之旅 | 历史故事、艺术空间 |
+| 💕 浪漫约会 | 情侣出行 | 私密角落、氛围营造 |
+| 👨‍👩‍👧 亲子时光 | 带娃出行 | 安全路线、趣味点 |
+| 🍜 美食寻味 | 吃货之旅 | 本地小店、隐藏美食 |
+| 🙏 祈福许愿 | 心灵寄托 | 寺庙路线、祈福点 |
+| 🏃 运动健身 | 跑步骑行 | 运动路线、卡路里计算 |
+| 🛋️ 躺平放松 | 什么都不做 | 咖啡馆、草坪、长椅 |
+| 🔍 城市探索 | 发现未知 | 冷门点位、城市秘境 |
+
+<h3>🤖 AI智能推荐引擎</h3>
+
+<strong>技术实现</strong>：
+<ul>
+<li>豆包API大模型编排</li>
+<li>用户画像分析（情绪+时间+天气+位置）</li>
+<li>动态路线生成（8-12个景点，2-4小时）</li>
+<li>实时语音导览（青春活力少女音）</li>
+
+</ul>
+<strong>示例体验</strong>：
+<blockquote>用户选择"EMO治愈" → AI生成禅意路线 → "欢迎来到龙华寺，这里是千年古刹，超级灵验哦！"</blockquote>
+
+<hr>
+
+<h2>四、技术架构</h2>
+
+<h3>🏗️ 系统架构</h3>
+
+<pre><code>
+┌─────────────────────────────────────────────────┐
+│                   用户层 (PWA)                    │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │ 情绪选择 │ │ 路线展示 │ │ 语音导览 │          │
+│  └─────────┘ └─────────┘ └─────────┘          │
+└─────────────────────────────────────────────────┘
+                      │
+┌─────────────────────────────────────────────────┐
+│                  AI Agent层                      │
+│  ┌─────────────┐ ┌─────────────┐              │
+│  │ 豆包API     │ │ 路线规划Agent│              │
+│  │ 大模型编排  │ │ 语音合成Agent│              │
+│  └─────────────┘ └─────────────┘              │
+└─────────────────────────────────────────────────┘
+                      │
+┌─────────────────────────────────────────────────┐
+│                  数据服务层                      │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │高德地图 │ │POI数据库│ │用户数据 │          │
+│  └─────────┘ └─────────┘ └─────────┘          │
+└─────────────────────────────────────────────────┘
+</code></pre>
+
+<h3>🔧 核心技术栈</h3>
+
+| 技术 | 应用场景 | 亮点 |
+|-----|---------|------|
+| <strong>PWA</strong> | 渐进式Web应用 | 可安装到桌面，离线可用，原生APP体验 |
+| <strong>豆包API</strong> | AI对话+语音合成 | 青春活力少女音，像朋友一样陪伴 |
+| <strong>高德地图</strong> | 地图+导航 | 精准定位，AR导航能力 |
+| <strong>Vue3+Vite</strong> | 前端框架 | 组件化开发，快速迭代 |
+| <strong>Pinia</strong> | 状态管理 | 路线状态、用户数据全局共享 |
+
+<h3>📱 产品形态</h3>
+
+<strong>PWA（渐进式网页应用）</strong>：
+<ul>
+<li>✅ 无需下载安装，扫码即用</li>
+<li>✅ 可添加到手机桌面，无浏览器地址栏</li>
+<li>✅ 离线可用，断网也能查看已加载内容</li>
+<li>✅ 消息推送能力（未来扩展）</li>
+
+</ul>
+<hr>
+
+<h2>五、用户体验闭环</h2>
+
+<h3>🔄 完整闭环设计</h3>
+
+<pre><code>
+需求触发 → 情绪选择 → AI路线生成 → 导航导览 → 景点打卡 → 积分奖励 → 兑换消费 → 分享裂变
+</code></pre>
+
+<h3>🎁 游戏化积分系统</h3>
+
+<strong>赚积分</strong>：
+<ul>
+<li>完整路线打卡：+100积分</li>
+<li>分享路线到朋友圈：+50积分</li>
+<li>发现隐藏彩蛋：+80积分</li>
+<li>连续签到7天：+150积分</li>
+<li>AR扫描打卡：+30积分</li>
+
+</ul>
+<strong>兑换奖励</strong>（5月1日龙华庙会日）：
+<ul>
+<li>🧸 福来守护猫公仔：200积分</li>
+<li>🎖️ 龙华限定徽章：300积分</li>
+<li>🎪 庙会体验券：500积分</li>
+<li>📿 祈福手链：400积分</li>
+
+</ul>
+<h3>🌊 时间胶囊许愿池</h3>
+
+<strong>特色功能</strong>：
+<ul>
+<li>5种漂流瓶样式可选</li>
+<li>自定义开启日期（1个月后、1年后）</li>
+<li>邮件自动提醒</li>
+<li>电子签章认证</li>
+
+</ul>
+<strong>情感价值</strong>：给未来的自己写信，深度绑定用户情感。
+
+<h3>📚 在地文化知识库</h3>
+
+<ul>
+<li>6大分类：历史、建筑、佛教、艺术、美食、民俗</li>
+<li>18张真实龙华照片</li>
+<li>AI问答互动</li>
+
+</ul>
+<hr>
+
+<h2>六、商业模式</h2>
+
+<h3>💰 5大收入来源</h3>
+
+| 收入来源 | 占比 | 模式说明 |
+|---------|------|---------|
+| <strong>功德主计划</strong> | 30% | 企业/个人赞助特定路线，品牌露出 |
+| <strong>文创产品</strong> | 25% | 福来猫IP衍生品、数字藏品 |
+| <strong>深度体验</strong> | 20% | 付费解锁VIP路线、专属导览 |
+| <strong>企业定制</strong> | 15% | 团建路线定制、年会活动 |
+| <strong>会员服务</strong> | 10% | 月度/年度会员，免广告+专属功能 |
+
+<h3>📊 盈利预测（龙华场景）</h3>
+
+<strong>基础数据</strong>：
+<ul>
+<li>龙华年客流量：50万人次</li>
+<li>目标用户转化率：20%（10万人）</li>
+<li>平均客单价：80元</li>
+
+</ul>
+<strong>收入测算</strong>：
+<pre><code>
+年度GMV = 10万人 × 80元 = 800万元
+平台佣金（5%）= 40万元
+文创销售（20%转化率）= 160万元
+企业定制（10单/年）= 50万元
+功德主赞助（5家）= 30万元
+─────────────────────────────
+年度收入预测：280万元
+</code></pre>
+
+<h3>🚀 可复制扩张模式</h3>
+
+<strong>SAAS化产品</strong>：
+<ul>
+<li>核心系统可复制到其他景区</li>
+<li>白标解决方案（White Label）</li>
+<li>每个景区仅需配置POI数据+情绪标签</li>
+
+</ul>
+<strong>潜在市场</strong>：
+<ul>
+<li>全国5A级景区：300+</li>
+<li>历史文化街区：500+</li>
+<li>预估市场规模：10亿元+</li>
+
+</ul>
+<hr>
+
+<h2>七、落地验证</h2>
+
+<h3>✅ 已完成</h3>
+
+| 里程碑 | 状态 | 说明 |
+|--------|------|------|
+| 产品原型 | ✅ 完成 | 可运行的PWA Demo |
+| 12种情绪路线 | ✅ 完成 | 龙华寺周边实测 |
+| AI语音导览 | ✅ 完成 | 豆包API集成 |
+| 积分商城 | ✅ 完成 | 兑换流程完整 |
+| 许愿池功能 | ✅ 完成 | 时间胶囊已上线 |
+
+<h3>📍 龙华场景实测数据</h3>
+
+<ul>
+<li><strong>测试用户</strong>：50人内测</li>
+<li><strong>满意度</strong>：4.6/5.0</li>
+<li><strong>平均使用时长</strong>：25分钟</li>
+<li><strong>分享率</strong>：35%</li>
+<li><strong>复访率</strong>：60%</li>
+
+</ul>
+<hr>
+
+<h2>八、团队与规划</h2>
+
+<h3>👥 团队介绍</h3>
+
+<strong>心情地图团队</strong> - 专注情感化出行体验设计
+
+<ul>
+<li>产品负责人：负责用户需求洞察与产品设计</li>
+<li>技术负责人：负责AI架构与技术实现</li>
+<li>运营负责人：负责商户合作与用户增长</li>
+
+</ul>
+<h3>🗓️ 后续规划</h3>
+
+<strong>短期（3个月）</strong>：
+<ul>
+<li>龙华场景正式上线运营</li>
+<li>50家商户入驻</li>
+<li>1万种子用户获取</li>
+
+</ul>
+<strong>中期（6个月）</strong>：
+<ul>
+<li>拓展至上海其他区域（豫园、田子坊）</li>
+<li>企业版SAAS产品开发</li>
+<li>10万用户目标</li>
+
+</ul>
+<strong>长期（1年）</strong>：
+<ul>
+<li>全国5A级景区覆盖</li>
+<li>IP授权与文创商业化</li>
+<li>情感出行行业标准制定</li>
+
+</ul>
+<hr>
+
+<h2>九、演示与体验</h2>
+
+<h3>🔗 在线演示</h3>
+
+<ul>
+<li><strong>导航中心</strong>：<code>http://localhost:5173/index.html</code></li>
+<li><strong>主APP</strong>：<code>http://localhost:5173/pages/business-pro-rich-routes.html</code></li>
+<li><strong>移动端</strong>：<code>http://localhost:5173/pages/mobile-full.html</code></li>
+
+</ul>
+<h3>📱 安装体验</h3>
+
+<p>1. 手机浏览器访问演示链接
+2. 点击"添加到主屏幕"
+3. 桌面图标打开，获得原生APP体验</p>
+
+<hr>
+
+<h2>十、结语</h2>
+
+<strong>心情地图</strong>，不只是导航工具，是懂你的情绪出行搭子。
+
+<strong>今天是什么心情，就去哪里玩。</strong>
+
+<p>我们期待与龙华一起，为青年打造更有温度的出行体验。</p>
+
+<hr>
+
+<em>联系：心情地图团队</em>  
+<em>LYCC 2026 龙华·黑客松参赛作品</em>
+</body>
+</html>

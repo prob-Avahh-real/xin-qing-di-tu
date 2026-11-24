@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共享车位登记 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        
+        /* 顶部 */
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px 16px;text-align:center;position:sticky;top:0;z-index:100}
+        .header h1{font-size:1.3rem;font-weight:600}
+        .header p{font-size:0.85rem;opacity:0.9;margin-top:5px}
+        
+        /* 内容区 */
+        main{max-width:600px;margin:0 auto;padding:16px}
+        
+        /* 卡片 */
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .card h2{font-size:1.2rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .card h2 .icon{font-size:1.5rem}
+        
+        /* 表单 */
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:0.9rem;color:#666;margin-bottom:8px;font-weight:500}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.95rem;transition:all 0.3s}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#667eea;outline:none}
+        .form-group textarea{resize:vertical;min-height:80px}
+        .form-group .hint{font-size:0.8rem;color:#999;margin-top:5px}
+        
+        /* 时间段选择 */
+        .time-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+        .time-slot{background:#f9f9f9;border:2px solid #e0e0e0;border-radius:8px;padding:12px;cursor:pointer;transition:all 0.3s}
+        .time-slot:hover{border-color:#667eea}
+        .time-slot.selected{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-color:transparent}
+        .time-slot .time{font-size:0.95rem;font-weight:600;margin-bottom:4px}
+        .time-slot .desc{font-size:0.8rem;opacity:0.8}
+        
+        /* 星期选择 */
+        .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+        .weekday-btn{padding:10px 5px;background:#f9f9f9;border:2px solid #e0e0e0;border-radius:8px;text-align:center;cursor:pointer;transition:all 0.3s}
+        .weekday-btn:hover{border-color:#667eea}
+        .weekday-btn.selected{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-color:transparent}
+        .weekday-btn .day{font-size:0.85rem;font-weight:600}
+        .weekday-btn .label{font-size:0.7rem;opacity:0.8;margin-top:2px}
+        
+        /* 提交按钮 */
+        .submit-btn{width:100%;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 15px rgba(249,181,114,0.3)}
+        .submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(249,181,114,0.4)}
+        .submit-btn:active{transform:scale(0.98)}
+        
+        /* 车位列表 */
+        .parking-list{margin-top:16px}
+        .parking-item{background:#f9f9f9;border-radius:12px;padding:16px;margin-bottom:12px;border-left:4px solid #667eea}
+        .parking-item .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .parking-item .title{font-size:1rem;font-weight:600;color:#333}
+        .parking-item .status{padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600}
+        .status.active{background:#52c41a;color:white}
+        .status.pending{background:#faad14;color:white}
+        .parking-item .info{font-size:0.85rem;color:#666;margin:6px 0}
+        .parking-item .info .label{color:#999}
+        .parking-item .time-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+        .time-tag{background:white;padding:6px 10px;border-radius:6px;font-size:0.8rem;color:#666;border:1px solid #e0e0e0}
+        
+        /* 统计卡片 */
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+        .stat-card{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:12px;padding:16px;text-align:center}
+        .stat-card .number{font-size:2rem;font-weight:700;margin-bottom:4px}
+        .stat-card .label{font-size:0.8rem;opacity:0.9}
+        
+        /* 提示 */
+        .tip-card{background:#fffbe6;border-left:4px solid #faad14;padding:16px;border-radius:8px;margin-bottom:16px}
+        .tip-card h3{font-size:0.95rem;color:#b77b5c;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+        .tip-card ul{margin-left:18px;font-size:0.85rem;color:#666;line-height:1.8}
+        
+        /* Toast */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:24px;font-size:0.9rem;display:none;z-index:1000;white-space:nowrap}
+        
+        @media(max-width:768px){.weekday-grid{grid-template-columns:repeat(7,1fr)}.weekday-btn .label{display:none}}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1>🅿️ 共享车位登记</h1>
+    <p>闲置车位变废为宝，分享赚取收益</p>
+</header>
+
+<main>
+    <!-- 统计卡片 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="number" id="totalCount">0</div>
+            <div class="label">已登记车位</div>
+        </div>
+        <div class="stat-card" style="background:linear-gradient(135deg,#52c41a,#389e0d)">
+            <div class="number" id="activeCount">0</div>
+            <div class="label">可共享车位</div>
+        </div>
+        <div class="stat-card" style="background:linear-gradient(135deg,#F9B572,#E87A5D)">
+            <div class="number" id="earningsCount">¥0</div>
+            <div class="label">预计月收益</div>
+        </div>
+    </div>
+    
+    <!-- 提示信息 -->
+    <div class="tip-card">
+        <h3>💡 共享车位好处</h3>
+        <ul>
+            <li>闲置时段出租，每月多赚 500-1500 元</li>
+            <li>平台提供保险，停车纠纷有保障</li>
+            <li>自动计费，收益自动到账</li>
+            <li>帮助周边居民解决停车难问题</li>
+        </ul>
+    </div>
+    
+    <!-- 登记表单 -->
+    <div class="card">
+        <h2><span class="icon">📝</span> 车位信息登记</h2>
+        
+        <div class="form-group">
+            <label>📍 小区名称</label>
+            <input type="text" id="communityName" placeholder="例如：龙华小区">
+        </div>
+        
+        <div class="form-group">
+            <label>🏠 具体位置</label>
+            <input type="text" id="parkingLocation" placeholder="例如：地下车库 B2 层 A 区 056 号">
+            <div class="hint">请详细填写车位位置，方便车主找到</div>
+        </div>
+        
+        <div class="form-group">
+            <label>🚗 车位类型</label>
+            <select id="parkingType">
+                <option value="underground">地下车库</option>
+                <option value="ground">地面车位</option>
+                <option value="mechanical">机械车位</option>
+                <option value="open">露天车位</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>📏 车位尺寸</label>
+            <select id="parkingSize">
+                <option value="standard">标准车位（5m×2.5m）</option>
+                <option value="large">大型车位（6m×3m）</option>
+                <option value="compact">紧凑型车位（4.5m×2.3m）</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>💰 期望价格（元/小时）</label>
+            <input type="number" id="hourlyRate" placeholder="例如：5" min="1" max="50" value="5">
+            <div class="hint">建议价格：3-8 元/小时，平台会自动推荐周边价格</div>
+        </div>
+    </div>
+    
+    <!-- 可共享时间 -->
+    <div class="card">
+        <h2><span class="icon">⏰</span> 可共享时段</h2>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:12px">选择您车位空闲的时间段（可多选）</p>
+        
+        <div class="time-slots" id="timeSlots">
+            <div class="time-slot" data-time="morning" onclick="selectTimeSlot(this)">
+                <div class="time">🌅 上午</div>
+                <div class="desc">8:00 - 12:00</div>
+            </div>
+            <div class="time-slot" data-time="afternoon" onclick="selectTimeSlot(this)">
+                <div class="time">☀️ 下午</div>
+                <div class="desc">13:00 - 18:00</div>
+            </div>
+            <div class="time-slot" data-time="evening" onclick="selectTimeSlot(this)">
+                <div class="time">🌆 傍晚</div>
+                <div class="desc">18:00 - 22:00</div>
+            </div>
+            <div class="time-slot" data-time="night" onclick="selectTimeSlot(this)">
+                <div class="time">🌙 夜间</div>
+                <div class="desc">22:00 - 次日 8:00</div>
+            </div>
+            <div class="time-slot" data-time="weekend" onclick="selectTimeSlot(this)">
+                <div class="time">📅 周末</div>
+                <div class="desc">周六日全天</div>
+            </div>
+            <div class="time-slot" data-time="holiday" onclick="selectTimeSlot(this)">
+                <div class="time">🎉 节假日</div>
+                <div class="desc">法定节假日</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 可共享日期 -->
+    <div class="card">
+        <h2><span class="icon">📆</span> 可共享星期</h2>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:12px">选择可以共享的星期（可多选）</p>
+        
+        <div class="weekday-grid" id="weekdayGrid">
+            <div class="weekday-btn" data-day="1" onclick="selectWeekday(this)">
+                <div class="day">周一</div>
+                <div class="label">Mon</div>
+            </div>
+            <div class="weekday-btn" data-day="2" onclick="selectWeekday(this)">
+                <div class="day">周二</div>
+                <div class="label">Tue</div>
+            </div>
+            <div class="weekday-btn" data-day="3" onclick="selectWeekday(this)">
+                <div class="day">周三</div>
+                <div class="label">Wed</div>
+            </div>
+            <div class="weekday-btn" data-day="4" onclick="selectWeekday(this)">
+                <div class="day">周四</div>
+                <div class="label">Thu</div>
+            </div>
+            <div class="weekday-btn" data-day="5" onclick="selectWeekday(this)">
+                <div class="day">周五</div>
+                <div class="label">Fri</div>
+            </div>
+            <div class="weekday-btn" data-day="6" onclick="selectWeekday(this)">
+                <div class="day">周六</div>
+                <div class="label">Sat</div>
+            </div>
+            <div class="weekday-btn" data-day="0" onclick="selectWeekday(this)">
+                <div class="day">周日</div>
+                <div class="label">Sun</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 补充信息 -->
+    <div class="card">
+        <h2><span class="icon">📝</span> 补充信息</h2>
+        
+        <div class="form-group">
+            <label>📱 联系电话</label>
+            <input type="tel" id="phone" placeholder="用于接收预订通知" maxlength="11">
+        </div>
+        
+        <div class="form-group">
+            <label>💬 备注说明</label>
+            <textarea id="notes" placeholder="例如：车位宽敞，SUV 也能停；有充电桩；需要自备停车卡等"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="agreeTerms" style="width:auto;margin-right:8px">
+                我同意《共享车位服务协议》
+            </label>
+        </div>
+    </div>
+    
+    <!-- 提交按钮 -->
+    <button class="submit-btn" onclick="submitParking()">✅ 提交车位登记</button>
+    
+    <!-- 已登记车位列表 -->
+    <div class="card" style="margin-top:20px">
+        <h2><span class="icon">📋</span> 我已登记的车位</h2>
+        <div class="parking-list" id="parkingList">
+            <div style="text-align:center;padding:30px;color:#999">
+                暂无登记车位<br>
+                <span style="font-size:0.85rem">填写上方表单提交后，您的车位将显示在这里</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 存储已选的时间段和星期
+let selectedTimeSlots = [];
+let selectedWeekdays = [];
+
+// 选择时间段
+function selectTimeSlot(element) {
+    const time = element.dataset.time;
+    
+    if (selectedTimeSlots.includes(time)) {
+        // 取消选择
+        selectedTimeSlots = selectedTimeSlots.filter(t => t !== time);
+        element.classList.remove('selected');
+    } else {
+        // 添加选择
+        selectedTimeSlots.push(time);
+        element.classList.add('selected');
+    }
+    
+    console.log('已选时间段:', selectedTimeSlots);
+}
+
+// 选择星期
+function selectWeekday(element) {
+    const day = parseInt(element.dataset.day);
+    
+    if (selectedWeekdays.includes(day)) {
+        // 取消选择
+        selectedWeekdays = selectedWeekdays.filter(d => d !== day);
+        element.classList.remove('selected');
+    } else {
+        // 添加选择
+        selectedWeekdays.push(day);
+        element.classList.add('selected');
+    }
+    
+    console.log('已选星期:', selectedWeekdays);
+}
+
+// 提交车位登记
+function submitParking() {
+    // 获取表单数据
+    const communityName = document.getElementById('communityName').value.trim();
+    const parkingLocation = document.getElementById('parkingLocation').value.trim();
+    const parkingType = document.getElementById('parkingType').value;
+    const parkingSize = document.getElementById('parkingSize').value;
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const phone = document.getElementById('phone').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    const agreeTerms = document.getElementById('agreeTerms').checked;
+    
+    // 验证必填项
+    if (!communityName) {
+        showToast('❌ 请填写小区名称');
+        document.getElementById('communityName').focus();
+        return;
+    }
+    
+    if (!parkingLocation) {
+        showToast('❌ 请填写具体位置');
+        document.getElementById('parkingLocation').focus();
+        return;
+    }
+    
+    if (!phone || phone.length !== 11) {
+        showToast('❌ 请填写 11 位手机号码');
+        document.getElementById('phone').focus();
+        return;
+    }
+    
+    if (!agreeTerms) {
+        showToast('❌ 请先同意服务协议');
+        return;
+    }
+    
+    if (selectedTimeSlots.length === 0) {
+        showToast('⚠️ 请至少选择一个可共享时段');
+        return;
+    }
+    
+    if (selectedWeekdays.length === 0) {
+        showToast('⚠️ 请至少选择一个可共享星期');
+        return;
+    }
+    
+    // 创建车位对象
+    const parking = {
+        id: Date.now(),
+        communityName,
+        parkingLocation,
+        parkingType,
+        parkingSize,
+        hourlyRate,
+        phone,
+        notes,
+        timeSlots: selectedTimeSlots,
+        weekdays: selectedWeekdays,
+        status: 'active',
+        createdAt: new Date().toISOString()
+    };
+    
+    // 保存到 localStorage
+    const parkings = JSON.parse(localStorage.getItem('shared_parkings') || '[]');
+    parkings.push(parking);
+    localStorage.setItem('shared_parkings', JSON.stringify(parkings));
+    
+    // 显示成功提示
+    showToast('✅ 车位登记成功！');
+    
+    // 刷新列表
+    loadParkingList();
+    
+    // 更新统计
+    updateStats();
+    
+    // 重置表单
+    resetForm();
+}
+
+// 加载车位列表
+function loadParkingList() {
+    const parkings = JSON.parse(localStorage.getItem('shared_parkings') || '[]');
+    const listEl = document.getElementById('parkingList');
+    
+    if (parkings.length === 0) {
+        listEl.innerHTML = `
+            <div style="text-align:center;padding:30px;color:#999">
+                暂无登记车位<br>
+                <span style="font-size:0.85rem">填写上方表单提交后，您的车位将显示在这里</span>
+            </div>
+        `;
+        return;
+    }
+    
+    listEl.innerHTML = parkings.map(p => {
+        const timeSlotNames = {
+            morning: '上午',
+            afternoon: '下午',
+            evening: '傍晚',
+            night: '夜间',
+            weekend: '周末',
+            holiday: '节假日'
+        };
+        
+        const weekdayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        
+        return `
+            <div class="parking-item">
+                <div class="header">
+                    <div class="title">📍 ${p.communityName} - ${p.parkingLocation}</div>
+                    <div class="status ${p.status}">${p.status === 'active' ? '🟢 可共享' : '🟡 审核中'}</div>
+                </div>
+                <div class="info"><span class="label">类型：</span>${getTypeName(p.parkingType)} | ${getSizeName(p.parkingSize)}</div>
+                <div class="info"><span class="label">价格：</span>¥${p.hourlyRate}/小时</div>
+                <div class="info"><span class="label">时段：</span>${p.timeSlots.map(t => timeSlotNames[t]).join('、')}</div>
+                <div class="info"><span class="label">星期：</span>${p.weekdays.map(d => weekdayNames[d]).join('、')}</div>
+                ${p.notes ? `<div class="info"><span class="label">备注：</span>${p.notes}</div>` : ''}
+                <div class="time-tags">
+                    <span class="time-tag">预计月收益：¥${calculateEarnings(p.hourlyRate, p.timeSlots.length)}</span>
+                    <span class="time-tag">登记时间：${new Date(p.createdAt).toLocaleDateString('zh-CN')}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 更新统计
+function updateStats() {
+    const parkings = JSON.parse(localStorage.getItem('shared_parkings') || '[]');
+    const activeCount = parkings.filter(p => p.status === 'active').length;
+    const totalEarnings = parkings.reduce((sum, p) => sum + calculateEarnings(p.hourlyRate, p.timeSlots.length), 0);
+    
+    document.getElementById('totalCount').textContent = parkings.length;
+    document.getElementById('activeCount').textContent = activeCount;
+    document.getElementById('earningsCount').textContent = '¥' + totalEarnings;
+}
+
+// 计算预计收益
+function calculateEarnings(hourlyRate, timeSlotCount) {
+    // 简化计算：每小时 × 8 小时 × 22 天 × 利用率
+    const dailyHours = timeSlotCount * 4; // 每个时段约 4 小时
+    const monthlyHours = dailyHours * 22;
+    const utilization = 0.6; // 60% 利用率
+    return Math.round(hourlyRate * monthlyHours * utilization);
+}
+
+// 获取类型名称
+function getTypeName(type) {
+    const names = {
+        underground: '地下车库',
+        ground: '地面车位',
+        mechanical: '机械车位',
+        open: '露天车位'
+    };
+    return names[type] || type;
+}
+
+// 获取尺寸名称
+function getSizeName(size) {
+    const names = {
+        standard: '标准车位',
+        large: '大型车位',
+        compact: '紧凑型'
+    };
+    return names[size] || size;
+}
+
+// 重置表单
+function resetForm() {
+    document.getElementById('communityName').value = '';
+    document.getElementById('parkingLocation').value = '';
+    document.getElementById('hourlyRate').value = '5';
+    document.getElementById('phone').value = '';
+    document.getElementById('notes').value = '';
+    document.getElementById('agreeTerms').checked = false;
+    
+    // 重置选择
+    selectedTimeSlots = [];
+    selectedWeekdays = [];
+    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.weekday-btn').forEach(el => el.classList.remove('selected'));
+}
+
+// 显示 Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    loadParkingList();
+    updateStats();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 心情地图 - 功能快速测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #2d1b4e, #4a1c40);
+            color: white;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #F9B572, #E87A5D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .test-item {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-item .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .test-item .status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .test-item .status.pass {
+            background: #10b981;
+            color: white;
+        }
+        .test-item .status.fail {
+            background: #ef4444;
+            color: white;
+        }
+        .test-item .status.waiting {
+            background: #f59e0b;
+            color: white;
+        }
+        .test-btn {
+            background: #F9B572;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        .test-btn:hover {
+            background: #E87A5D;
+            transform: scale(1.05);
+        }
+        .summary {
+            background: linear-gradient(135deg, rgba(249,181,114,0.2), rgba(232,122,93,0.15));
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .summary h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .summary-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #F9B572, #E87A5D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F9B572, #E87A5D);
+            transition: width 0.3s;
+            border-radius: 6px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .action-btn {
+            background: linear-gradient(135deg, #F9B572, #E87A5D);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(249,181,114,0.3);
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(249,181,114,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 心情地图 - 功能快速测试</h1>
+        
+        <!-- 总览 -->
+        <div class="summary">
+            <h2>📊 测试总览</h2>
+            <div class="summary-stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">总文件数</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="passCount">0</div>
+                    <div class="stat-label">通过</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="failCount">0</div>
+                    <div class="stat-label">失败</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="passRate">0%</div>
+                    <div class="stat-label">通过率</div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="runAllTests()">🚀 运行全部测试</button>
+                <button class="action-btn" onclick="openNavigationCenter()">🗺️ 打开导航中心</button>
+                <button class="action-btn" onclick="openMainApp()">🎯 打开主 APP</button>
+            </div>
+        </div>
+
+        <!-- 核心功能测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span>🎯</span>
+                <span>核心功能文件</span>
+            </div>
+            <div class="test-grid" id="coreFiles"></div>
+        </div>
+
+        <!-- 工具文件测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span>🔧</span>
+                <span>工具文件</span>
+            </div>
+            <div class="test-grid" id="toolFiles"></div>
+        </div>
+
+        <!-- 配置测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span>⚙️</span>
+                <span>配置文件</span>
+            </div>
+            <div class="test-grid" id="configFiles"></div>
+        </div>
+
+        <!-- 文档测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <span>📄</span>
+                <span>文档文件</span>
+            </div>
+            <div class="test-grid" id="docFiles"></div>
+        </div>
+    </div>
+
+    <script>
+        // 文件列表
+        const files = {
+            core: [
+                { name: '心情地图 - 导航中心.html', required: true, desc: '统一导航入口' },
+                { name: 'business-pro-rich-routes.html', required: true, desc: '主 APP-12 情绪路线' },
+                { name: '心情地图 - 统一导航.html', required: true, desc: '5 合 1 导航' },
+                { name: '门票预订 - 完整版.html', required: true, desc: '门票系统' },
+                { name: 'points-mall-app.html', required: true, desc: '积分商城' },
+                { name: 'wishing-pool.html', required: true, desc: '许愿池' },
+                { name: 'knowledge-base.html', required: true, desc: '知识库' },
+                { name: 'poi-detail.html', required: true, desc: 'POI 详情' },
+                { name: '游玩指引 - 用户留存系统.html', required: true, desc: '用户留存' }
+            ],
+            tools: [
+                { name: 'merchant-partnership.html', required: false, desc: '商户合作' },
+                { name: 'admin-dashboard.html', required: false, desc: '管理后台' },
+                { name: '小红书网红店搜索.html', required: false, desc: '小红书搜索' },
+                { name: 'demo-judge-fixed.html', required: true, desc: '评委演示' },
+                { name: '高德地图能力诊断.html', required: false, desc: '高德诊断' },
+                { name: '停车引导 - 极简版.html', required: false, desc: '停车引导' },
+                { name: 'mobile-lite.html', required: false, desc: '轻量版 16KB' }
+            ],
+            config: [
+                { name: 'manifest.json', required: true, desc: 'PWA manifest' },
+                { name: 'sw.js', required: true, desc: 'Service Worker' },
+                { name: 'icons/', required: false, desc: 'PWA 图标' }
+            ],
+            docs: [
+                { name: '推广策略.md', required: false, desc: '推广方案' },
+                { name: '青年用户体验地图.md', required: false, desc: '用户画像' },
+                { name: 'PWA-APP 安装指南.md', required: false, desc: 'PWA 指南' },
+                { name: '提交前检查清单.md', required: false, desc: '检查清单' }
+            ]
+        };
+
+        let testResults = {
+            total: 0,
+            pass: 0,
+            fail: 0
+        };
+
+        // 测试文件是否存在
+        async function testFileExists(filename, isDir = false) {
+            try {
+                const response = await fetch(filename, { method: isDir ? 'HEAD' : 'GET' });
+                return response.ok || response.status === 304;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 创建测试项
+        function createTestItem(file, category) {
+            const item = document.createElement('div');
+            item.className = 'test-item';
+            item.id = `test-${category}-${file.name.replace(/\./g, '-')}`;
+            
+            item.innerHTML = `
+                <div>
+                    <div class="name">${file.name}</div>
+                    <div style="font-size:0.75rem;opacity:0.7;margin-top:4px;">${file.desc}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="status waiting" id="status-${category}-${file.name.replace(/\./g, '-')}">待测试</span>
+                    <button class="test-btn" onclick="testSingleFile('${category}', '${file.name}', ${file.required})">测试</button>
+                </div>
+            `;
+            
+            return item;
+        }
+
+        // 渲染测试列表
+        function renderTestList() {
+            const coreContainer = document.getElementById('coreFiles');
+            const toolContainer = document.getElementById('toolFiles');
+            const configContainer = document.getElementById('configFiles');
+            const docContainer = document.getElementById('docFiles');
+
+            files.core.forEach(file => coreContainer.appendChild(createTestItem(file, 'core')));
+            files.tools.forEach(file => toolContainer.appendChild(createTestItem(file, 'tool')));
+            files.config.forEach(file => configContainer.appendChild(createTestItem(file, 'config')));
+            files.docs.forEach(file => docContainer.appendChild(createTestItem(file, 'doc')));
+
+            testResults.total = [...files.core, ...files.tools, ...files.config, ...files.docs].length;
+            document.getElementById('totalCount').textContent = testResults.total;
+        }
+
+        // 测试单个文件
+        async function testSingleFile(category, filename, isRequired) {
+            const statusEl = document.getElementById(`status-${category}-${filename.replace(/\./g, '-')}`);
+            const isDir = filename.endsWith('/');
+            
+            statusEl.textContent = '测试中...';
+            statusEl.className = 'status waiting';
+
+            const exists = await testFileExists(filename, isDir);
+            
+            if (exists) {
+                statusEl.textContent = '✅ 通过';
+                statusEl.className = 'status pass';
+                testResults.pass++;
+            } else {
+                if (isRequired) {
+                    statusEl.textContent = '❌ 缺失';
+                    statusEl.className = 'status fail';
+                } else {
+                    statusEl.textContent = '⚠️ 可选';
+                    statusEl.className = 'status waiting';
+                }
+                testResults.fail++;
+            }
+
+            updateSummary();
+        }
+
+        // 运行全部测试
+        async function runAllTests() {
+            testResults.pass = 0;
+            testResults.fail = 0;
+
+            // 测试所有文件
+            for (const category of ['core', 'tool', 'config', 'doc']) {
+                const fileList = files[category];
+                for (const file of fileList) {
+                    await testSingleFile(category, file.name, file.required);
+                }
+            }
+
+            updateSummary();
+        }
+
+        // 更新总览
+        function updateSummary() {
+            document.getElementById('passCount').textContent = testResults.pass;
+            document.getElementById('failCount').textContent = testResults.fail;
+            
+            const rate = testResults.total > 0 
+                ? Math.round((testResults.pass / testResults.total) * 100) 
+                : 0;
+            document.getElementById('passRate').textContent = rate + '%';
+            document.getElementById('progressBar').style.width = rate + '%';
+        }
+
+        // 打开页面
+        function openNavigationCenter() {
+            window.location.href = '心情地图 - 导航中心.html';
+        }
+
+        function openMainApp() {
+            window.location.href = 'business-pro-rich-routes.html';
+        }
+
+        // 初始化
+        renderTestList();
+        console.log('🧪 心情地图 - 功能测试工具已就绪');
+        console.log('点击"运行全部测试"开始自动检测');
+    </script>
+</body>
+</html>

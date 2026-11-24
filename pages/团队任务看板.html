@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 团队任务看板</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:1400px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2.5rem;margin-bottom:10px}
+        header p{opacity:0.9}
+        .board{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+        .column{background:rgba(255,255,255,0.95);border-radius:16px;padding:20px;min-height:600px}
+        .column h2{font-size:1.2rem;margin-bottom:15px;padding-bottom:10px;border-bottom:3px solid}
+        .column.todo h2{border-color:#faad14}
+        .column.progress h2{border-color:#1890ff}
+        .column.review h2{border-color:#722ed1}
+        .column.done h2{border-color:#52c41a}
+        .column.blocked h2{border-color:#f5222d}
+        .task-card{background:white;border-radius:8px;padding:15px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;transition:all 0.2s}
+        .task-card:hover{transform:translateY(-3px);box-shadow:0 4px 15px rgba(0,0,0,0.15)}
+        .task-card .tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;margin-bottom:8px}
+        .tag-urgent{background:#fff2f0;color:#f5222d}
+        .tag-important{background:#fffbe6;color:#faad14}
+        .tag-normal{background:#e6f7ff;color:#1890ff}
+        .task-card .title{font-size:0.95rem;font-weight:600;margin-bottom:8px;color:#333}
+        .task-card .desc{font-size:0.8rem;color:#666;margin-bottom:10px;line-height:1.4}
+        .task-card .meta{display:flex;justify-content:space-between;align-items:center;font-size:0.75rem}
+        .task-card .assignee{background:#f5f5f5;padding:3px 8px;border-radius:4px;color:#666}
+        .task-card .deadline{color:#f5222d;font-weight:600}
+        .task-card .deadline.passed{background:#fff2f0;padding:2px 6px;border-radius:4px}
+        .add-btn{width:100%;padding:12px;background:#f5f5f5;border:2px dashed #d9d9d9;border-radius:8px;font-size:0.9rem;color:#999;cursor:pointer;transition:all 0.2s}
+        .add-btn:hover{background:#e6e6e6;border-color:#999;color:#666}
+        .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-bottom:30px}
+        .stat-card{background:white;border-radius:12px;padding:20px;text-align:center}
+        .stat-card .number{font-size:2rem;font-weight:700;margin-bottom:5px}
+        .stat-card .label{font-size:0.85rem;color:#666}
+        .stat-card.todo .number{color:#faad14}
+        .stat-card.progress .number{color:#1890ff}
+        .stat-card.review .number{color:#722ed1}
+        .stat-card.done .number{color:#52c41a}
+        .stat-card.blocked .number{color:#f5222d}
+        .team-members{background:white;border-radius:12px;padding:20px;margin-bottom:30px;display:flex;gap:15px;flex-wrap:wrap}
+        .member{display:flex;align-items:center;gap:10px;background:#f9f9f9;padding:10px 15px;border-radius:8px}
+        .member .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center;font-weight:600}
+        .member .info .name{font-weight:600;color:#333}
+        .member .info .role{font-size:0.75rem;color:#999}
+        .toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .btn{background:white;color:#333;border:2px solid #e0e0e0;padding:10px 20px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .btn:hover{background:#f5f5f5}
+        .btn-primary{background:#667eea;color:white;border-color:#667eea}
+        .btn-primary:hover{background:#5568d3}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>📋 心情地图 - 团队任务看板</h1>
+        <p>黑客松冲刺 · 5 人协作 · 4 月 25 日提交</p>
+    </header>
+
+    <!-- 团队信息 -->
+    <div class="team-members">
+        <div class="member">
+            <div class="avatar">队</div>
+            <div class="info">
+                <div class="name">王者归来（队长）</div>
+                <div class="role">产品经理 + 演示</div>
+            </div>
+        </div>
+        <div class="member">
+            <div class="avatar" style="background:linear-gradient(135deg,#52c41a,#73d13d)">A</div>
+            <div class="info">
+                <div class="name">队员 A</div>
+                <div class="role">前端开发 1（主 APP）</div>
+            </div>
+        </div>
+        <div class="member">
+            <div class="avatar" style="background:linear-gradient(135deg,#1890ff,#40a9ff)">B</div>
+            <div class="info">
+                <div class="name">队员 B</div>
+                <div class="role">前端开发 2（停车/导航）</div>
+            </div>
+        </div>
+        <div class="member">
+            <div class="avatar" style="background:linear-gradient(135deg,#722ed1,#9254de)">C</div>
+            <div class="info">
+                <div class="name">队员 C</div>
+                <div class="role">后端/AI 集成</div>
+            </div>
+        </div>
+        <div class="member">
+            <div class="avatar" style="background:linear-gradient(135deg,#faad14,#ffc53d)">D</div>
+            <div class="info">
+                <div class="name">队员 D</div>
+                <div class="role">设计/文档</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计 -->
+    <div class="stats">
+        <div class="stat-card todo">
+            <div class="number" id="todoCount">3</div>
+            <div class="label">📋 待办</div>
+        </div>
+        <div class="stat-card progress">
+            <div class="number" id="progressCount">5</div>
+            <div class="label">🚧 进行中</div>
+        </div>
+        <div class="stat-card review">
+            <div class="number" id="reviewCount">0</div>
+            <div class="label">👀 审核中</div>
+        </div>
+        <div class="stat-card done">
+            <div class="number" id="doneCount">8</div>
+            <div class="label">✅ 已完成</div>
+        </div>
+        <div class="stat-card blocked">
+            <div class="number" id="blockedCount">1</div>
+            <div class="label">❌ 受阻</div>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <button class="btn btn-primary" onclick="refreshBoard()">🔄 刷新看板</button>
+        <button class="btn" onclick="exportToMarkdown()">📥 导出 Markdown</button>
+        <button class="btn" onclick="printBoard()">🖨️ 打印看板</button>
+        <button class="btn" onclick="showInstructions()">❓ 使用说明</button>
+    </div>
+
+    <!-- 看板 -->
+    <div class="board">
+        <!-- 待办 -->
+        <div class="column todo">
+            <h2>📋 待办</h2>
+            <div id="todoTasks">
+                <div class="task-card" onclick="moveTask('todo','progress')">
+                    <span class="tag tag-important">重要</span>
+                    <div class="title">PPT 最终美化</div>
+                    <div class="desc">调整配色、添加动画、优化字体</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 D</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('todo','progress')">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">用户手册完善</div>
+                    <div class="desc">补充截图和详细步骤说明</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 D</span>
+                        <span class="deadline">明天 12:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('todo','progress')">
+                    <span class="tag tag-important">重要</span>
+                    <div class="title">路演彩排</div>
+                    <div class="desc">全体参与，至少 3 次完整彩排</div>
+                    <div class="meta">
+                        <span class="assignee">👤 全体</span>
+                        <span class="deadline">明天 20:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 进行中 -->
+        <div class="column progress">
+            <h2>🚧 进行中</h2>
+            <div id="progressTasks">
+                <div class="task-card" onclick="moveTask('progress','review')">
+                    <span class="tag tag-urgent">紧急</span>
+                    <div class="title">主 APP 功能测试</div>
+                    <div class="desc">测试 12 种情绪路线生成，确保无 bug</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 A</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('progress','review')">
+                    <span class="tag tag-urgent">紧急</span>
+                    <div class="title">停车引导优化</div>
+                    <div class="desc">确保一键导航正常，地图显示正确</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 B</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('progress','review')">
+                    <span class="tag tag-urgent">紧急</span>
+                    <div class="title">AI 对话调试</div>
+                    <div class="desc">测试豆包 API 连接，优化回复质量</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 C</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('progress','review')">
+                    <span class="tag tag-important">重要</span>
+                    <div class="title">积分商城测试</div>
+                    <div class="desc">测试 4 个页面切换和 localStorage</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 A</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+                <div class="task-card" onclick="moveTask('progress','review')">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">高德地图能力诊断</div>
+                    <div class="desc">确保所有地图功能正常</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 C</span>
+                        <span class="deadline">今天 22:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 审核中 -->
+        <div class="column review">
+            <h2>👀 审核中</h2>
+            <div id="reviewTasks">
+                <!-- 暂无任务 -->
+                <div style="text-align:center;color:#999;padding:40px 20px">
+                    暂无任务待审核
+                </div>
+            </div>
+        </div>
+
+        <!-- 已完成 -->
+        <div class="column done">
+            <h2>✅ 已完成</h2>
+            <div id="doneTasks">
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">主 APP 修复版</div>
+                    <div class="desc">创建 business-pro-fixed.html</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 A</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">停车引导极简版</div>
+                    <div class="desc">创建停车引导 - 极简版.html</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 B</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">全局导航中心</div>
+                    <div class="desc">创建统一导航系统</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 B</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-important">重要</span>
+                    <div class="title">评委演示版</div>
+                    <div class="desc">创建 demo-judge-fixed.html + 二维码</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队长</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">API 配置工具</div>
+                    <div class="desc">创建演示配置工具.html</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 C</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">团队协作指南</div>
+                    <div class="desc">创建协作文档和任务看板</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队长</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">高德地图诊断工具</div>
+                    <div class="desc">创建能力诊断页面</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 C</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+                <div class="task-card">
+                    <span class="tag tag-normal">常规</span>
+                    <div class="title">PPT 初稿</div>
+                    <div class="desc">完成路演 PPT 框架</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 D</span>
+                        <span class="deadline">✅ 已完成</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 受阻 -->
+        <div class="column blocked">
+            <h2>❌ 受阻</h2>
+            <div id="blockedTasks">
+                <div class="task-card" onclick="moveTask('blocked','progress')">
+                    <span class="tag tag-urgent">紧急</span>
+                    <div class="title">豆包 API 注册</div>
+                    <div class="desc">需要实名认证，等待用户确认</div>
+                    <div class="meta">
+                        <span class="assignee">👤 队员 C</span>
+                        <span class="deadline">⏳ 等待中</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 移动任务
+function moveTask(from, to) {
+    const task = event.currentTarget;
+    const targetColumn = document.getElementById(to + 'Tasks');
+    const sourceColumn = document.getElementById(from + 'Tasks');
+    
+    // 移动到目标列
+    targetColumn.appendChild(task);
+    
+    // 如果源列没有任务了，添加提示
+    if (sourceColumn.children.length === 0) {
+        if (from === 'review') {
+            sourceColumn.innerHTML = '<div style="text-align:center;color:#999;padding:40px 20px">暂无任务待审核</div>';
+        }
+    } else {
+        // 移除提示（如果有）
+        const emptyHint = sourceColumn.querySelector('div[style*="text-align:center"]');
+        if (emptyHint) emptyHint.remove();
+    }
+    
+    updateStats();
+}
+
+// 更新统计
+function updateStats() {
+    document.getElementById('todoCount').textContent = document.getElementById('todoTasks').children.length;
+    document.getElementById('progressCount').textContent = document.getElementById('progressTasks').children.length;
+    document.getElementById('reviewCount').textContent = document.getElementById('reviewTasks').children.length - (document.querySelector('#reviewTasks div[style*="text-align:center"]') ? 1 : 0);
+    document.getElementById('doneCount').textContent = document.getElementById('doneTasks').children.length;
+    document.getElementById('blockedCount').textContent = document.getElementById('blockedTasks').children.length;
+}
+
+// 刷新看板
+function refreshBoard() {
+    location.reload();
+}
+
+// 导出 Markdown
+function exportToMarkdown() {
+    alert('📥 导出功能：可以将看板内容复制到飞书文档或 Notion');
+}
+
+// 打印看板
+function printBoard() {
+    window.print();
+}
+
+// 使用说明
+function showInstructions() {
+    alert(`📋 使用说明：
+
+1. 点击任务卡片可以移动状态
+   - 待办 → 进行中 → 审核中 → 已完成
+   - 受阻的任务可以单独放在"受阻"列
+
+2. 每日站会更新看板
+   - 早上 9:00 更新今日任务
+   - 晚上 22:00 总结完成情况
+
+3. 颜色说明
+   - 红色标签：紧急（今天截止）
+   - 黄色标签：重要（明天截止）
+   - 蓝色标签：常规
+
+4. 团队协作
+   - 队长负责分配任务
+   - 队员完成后点击移动到"已完成"
+   - 遇到问题移动到"受阻"并@负责人`);
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    updateStats();
+    showInstructions();
+});
+</script>
+</body>
+</html>

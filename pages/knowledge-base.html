@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华知识�?/title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:20px}
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+        .header-top{display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto}
+        .back-btn{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:8px}
+        .header h1{font-size:20px;font-weight:600;text-align:center}
+        .tabs{display:flex;gap:8px;padding:12px 16px;max-width:600px;margin:0 auto;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+        .tab{padding:8px 16px;background:#fff;border-radius:20px;font-size:14px;color:#374151;cursor:pointer;border:2px solid #e5e7eb;flex-shrink:0}
+        .tab.active{background:#667eea;color:#fff;border-color:#667eea}
+        .content{max-width:600px;margin:0 auto;padding:16px}
+        .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+        .card-title{font-size:16px;font-weight:600;color:#1f2937;margin-bottom:8px}
+        .card-text{font-size:14px;color:#6b7280;line-height:1.6}
+        .card-image{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:12px;background:#e5e7eb}
+        .tag{display:inline-block;padding:4px 8px;background:#f3f4f6;border-radius:4px;font-size:12px;color:#6b7280;margin-right:6px;margin-bottom:6px}
+        .tag.highlight{background:#667eea;color:#fff}
+        .list{list-style:none}
+        .list-item{padding:12px;border-bottom:1px solid #f3f4f6}
+        .list-item:last-child{border-bottom:none}
+        .list-title{font-size:14px;font-weight:500;color:#1f2937;margin-bottom:4px}
+        .list-desc{font-size:12px;color:#9ca3af}
+        .emoji{font-size:24px;margin-right:8px}
+        .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:6px;font-size:12px;display:none;z-index:1000}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <button class="back-btn" onclick="window.history.back()">�?/button>
+            <h1>📚 龙华知识�?/h1>
+            <div style="width:40px"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-category="history">📜 历史</div>
+        <div class="tab" data-category="culture">🎭 人文</div>
+        <div class="tab" data-category="food">🍜 美食</div>
+        <div class="tab" data-category="photo">📸 拍照</div>
+        <div class="tab" data-category="easter">🎁 彩蛋</div>
+        <div class="tab" data-category="events">🎪 活动</div>
+    </div>
+
+    <div class="content" id="content"></div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const knowledge = {
+            history: [
+                {
+                    title: '龙华�?- 千年古刹',
+                    emoji: '🏯',
+                    content: '龙华寺始建于三国吴赤乌五年（公元 242 年），距今已�?1780 多年历史，是上海地区历史最久、规模最大的古刹。\n\n龙华寺名称来源于佛经中弥勒菩萨在龙华树下成佛的典故。寺院占地面�?2 万余平方米，建筑面积 5219 平方米，按伽蓝七堂制布局。\n\n主要建筑有弥勒殿、天王殿、大雄宝殿、三圣殿、方丈室、藏经楼等。大雄宝殿内供奉的三尊大佛，分别是释迦牟尼佛、药师佛和阿弥陀佛�?,
+                    tags: ['三国时期', '上海最�?, '佛教圣地'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Longhua_Temple_Shanghai.jpg/640px-Longhua_Temple_Shanghai.jpg'
+                },
+                {
+                    title: '龙华�?- 宋代古塔',
+                    emoji: '🗼',
+                    content: '龙华塔位于龙华寺前，始建于北宋太平兴国二年（公元 977 年），距今已�?1000 多年历史。\n\n塔高 40.64 米，七层八角，砖木结构。每层有平座栏杆，可登临远眺。塔身逐层收分，造型优美，是上海地区保存最完好的宋代古塔。\n\n龙华塔在历史上多次修缮，最近一次大修在 1954 年，基本保持了宋代建筑的原貌�?,
+                    tags: ['北宋', '七层八角', '上海地标'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Longhua_Pagoda_Shanghai.jpg/640px-Longhua_Pagoda_Shanghai.jpg'
+                },
+                {
+                    title: '龙华烈士陵园',
+                    emoji: '🎖�?,
+                    content: '龙华烈士陵园是国家级爱国主义教育基地，原为国民党淞沪警备司令部旧址和革命烈士就义地。\n\n园区占地 21 万平方米，分为陵园纪念区、革命烈士墓区、历史遗址区等。主要建筑有纪念馆、纪念碑、烈士墓等。\n\n这里长眠着 1927-1949 年间在此牺牲�?1000 多位革命烈士，包�?龙华二十四烈�?等著名革命先驱�?,
+                    tags: ['红色教育', '爱国主义', '革命遗址'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Longhua_Martyrs_Memorial_Park.jpg/640px-Longhua_Martyrs_Memorial_Park.jpg'
+                }
+            ],
+            culture: [
+                {
+                    title: '龙华庙会 - 非物质文化遗�?,
+                    emoji: '🎪',
+                    content: '龙华庙会是上海地区最具影响力的传统庙会之一，起源于明代，距今已�?400 多年历史。\n\n每年农历三月初三（龙华节）期间举办，为期 15 天。庙会期间有舞龙舞狮、戏曲表演、民俗展示、特色小吃等活动。\n\n2008 年，龙华庙会被列入国家级非物质文化遗产名录�?,
+                    tags: ['非遗', '传统民俗', '三月�?],
+                    highlight: true
+                },
+                {
+                    title: '塔影空间 - 文艺新地�?,
+                    emoji: '�?,
+                    content: '塔影空间是龙华地区的网红文艺地标，位于龙华塔附近的百年老建筑内。\n\n这里集咖啡馆、书店、艺术展览于一体，可以边喝咖啡边欣赏龙华塔美景。建筑风格融合了海派文化和现代设计，是年轻人拍照打卡的热门地点。\n\n推荐：塔影拿铁、龙华主题文创产品�?,
+                    tags: ['网红打卡', '文艺咖啡', '海派文化']
+                },
+                {
+                    title: '龙华晚钟 - 新年传统',
+                    emoji: '🔔',
+                    content: '每年除夕夜，龙华寺都会举�?龙华晚钟"迎新活动，这是上海市民过年的传统习俗之一。\n\n�?108 响钟声，寓意消除 108 种烦恼，祈求新年平安吉祥。活动吸引上万市民前来祈福，场面盛大。\n\n龙华晚钟已成为上海新年标志性活动之一，被媒体誉为"上海第一�?�?,
+                    tags: ['除夕', '祈福', '传统习俗']
+                }
+            ],
+            food: [
+                {
+                    title: '龙华素斋 - 百年老字�?,
+                    emoji: '🍜',
+                    content: '龙华素斋始于清代，距今已�?100 多年历史，是上海最著名的素菜馆之一。\n\n招牌菜：素鸭、素鹅、罗汉斋、素月饼等。采用传统工艺，以豆制品、菌菇、蔬菜为原料，制作出媲美荤菜的口感和味道。\n\n人均消费�?0-80 元\n推荐：素鸭面、罗汉斋、素月饼（中秋限定）',
+                    tags: ['百年老店', '素食', '老字�?],
+                    price: '人均 50-80 �?,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Vegetarian_duck_Shanghai.jpg/640px-Vegetarian_duck_Shanghai.jpg'
+                },
+                {
+                    title: '龙华老街小吃',
+                    emoji: '🥟',
+                    content: '龙华老街是上海传统美食聚集地，这里有各种地道小吃：\n\n�?小杨生煎：皮薄汁多，底部金黄酥脆\n�?南翔小笼：皮薄馅大，汤汁鲜美\n�?蟹壳黄：酥皮层层，咸甜可选\n�?豆腐花：嫩滑爽口，配榨菜虾皮\n\n人均消费�?0-40 元\n最佳时间：早上 8-10 点（最正宗�?,
+                    tags: ['地道小吃', '上海味道', '平价美食'],
+                    price: '人均 20-40 �?,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Xiaolongbao_shanghai.jpg/640px-Xiaolongbao_shanghai.jpg'
+                },
+                {
+                    title: '塔影咖啡',
+                    emoji: '�?,
+                    content: '塔影咖啡是龙华地区的网红咖啡馆，以其独特�?塔影拿铁"闻名。\n\n特色：可以在咖啡拉花中看到龙华塔的倒影。店内装修文艺，有露台可以远眺龙华塔，是拍照打卡的绝佳位置。\n\n人均消费�?5-50 元\n推荐：塔影拿铁、龙华塔慕斯蛋糕',
+                    tags: ['网红咖啡', '拍照圣地', '文艺青年'],
+                    price: '人均 35-50 �?,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Latte_art_coffee.jpg/640px-Latte_art_coffee.jpg'
+                }
+            ],
+            photo: [
+                {
+                    title: '龙华塔最佳拍摄点',
+                    emoji: '📷',
+                    content: '📍 拍摄�?1：塔影空间露台\n时间：下�?3-5 点（光线最佳）\n角度：仰拍龙华塔全景\n特点：可以拍到塔与咖啡杯的创意合影\n\n📍 拍摄�?2：龙华寺广场\n时间：早�?7-9 点（人少）\n角度：平视拍摄\n特点：可以拍到塔与寺庙的完整画面\n\n📍 拍摄�?3：西岸滨江\n时间：日落时分\n角度：远眺龙华塔\n特点：可以拍到塔与夕阳的美景',
+                    tags: ['拍照指南', '最佳机�?, '打卡攻略'],
+                    highlight: true,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Shanghai_sunset_Bund.jpg/640px-Shanghai_sunset_Bund.jpg'
+                },
+                {
+                    title: '龙美术馆 - 工业风拍�?,
+                    emoji: '🏭',
+                    content: '龙美术馆是由原北票码头煤炭传输站改造而成，保留了浓厚的工业风格。\n\n拍照亮点：\n�?清水混凝土墙面\n�?钢结构框架\n�?挑高空间\n�?光影效果\n\n穿搭建议：简约风、黑白灰、工装风\n最佳时间：工作日人少，周末光线好\n门票：免费（特展除外�?,
+                    tags: ['工业�?, '美术�?, '免费拍照'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Yuz_Museum_Shanghai.jpg/640px-Yuz_Museum_Shanghai.jpg'
+                },
+                {
+                    title: '西岸大剧�?- 现代建筑',
+                    emoji: '🎭',
+                    content: '西岸大剧院是龙华地区的现代建筑代表作，由著名建筑师设计。\n\n拍照亮点：\n�?流线型外观\n�?玻璃幕墙\n�?夜景灯光\n�?水景倒影\n\n最佳拍摄时间：\n�?白天：建筑细节\n�?黄昏：金色时刻\n�?夜晚：灯光秀\n\n地址：徐汇区龙腾大道 2290 �?,
+                    tags: ['现代建筑', '地标打卡', '夜景'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Shanghai_Grand_Theatre.jpg/640px-Shanghai_Grand_Theatre.jpg'
+                }
+            ],
+            easter: [
+                {
+                    title: '🐱 龙华寺猫 - 福来',
+                    emoji: '🐱',
+                    content: '龙华寺有只网红大橘猫�?福来"，在寺里生活�?5 年，深受游客和香客喜爱。\n\n特征：橘色毛发，体型圆润，特别亲人\n出没地点：天王殿右侧石阶、大雄宝殿门口\n喜好：喜欢被摸耳朵，尤其是右耳\n\n传说：\n�?摸左耳招桃花\n�?摸右耳招财运\n�?摸头保平安\n\n积分奖励：找到福来并合影 +30 积分',
+                    tags: ['网红�?, '隐藏彩蛋', '好运'],
+                    highlight: true,
+                    points: 30,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Cat_March_2010-1a.jpg/640px-Cat_March_2010-1a.jpg'
+                },
+                {
+                    title: '🌸 樱花秘境 - 小众打卡�?,
+                    emoji: '🌸',
+                    content: '龙华寺藏经楼后有一片樱花林，是少有人知的拍照秘境。\n\n品种：染井吉野樱\n数量：约 50 棵\n花期�? 月中下旬\n特点：游客少，出片率高，可以拍到樱花与古塔的创意合影\n\n最佳时间：工作日上午\n拍摄建议：穿浅色衣服，带透明�?,
+                    tags: ['樱花', '秘境', '春季限定'],
+                    points: 20,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Cherry_blossoms_in_Shanghai.jpg/640px-Cherry_blossoms_in_Shanghai.jpg'
+                },
+                {
+                    title: '🎋 许愿�?- 投币祈福',
+                    emoji: '�?,
+                    content: '龙华寺内有一个古老的许愿池，传说投币祈福很灵验。\n\n位置：大雄宝殿后方\n规则：\n�?�?1 枚硬币：保平安\n�?�?3 枚硬币：求姻缘\n�?�?5 枚硬币：求财运\n\n提示：请使用 1 角硬币，环保祈福\n\n积分奖励：投币祈�?+10 积分',
+                    tags: ['祈福', '许愿', '传统'],
+                    points: 10,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Fountain_of_Trevi_Rome.jpg/640px-Fountain_of_Trevi_Rome.jpg'
+                }
+            ],
+            events: [
+                {
+                    title: '🎆 龙华庙会（年度）',
+                    emoji: '🎪',
+                    content: '龙华庙会是上海规模最大的传统庙会之一。\n\n时间：每年农历三月初三（公历 4 月）\n地点：龙华寺及周边街区\n持续时间�?5 天\n\n活动内容：\n�?开幕式表演（舞龙舞狮）\n�?民俗展示（非遗技艺）\n�?特色小吃（各地美食）\n�?文创市集（手工艺品）\n�?戏曲演出（京剧、越剧）\n\n门票：免费\n预计人流：日�?5 万人�?,
+                    tags: ['年度盛会', '免费', '全家出游'],
+                    highlight: true,
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Longhua_Temple_Fair_Shanghai.jpg/640px-Longhua_Temple_Fair_Shanghai.jpg'
+                },
+                {
+                    title: '🎵 西岸音乐节（春季�?,
+                    emoji: '🎸',
+                    content: '西岸音乐节是上海知名的户外音乐节。\n\n时间：每�?5 月\n地点：西岸滨江绿地\n持续时间�? 天\n\n演出阵容：\n�?国内知名乐队\n�?独立音乐人\n�?DJ 表演\n\n票价：\n�?单日票：280 元\n�?双日通票�?80 元\n�?VIP 票：680 元（含后台探班）\n\n提示：建议自带野餐垫，现场有餐饮�?,
+                    tags: ['音乐�?, '户外', '年轻�?],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Music_festival_crowd.jpg/640px-Music_festival_crowd.jpg'
+                },
+                {
+                    title: '🎨 艺术夜生活（每月�?,
+                    emoji: '🌙',
+                    content: '龙华地区美术馆、博物馆每月一次的夜游活动。\n\n时间：每月最后一个周�?18:00-22:00\n参与场馆：\n�?龙美术馆\n�?西岸美术馆\n�?余德耀美术馆\n�?塔影空间\n\n活动：\n�?夜间观展\n�?艺术家讲座\n�?艺术工作坊\n�?文创市集\n\n门票：部分免费，部分特惠\n适合人群：艺术爱好者、情侣约�?,
+                    tags: ['艺术', '夜游', '约会'],
+                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Museum_night_visit.jpg/640px-Museum_night_visit.jpg'
+                }
+            ]
+        };
+
+        let currentCategory = 'history';
+
+        function renderContent(category) {
+            const content = document.getElementById('content');
+            const items = knowledge[category];
+            
+            content.innerHTML = items.map(item => `
+                <div class="card">
+                    ${item.image ? `<img src="${item.image}" class="card-image" alt="${item.title}" onerror="this.style.display='none'">` : ''}
+                    <div class="card-title">
+                        <span class="emoji">${item.emoji}</span>
+                        ${item.title}
+                        ${item.highlight ? '<span class="tag highlight">推荐</span>' : ''}
+                    </div>
+                    <div class="card-text">${item.content.replace(/\n/g, '<br>')}</div>
+                    <div style="margin-top:12px">
+                        ${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        ${item.points ? `<span class="tag highlight">🏆 +${item.points}积分</span>` : ''}
+                        ${item.price ? `<span class="tag">💰 ${item.price}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tab 切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                renderContent(currentCategory);
+                showToast(`切换�?{this.textContent}分类`);
+            });
+        });
+
+        // 提示�?        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        // 初始�?        renderContent('history');
+    </script>
+</body>
+</html>

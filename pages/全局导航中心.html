@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 全局导航中心</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2.5rem;margin-bottom:10px}
+        header p{font-size:1.1rem;opacity:0.9}
+        .nav-bar{background:white;border-radius:16px;padding:15px 20px;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+        .nav-logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:600;color:#667eea}
+        .nav-logo .emoji{font-size:1.8rem}
+        .nav-links{display:flex;gap:10px;flex-wrap:wrap}
+        .nav-link{background:#f5f5f5;padding:8px 15px;border-radius:8px;font-size:0.9rem;color:#666;text-decoration:none;transition:all 0.2s}
+        .nav-link:hover{background:#667eea;color:white;transform:translateY(-2px)}
+        .nav-link.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+        .main-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:30px}
+        .card{background:white;border-radius:16px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,0.1);transition:all 0.3s;cursor:pointer}
+        .card:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(0,0,0,0.2)}
+        .card .emoji{font-size:3rem;margin-bottom:15px;display:block}
+        .card h3{font-size:1.3rem;color:#333;margin-bottom:10px}
+        .card p{color:#666;margin-bottom:15px;line-height:1.6}
+        .card .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-right:5px}
+        .badge-primary{background:#667eea;color:white}
+        .badge-success{background:#52c41a;color:white}
+        .badge-warning{background:#faad14;color:white}
+        .badge-info{background:#1890ff;color:white}
+        .card .btn{display:inline-block;margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:8px;font-size:0.95rem;cursor:pointer;text-decoration:none}
+        .card .btn:hover{transform:translateX(5px)}
+        .quick-actions{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1);margin-bottom:20px}
+        .quick-actions h3{margin-bottom:15px;color:#333}
+        .quick-links{display:flex;gap:10px;flex-wrap:wrap}
+        .quick-link{flex:1;min-width:150px;padding:12px;background:#f9f9f9;border-radius:8px;text-align:center;text-decoration:none;color:#666;transition:all 0.2s;border:2px solid transparent}
+        .quick-link:hover{background:#667eea;color:white;border-color:#667eea}
+        .status-bar{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+        .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+        .status-item{padding:15px;background:#f9f9f9;border-radius:8px;text-align:center}
+        .status-item .label{font-size:0.85rem;color:#999;margin-bottom:5px}
+        .status-item .value{font-size:1.5rem;font-weight:600;color:#333}
+        .status-item.success .value{color:#52c41a}
+        .status-item.warning .value{color:#faad14}
+        .keyboard-hint{background:#fffbe6;border:1px solid #ffe58f;padding:15px;border-radius:8px;margin-top:20px;text-align:center;color:#b77b5c;font-size:0.9rem}
+        .keyboard-hint kbd{background:#f5f5f5;padding:3px 8px;border-radius:4px;border:1px solid #e0e0e0;font-family:monospace;margin:0 3px}
+        @media(max-width:768px){.nav-bar{flex-direction:column;align-items:stretch}.nav-links{flex-direction:column}.main-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🗺️ 心情地图</h1>
+        <p>今天是什么心情，就去哪里玩</p>
+    </header>
+
+    <!-- 顶部导航栏 -->
+    <div class="nav-bar">
+        <div class="nav-logo">
+            <span class="emoji">🗺️</span>
+            <span>心情地图导航中心</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active" onclick="switchTab('all')">全部</a>
+            <a href="#" class="nav-link" onclick="switchTab('core')">核心功能</a>
+            <a href="#" class="nav-link" onclick="switchTab('demo')">演示专用</a>
+            <a href="#" class="nav-link" onclick="switchTab('tool')">工具</a>
+            <a href="#" class="nav-link" onclick="switchTab('doc')">文档</a>
+        </div>
+    </div>
+
+    <!-- 主功能区 -->
+    <div class="main-grid" id="cardGrid">
+        <!-- 核心功能 -->
+        <div class="card" data-category="core" onclick="openPage('demo-judge-fixed.html')">
+            <span class="emoji">🎭</span>
+            <h3>评委演示版</h3>
+            <p>一键演示所有功能 + AI 对话 + 二维码扫码</p>
+            <span class="badge badge-primary">推荐</span>
+            <span class="badge badge-success">演示专用</span>
+            <a href="demo-judge-fixed.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('business-pro-rich-routes.html')">
+            <span class="emoji">📱</span>
+            <h3>主 APP</h3>
+            <p>12 种情绪路线生成，8-12 个景点/路线</p>
+            <span class="badge badge-primary">核心</span>
+            <a href="business-pro-rich-routes.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('points-mall-app.html')">
+            <span class="emoji">🎁</span>
+            <h3>积分商城</h3>
+            <p>4 页面完整积分系统（首页/任务/订单/我的）</p>
+            <span class="badge badge-success">完整</span>
+            <a href="points-mall-app.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('knowledge-base.html')">
+            <span class="emoji">📚</span>
+            <h3>知识库</h3>
+            <p>龙华历史文化（历史/人文/美食/拍照/彩蛋/活动）</p>
+            <span class="badge badge-info">6 分类</span>
+            <a href="knowledge-base.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('wishing-pool.html')">
+            <span class="emoji">🌊</span>
+            <h3>许愿池</h3>
+            <p>时间胶囊功能，5 种漂流瓶，邮箱提醒</p>
+            <span class="badge badge-success">情感</span>
+            <a href="wishing-pool.html" class="btn">立即打开 →</a>
+        </div>
+
+        <!-- 商户端 -->
+        <div class="card" data-category="core" onclick="openPage('merchant-partnership.html')">
+            <span class="emoji">🏪</span>
+            <h3>商户端</h3>
+            <p>商户入驻申请，收益数据看板（隐藏 revenue）</p>
+            <span class="badge badge-warning">商户专用</span>
+            <a href="merchant-partnership.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('admin-dashboard.html')">
+            <span class="emoji">⚙️</span>
+            <h3>管理后台</h3>
+            <p>商户/路线/活动审核，数据看板</p>
+            <span class="badge badge-warning">管理员</span>
+            <a href="admin-dashboard.html" class="btn">立即打开 →</a>
+        </div>
+
+        <!-- 特色功能 -->
+        <div class="card" data-category="core" onclick="openPage('parking-stats.html')">
+            <span class="emoji">🅿️</span>
+            <h3>停车位统计器</h3>
+            <p>龙华地区 1630 个车位实时监控 + 地图</p>
+            <span class="badge badge-info">特色</span>
+            <a href="parking-stats.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="core" onclick="openPage('poi-detail.html')">
+            <span class="emoji">📍</span>
+            <h3>POI 详情页</h3>
+            <p>景点详情（故事/拍照/弹幕/挑战/彩蛋）</p>
+            <span class="badge badge-primary">青年化</span>
+            <a href="poi-detail.html" class="btn">立即打开 →</a>
+        </div>
+
+        <!-- 演示工具 -->
+        <div class="card" data-category="demo" onclick="openPage('fulai-ai-doubao.html')">
+            <span class="emoji">🤖</span>
+            <h3>福来猫 AI 测试</h3>
+            <p>豆包 AI vs 本地模拟 对比测试</p>
+            <span class="badge badge-info">AI 测试</span>
+            <a href="fulai-ai-doubao.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="demo" onclick="openPage('演示配置工具.html')">
+            <span class="emoji">🔐</span>
+            <h3>演示配置工具</h3>
+            <p>API 配置管理，模式切换，安全保护</p>
+            <span class="badge badge-warning">配置</span>
+            <a href="演示配置工具.html" class="btn">立即打开 →</a>
+        </div>
+
+        <!-- 工具 -->
+        <div class="card" data-category="tool" onclick="openPage('embedded-navigation.html')">
+            <span class="emoji">🗺️</span>
+            <h3>嵌入式导航</h3>
+            <p>APP 内路径规划（不跳转 AMap）</p>
+            <span class="badge badge-info">导航</span>
+            <a href="embedded-navigation.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="tool" onclick="openPage('share-generator.html')">
+            <span class="emoji">📸</span>
+            <h3>分享生成器</h3>
+            <p>微信朋友圈分享图生成（html2canvas）</p>
+            <span class="badge badge-info">分享</span>
+            <a href="share-generator.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="tool" onclick="openPage('optimized-voice-test.html')">
+            <span class="emoji">🎤</span>
+            <h3>语音优化测试</h3>
+            <p>语音合成优化（语速/音调/停顿）</p>
+            <span class="badge badge-info">语音</span>
+            <a href="optimized-voice-test.html" class="btn">立即打开 →</a>
+        </div>
+
+        <!-- 文档 -->
+        <div class="card" data-category="doc" onclick="openPage('启动菜单.html')">
+            <span class="emoji">🚀</span>
+            <h3>启动菜单</h3>
+            <p>一键启动所有页面（U 盘演示用）</p>
+            <span class="badge badge-success">入口</span>
+            <a href="启动菜单.html" class="btn">立即打开 →</a>
+        </div>
+
+        <div class="card" data-category="doc" onclick="openPage('API 配置安全指南.md')">
+            <span class="emoji">🔐</span>
+            <h3>API 配置安全指南</h3>
+            <p>API Key 安全管理，演示最佳实践</p>
+            <span class="badge badge-info">安全</span>
+            <a href="API 配置安全指南.md" class="btn">查看文档 →</a>
+        </div>
+
+        <div class="card" data-category="doc" onclick="openPage('便携版部署指南.md')">
+            <span class="emoji">📦</span>
+            <h3>便携版部署指南</h3>
+            <p>U 盘部署，在线部署，二维码分享</p>
+            <span class="badge badge-info">部署</span>
+            <a href="便携版部署指南.md" class="btn">查看文档 →</a>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="quick-actions">
+        <h3>⚡ 快捷操作</h3>
+        <div class="quick-links">
+            <a href="demo-judge-fixed.html" class="quick-link">🎭 评委演示</a>
+            <a href="business-pro-rich-routes.html" class="quick-link">📱 主 APP</a>
+            <a href="points-mall-app.html" class="quick-link">🎁 积分商城</a>
+            <a href="knowledge-base.html" class="quick-link">📚 知识库</a>
+            <a href="wishing-pool.html" class="quick-link">🌊 许愿池</a>
+            <a href="parking-stats.html" class="quick-link">🅿️ 停车位</a>
+            <a href="启动菜单.html" class="quick-link">🚀 启动菜单</a>
+        </div>
+    </div>
+
+    <!-- 系统状态 -->
+    <div class="status-bar">
+        <h3>📊 系统状态</h3>
+        <div class="status-grid">
+            <div class="status-item success">
+                <div class="label">文件总数</div>
+                <div class="value">25+</div>
+            </div>
+            <div class="status-item success">
+                <div class="label">核心功能</div>
+                <div class="value">9 个</div>
+            </div>
+            <div class="status-item success">
+                <div class="label">演示页面</div>
+                <div class="value">2 个</div>
+            </div>
+            <div class="status-item success">
+                <div class="label">文档</div>
+                <div class="value">6 个</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 键盘快捷键提示 -->
+    <div class="keyboard-hint">
+        <strong>⌨️ 快捷键：</strong>
+        <kbd>Ctrl</kbd>+<kbd>1</kbd> 主 APP
+        <kbd>Ctrl</kbd>+<kbd>2</kbd> 商户端
+        <kbd>Ctrl</kbd>+<kbd>3</kbd> 管理后台
+        <kbd>H</kbd> 返回主页
+        <kbd>F5</kbd> 刷新
+    </div>
+</div>
+
+<script>
+// 打开页面
+function openPage(url) {
+    window.open(url, '_blank');
+}
+
+// 切换分类
+function switchTab(category) {
+    const cards = document.querySelectorAll('.card');
+    const links = document.querySelectorAll('.nav-link');
+    
+    // 更新激活状态
+    links.forEach(link => link.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // 筛选卡片
+    cards.forEach(card => {
+        if (category === 'all' || card.dataset.category === category) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// 键盘快捷键
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === '1') {
+        e.preventDefault();
+        openPage('business-pro-rich-routes.html');
+    } else if (e.ctrlKey && e.key === '2') {
+        e.preventDefault();
+        openPage('merchant-partnership.html');
+    } else if (e.ctrlKey && e.key === '3') {
+        e.preventDefault();
+        openPage('admin-dashboard.html');
+    } else if (e.key === 'h' || e.key === 'H') {
+        // 已经在主页，不操作
+    } else if (e.key === 'F5') {
+        // 允许刷新
+    }
+});
+</script>
+</body>
+</html>

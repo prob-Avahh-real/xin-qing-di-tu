@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathJoy - 黑客松作品海报</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: 65cm 110cm;
+            margin: 0;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            width: 65cm;
+            height: 110cm;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            overflow: hidden;
+        }
+        
+        .poster-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .gradient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(14, 165, 233, 0.05) 0%, 
+                rgba(217, 70, 239, 0.05) 50%, 
+                rgba(236, 72, 153, 0.05) 100%);
+            z-index: 1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 8cm;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-size: 8cm;
+            background: linear-gradient(135deg, #0ea5e9 0%, #d946ef 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 1cm;
+        }
+        
+        .tagline {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 3.5cm;
+            color: #1e293b;
+            line-height: 1.1;
+            margin-bottom: 2cm;
+        }
+        
+        .description {
+            font-size: 1.8cm;
+            color: #475569;
+            line-height: 1.4;
+            max-width: 50cm;
+            margin-bottom: 3cm;
+        }
+        
+        .demo-preview {
+            background: white;
+            border-radius: 1.5cm;
+            padding: 2cm;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-top: auto;
+            border: 0.5cm solid white;
+        }
+        
+        .demo-title {
+            font-size: 2cm;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1cm;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5cm;
+        }
+        
+        .demo-item {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 0.8cm;
+            padding: 1.5cm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .demo-icon {
+            font-size: 3cm;
+            margin-bottom: 0.5cm;
+        }
+        
+        .demo-text {
+            font-size: 1.2cm;
+            font-weight: 600;
+            color: #334155;
+        }
+        
+        .footer {
+            margin-top: 3cm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2cm;
+            color: #64748b;
+        }
+        
+        .hackathon-info {
+            font-weight: 600;
+            color: #0ea5e9;
+        }
+        
+        .qr-code {
+            width: 6cm;
+            height: 6cm;
+            background: #f1f5f9;
+            border-radius: 0.5cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2cm;
+            color: #94a3b8;
+        }
+        
+        /* 装饰元素 */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #d946ef 100%);
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .element-1 {
+            width: 30cm;
+            height: 30cm;
+            top: -10cm;
+            right: -10cm;
+        }
+        
+        .element-2 {
+            width: 20cm;
+            height: 20cm;
+            bottom: -5cm;
+            left: -5cm;
+        }
+        
+        .element-3 {
+            width: 15cm;
+            height: 15cm;
+            top: 40%;
+            left: -5cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="poster-container">
+        <!-- 背景渐变 -->
+        <div class="gradient-bg"></div>
+        
+        <!-- 浮动装饰元素 -->
+        <div class="floating-element element-1"></div>
+        <div class="floating-element element-2"></div>
+        <div class="floating-element element-3"></div>
+        
+        <!-- 主要内容 -->
+        <div class="content">
+            <!-- Logo和标题 -->
+            <div class="logo">PathJoy</div>
+            <div class="tagline">体验优先的出行路径设计</div>
+            
+            <!-- 描述 -->
+            <div class="description">
+                为年轻人打造的智能出行体验规划工具，将普通路线转变为可分享的社交旅程。
+                基于兴趣标签的个性化路径引擎，让每次出行都成为值得回忆的体验。
+            </div>
+            
+            <!-- Demo预览 -->
+            <div class="demo-preview">
+                <div class="demo-title">核心功能演示</div>
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <div class="demo-icon">🗺️</div>
+                        <div class="demo-text">智能路径规划</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-icon">📸</div>
+                        <div class="demo-text">兴趣点发现</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-icon">📱</div>
+                        <div class="demo-text">社交分享</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页脚 -->
+            <div class="footer">
+                <div>
+                    <div class="hackathon-info">黑客松大赛 · 体验优先的出行路径设计</div>
+                    <div>作品展架海报 · 尺寸: 高110cm × 宽65cm</div>
+                </div>
+                <div class="qr-code">
+                    🔗
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 打印提示
+        console.log('海报设计已生成');
+        console.log('建议：');
+        console.log('1. 在Chrome中打开此页面');
+        console.log('2. 按Ctrl+P打开打印对话框');
+        console.log('3. 选择纸张尺寸: 自定义 65cm × 110cm');
+        console.log('4. 边距: 无');
+        console.log('5. 缩放: 100%');
+        console.log('6. 打印为PDF或直接打印');
+        
+        // 自动调整打印样式
+        window.addEventListener('load', function() {
+            const style = document.createElement('style');
+            style.textContent = `
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

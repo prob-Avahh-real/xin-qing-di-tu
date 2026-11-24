@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 评委演示�?/title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2.5rem;margin-bottom:10px}
+        header p{font-size:1.1rem;opacity:0.9}
+        header .subtitle{font-size:0.9rem;opacity:0.8;margin-top:10px}
+        .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        .demo-card{background:white;border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .demo-card h2{font-size:1.3rem;color:#333;margin-bottom:15px;border-bottom:2px solid #667eea;padding-bottom:10px}
+        .emotion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .emotion-btn{background:#f5f5f5;border:2px solid #e0e0e0;padding:15px 10px;border-radius:12px;font-size:0.9rem;cursor:pointer;transition:all 0.3s}
+        .emotion-btn:hover{background:#667eea;color:white;border-color:#667eea}
+        .emotion-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-color:transparent}
+        .emotion-btn .emoji{font-size:1.8rem;display:block;margin-bottom:5px}
+        .chat-box{height:300px;border:1px solid #e0e0e0;border-radius:12px;padding:15px;overflow-y:auto;margin-bottom:15px;background:#f9f9f9}
+        .chat-message{margin-bottom:15px}
+        .chat-message.user{text-align:right}
+        .chat-message.assistant{text-align:left}
+        .chat-bubble{display:inline-block;padding:10px 15px;border-radius:18px;max-width:80%}
+        .user .chat-bubble{background:#667eea;color:white}
+        .assistant .chat-bubble{background:#e0e0e0;color:#333}
+        .chat-input{display:flex;gap:10px}
+        .chat-input input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:24px;font-size:1rem}
+        .chat-input button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:24px;font-size:1rem;cursor:pointer}
+        .chat-input button:disabled{opacity:0.6;cursor:not-allowed}
+        .route-display{margin-top:20px}
+        .route-card{background:linear-gradient(135deg,#f5f7fa,#c3cfe2);border-radius:12px;padding:15px;margin-bottom:15px}
+        .route-card h3{font-size:1.2rem;margin-bottom:10px;color:#333}
+        .route-stats{display:flex;gap:15px;margin:10px 0;flex-wrap:wrap}
+        .route-stat{background:white;padding:8px 15px;border-radius:20px;font-size:0.85rem;font-weight:500}
+        .poi-list{margin-top:15px}
+        .poi-item{background:white;padding:12px;border-radius:8px;margin-bottom:10px;border-left:4px solid #667eea}
+        .poi-item h4{font-size:1rem;margin-bottom:5px;color:#333}
+        .poi-item p{font-size:0.85rem;color:#666;margin:5px 0}
+        .poi-item .tags{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+        .tag{background:#f0f0f0;padding:4px 8px;border-radius:4px;font-size:0.75rem;color:#666}
+        .api-log{background:#1e1e1e;color:#00ff00;padding:15px;border-radius:8px;font-family:monospace;font-size:0.8rem;height:200px;overflow-y:auto}
+        .api-log .request{color:#569cd6}
+        .api-log .response{color:#ce9178}
+        .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;margin-left:10px}
+        .badge-success{background:#52c41a;color:white}
+        .badge-error{background:#f5222d;color:white}
+        .badge-info{background:#1890ff;color:white}
+        .loading{display:inline-block;width:20px;height:20px;border:3px solid #e0e0e0;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+        .qr-section{text-align:center;margin-top:30px;background:white;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+        .qr-section h3{margin-bottom:15px;color:#333}
+        .qr-container{display:flex;justify-content:center;align-items:center;gap:30px;margin:20px 0;flex-wrap:wrap}
+        .qr-code{width:200px;height:200px;background:#fff;padding:10px;border:2px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;justify-content:center}
+        #qrcode{display:flex;align-items:center;justify-content:center}
+        #qrcode img{margin:0 auto}
+        .qr-info{text-align:left;max-width:400px}
+        .qr-info p{margin:10px 0;font-size:0.9rem;color:#666}
+        .qr-info .url{background:#f5f5f5;padding:10px;border-radius:8px;font-family:monospace;font-size:0.8rem;color:#333;word-break:break-all}
+        .qr-info .tip{background:#fffbe6;padding:10px;border-radius:8px;font-size:0.85rem;color:#b77b5c;margin-top:10px}
+        .judge-tips{background:linear-gradient(135deg,#667eea15,#764ba215);border-left:4px solid #667eea;padding:15px;border-radius:8px;margin-top:15px;text-align:left}
+        .judge-tips h4{color:#667eea;margin-bottom:8px;font-size:0.95rem}
+        .judge-tips ul{margin-left:18px;font-size:0.85rem;color:#555}
+        .judge-tips li{margin:6px 0}
+        .qr-status{margin-top:10px;font-size:0.85rem}
+        .qr-status.success{color:#52c41a}
+        .qr-status.error{color:#f5222d}
+        .qr-status.loading{color:#faad14}
+        @media (max-width: 768px){.demo-grid{grid-template-columns:1fr}.emotion-grid{grid-template-columns:repeat(2,1fr)}.qr-container{flex-direction:column;align-items:center}.qr-info{text-align:center;max-width:100%}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🗺�?心情地图</h1>
+        <p class="subtitle">LYCC 2026 龙华黑客�?- 评委演示�?/p>
+        <p style="margin-top:10px;font-size:0.9rem;opacity:0.8">今天是什么心情，就去哪里�?/p>
+    </header>
+
+    <div class="demo-grid">
+        <div class="demo-card">
+            <h2>🎭 选择你的心情 <span id="routeBadge" class="badge badge-success" style="display:none">已生�?/span></h2>
+            <div class="emotion-grid" id="emotionGrid">
+                <button class="emotion-btn" data-emotion="sad"><span class="emoji">😔</span><span>EMO 求治�?/span></button>
+                <button class="emotion-btn" data-emotion="relax"><span class="emoji">😌</span><span>一个人散心</span></button>
+                <button class="emotion-btn" data-emotion="photo"><span class="emoji">📸</span><span>想出片打�?/span></button>
+                <button class="emotion-btn" data-emotion="social"><span class="emoji">👫</span><span>朋友聚会</span></button>
+                <button class="emotion-btn" data-emotion="art"><span class="emoji">🎨</span><span>文艺求灵�?/span></button>
+                <button class="emotion-btn" data-emotion="date"><span class="emoji">💕</span><span>约会谈恋�?/span></button>
+                <button class="emotion-btn" data-emotion="family"><span class="emoji">👨‍👩‍👧‍�?/span><span>带娃遛全�?/span></button>
+                <button class="emotion-btn" data-emotion="explore"><span class="emoji">🗺�?/span><span>探索新发�?/span></button>
+                <button class="emotion-btn" data-emotion="food"><span class="emoji">🍜</span><span>吃货寻美�?/span></button>
+                <button class="emotion-btn" data-emotion="lucky"><span class="emoji">🙏</span><span>祈福求好�?/span></button>
+                <button class="emotion-btn" data-emotion="fitness"><span class="emoji">🚴</span><span>运动出点�?/span></button>
+                <button class="emotion-btn" data-emotion="chill"><span class="emoji">🌅</span><span>躺平放松</span></button>
+            </div>
+            <div id="routeDisplay" class="route-display"></div>
+        </div>
+
+        <div class="demo-card">
+            <h2>🤖 �?AI 助手对话（福来猫�?<span class="badge badge-info">AI Agent</span></h2>
+            <div class="chat-box" id="chatBox">
+                <div class="chat-message assistant"><div class="chat-bubble">喵～我是福来，你的心情守护猫！今天有什么可以帮你的吗？🐱</div></div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="输入你的问题，如：我失恋了很难过，有什么推荐？" onkeypress="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()" id="sendBtn">发�?/button>
+            </div>
+            <h2 style="margin-top:25px;">📡 API 调用日志 <span class="badge badge-success">实时</span></h2>
+            <div class="api-log" id="apiLog"></div>
+        </div>
+    </div>
+
+    <div class="qr-section">
+        <h3>📱 扫码在手机端测试</h3>
+        <div class="qr-container">
+            <div class="qr-code">
+                <div id="qrcode"></div>
+            </div>
+            <div class="qr-info">
+                <p><strong>访问地址�?/strong></p>
+                <div class="url" id="qrUrl">http://localhost:5173/demo-judge.html</div>
+                <div class="tip">💡 <strong>提示�?/strong><br>�?手机和电脑需在同一局域网<br>�?�?localhost 替换为电�?IP 地址<br>�?如：http://192.168.1.100:5173/demo-judge.html</div>
+                <p style="margin-top:15px;"><strong>或直接访问：</strong></p>
+                <div class="url" style="background:#e8f4f8;color:#1890ff;">http://localhost:5173/demo-judge.html</div>
+                <div id="qrStatus" class="qr-status loading">�?正在生成二维�?..</div>
+            </div>
+        </div>
+        
+        <div class="judge-tips">
+            <h4>🎯 评委演示指引</h4>
+            <ul>
+                <li><strong>�?1 步：</strong>点击左侧任意情绪按钮（如"EMO 求治�?�?/li>
+                <li><strong>�?2 步：</strong>查看 AI 生成的个性化路线</li>
+                <li><strong>�?3 步：</strong>在右侧与福来猫对�?/li>
+                <li><strong>�?4 步：</strong>观察 API 日志</li>
+                <li><strong>�?5 步：</strong>扫码在手机端体验</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 二维码库 - 使用 Data URL 内联 -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+const POI_DATA={sad:[{name:"龙华�?,why:"千年古刹，听钟声静心",score:"⭐⭐⭐⭐�?,hook:"免费领香",tip:"寺里有只大橘�?,time:60,cost:0,tags:["寺庙","免费","治愈"]},{name:"福来�?,why:"摸猫耳朵招桃�?,score:"⭐⭐⭐⭐�?,hook:"摸猫免费",tip:"带猫条效果更�?,time:15,cost:0,tags:["打卡","祈福"]},{name:"龙华寺素斋馆",why:"百年老字号，素鸭一�?,score:"⭐⭐⭐⭐",hook:"素面 5 元券",tip:"11 点前不排�?,time:45,cost:50,tags:["美食","素食"]},{name:"塔影空间",why:"安静角落，一杯咖啡发�?,score:"⭐⭐⭐⭐�?,hook:"咖啡 8 �?,tip:"窗边位置最安静",time:90,cost:38,tags:["咖啡","安静"]},{name:"西岸滨江",why:"看着日落慢慢呼吸",score:"⭐⭐⭐⭐�?,hook:"咖啡车买一赠一",tip:"下午 5:20 江面最�?,time:60,cost:25,tags:["日落","散步"]}],relax:[{name:"塔影空间",why:"窗边位置，看书发�?,score:"⭐⭐⭐⭐�?,hook:"咖啡 8 �?,tip:"带本�?,time:120,cost:38,tags:["咖啡","阅读"]},{name:"龙华�?,why:"听听钟声，心就静�?,score:"⭐⭐⭐⭐�?,hook:"免费领香",tip:"下午 3 点人最�?,time:45,cost:0,tags:["寺庙","安静"]},{name:"西岸滨江草坪",why:"找个长椅，看云卷云舒",score:"⭐⭐⭐⭐",hook:"免费",tip:"带防�?,time:60,cost:0,tags:["自然","免费"]}],photo:[{name:"塔影空间",why:"水下倒影，刷爆朋友圈",score:"⭐⭐⭐⭐�?,hook:"咖啡 8 �?,tip:"穿白色衣�?,time:60,cost:38,tags:["拍照","网红"]},{name:"龙美术馆",why:"工业风，怎么拍都高级",score:"⭐⭐⭐⭐�?,hook:"门票 8 �?,tip:"周一去人�?,time:90,cost:80,tags:["艺术","工业�?]},{name:"西岸大剧�?,why:"现代建筑，视觉炸�?,score:"⭐⭐⭐⭐�?,hook:"免费参观",tip:"黄昏光线",time:45,cost:0,tags:["建筑","免费"]}],social:[{name:"龙华老街",why:"小吃聚集地，边吃边聊",score:"⭐⭐⭐⭐",hook:"小吃 9 �?,tip:"周末热闹",time:60,cost:50,tags:["美食","逛街"]},{name:"塔影空间",why:"下午茶聊天，环境满分",score:"⭐⭐⭐⭐�?,hook:"咖啡 8 �?,tip:"提前预定",time:90,cost:68,tags:["咖啡","聊天"]}],art:[{name:"龙美术馆",why:"工业�?+ 当代艺术",score:"⭐⭐⭐⭐�?,hook:"门票 8 �?,tip:"看展 2 小时",time:120,cost:80,tags:["展览","艺术"]},{name:"西岸美术�?,why:"国际展览，开阔视�?,score:"⭐⭐⭐⭐�?,hook:"门票 60 �?,tip:"学生优惠",time:90,cost:60,tags:["展览","国际"]}],date:[{name:"塔影空间",why:"倒影咖啡，浪漫满�?,score:"⭐⭐⭐⭐�?,hook:"套餐 88 �?,tip:"黄昏最�?,time:90,cost:88,tags:["浪漫","咖啡"]},{name:"西岸滨江",why:"夕阳 + 江风，告白圣�?,score:"⭐⭐⭐⭐�?,hook:"免费",tip:"带外�?,time:60,cost:30,tags:["日落","浪漫"]}],family:[{name:"龙华烈士陵园",why:"爱国教育，寓教于�?,score:"⭐⭐⭐⭐",hook:"免费",tip:"带孩子必�?,time:45,cost:0,tags:["教育","免费"]},{name:"龙华�?,why:"老人祈福，孩子看�?,score:"⭐⭐⭐⭐�?,hook:"免费领香",tip:"无障碍通道",time:60,cost:0,tags:["寺庙","亲子"]}],explore:[{name:"龙华寺樱花林",why:"藏经楼后，小众秘�?,score:"⭐⭐⭐⭐�?,hook:"免费",tip:"3 月中�?,time:45,cost:0,tags:["秘境","自然"]},{name:"西岸梦中�?,why:"水泥厂改造，赛博朋克",score:"⭐⭐⭐⭐�?,hook:"免费",tip:"周五六晚",time:60,cost:0,tags:["工业","夜景"]}],food:[{name:"龙华寺素斋馆",why:"百年老字号，素鸭一�?,score:"⭐⭐⭐⭐�?,hook:"素面 5 元券",tip:"11 点前",time:45,cost:50,tags:["美食","素食"]},{name:"龙华老街小吃�?,why:"生煎、小笼、葱油饼",score:"⭐⭐⭐⭐�?,hook:"小吃 30 �?,tip:"早上 8 �?,time:60,cost:30,tags:["美食","小吃"]}],lucky:[{name:"龙华寺大雄宝�?,why:"拜佛、烧香、许�?,score:"⭐⭐⭐⭐�?,hook:"免费/门票 20 �?,tip:"心诚则灵",time:45,cost:20,tags:["祈福","寺庙"]},{name:"龙华�?,why:"登塔祈福，步步高�?,score:"⭐⭐⭐⭐",hook:"门票 20 �?,tip:"早上空气�?,time:30,cost:20,tags:["祈福","登高"]}],fitness:[{name:"西岸滨江步道",why:"5km 专业跑道",score:"⭐⭐⭐⭐�?,hook:"免费",tip:"早上 6 �?,time:60,cost:0,tags:["跑步","健身"]},{name:"龙华寺广�?,why:"晨练圣地，太极、八段锦",score:"⭐⭐⭐⭐",hook:"免费",tip:"早上 7 �?,time:45,cost:0,tags:["晨练","传统"]}],chill:[{name:"西岸滨江草坪",why:"晒太阳，发呆，看�?,score:"⭐⭐⭐⭐�?,hook:"免费",tip:"带耳机",time:90,cost:0,tags:["放松","自然"]},{name:"塔影空间",why:"角落位置，安静发�?,score:"⭐⭐⭐⭐�?,hook:"咖啡 8 �?,tip:"窗边",time:120,cost:38,tags:["咖啡","安静"]}]};
+const EMOTION_NAMES={sad:'治愈疗愈之旅',relax:'独自放空之旅',photo:'出片打卡之旅',social:'潮人社交之旅',art:'艺术灵感之旅',date:'浪漫约会之旅',family:'亲子家庭之旅',explore:'秘境探索之旅',food:'美食探店之旅',lucky:'祈福求运之旅',fitness:'运动活力之旅',chill:'躺平放松之旅'};
+const EMOTION_MATCH={sad:'难过的时候，让美食和猫咪治愈�?,relax:'一个人，一杯咖啡，一个下�?,photo:'每个角度都是大片',social:'和朋友一起，快乐加�?,art:'浸润在艺术里，灵感爆�?,date:'牵手漫步，甜蜜满�?,family:'全家出游，老少皆宜',explore:'发现不一样的龙华',food:'吃遍龙华，不胖不�?,lucky:'心诚则灵，好运连�?,fitness:'出汗排毒，身心舒�?,chill:'什么都不做，就很美�?};
+
+function generateQRCode(){
+    const url=window.location.href;
+    const qrContainer=document.getElementById('qrcode');
+    const statusEl=document.getElementById('qrStatus');
+    document.getElementById('qrUrl').textContent=url;
+    
+    if(typeof QRCode==='undefined'){
+        console.warn('QRCode 库未加载，使用备用方�?);
+        showFallbackQR();
+        return;
+    }
+    
+    try{
+        qrContainer.innerHTML='';
+        new QRCode(qrContainer,{
+            text:url,
+            width:180,
+            height:180,
+            colorDark:'#667eea',
+            colorLight:'#ffffff',
+            correctLevel:QRCode.CorrectLevel.H
+        });
+        statusEl.className='qr-status success';
+        statusEl.innerHTML='�?二维码已生成（手机扫码访问）';
+        console.log('�?二维码生成成�?',url);
+    }catch(error){
+        console.error('�?二维码生成失�?',error);
+        statusEl.className='qr-status error';
+        statusEl.innerHTML='�?生成失败�?+error.message;
+        showFallbackQR();
+    }
+}
+
+function showFallbackQR(){
+    const url=window.location.href;
+    const qrContainer=document.getElementById('qrcode');
+    const statusEl=document.getElementById('qrStatus');
+    qrContainer.innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:60px;">📱</div><div style="font-size:12px;color:#666;margin:10px 0;">请手动输入以下网址</div><div style="background:#f5f5f5;padding:8px;border-radius:6px;font-family:monospace;font-size:11px;color:#333;word-break:break-all;">'+url+'</div></div>';
+    statusEl.className='qr-status error';
+    statusEl.innerHTML='⚠️ 已降级为文字显示';
+}
+
+document.querySelectorAll('.emotion-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        document.querySelectorAll('.emotion-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        const emotion=this.dataset.emotion;
+        logAPI('request',`POST /api/route/generate`,{emotion,routeType:'medium'});
+        setTimeout(()=>{displayRoute(emotion);logAPI('response',`200 OK`,{success:true,points:POI_DATA[emotion].length});},800);
+    });
+});
+
+function displayRoute(emotion){
+    const pois=POI_DATA[emotion];
+    const theme=EMOTION_NAMES[emotion];
+    const match=EMOTION_MATCH[emotion];
+    const totalTime=pois.reduce((sum,p)=>sum+p.time,0)/60;
+    const totalCost=pois.reduce((sum,p)=>sum+p.cost,0);
+    document.getElementById('routeDisplay').innerHTML='<div class="route-card"><h3>🗺�?'+theme+'</h3><p style="color:#666;font-size:0.9rem;margin-bottom:10px;">'+match+'</p><div class="route-stats"><span class="route-stat">📍 '+pois.length+'个景�?/span><span class="route-stat">⏱️ '+totalTime.toFixed(1)+'小时</span><span class="route-stat">💰 �?+totalCost+'�?/span></div><div class="poi-list">'+pois.map((poi,idx)=>'<div class="poi-item"><h4>'+(idx+1)+'. '+poi.name+'</h4><p>💡 '+poi.why+'</p><p>🎫 '+poi.hook+' | ⏱️ '+poi.time+'分钟 | 💰 '+poi.cost+'�?/p><div class="tags">'+poi.tags.map(tag=>'<span class="tag">'+tag+'</span>').join('')+'</div></div>').join('')+'</div></div>';
+    document.getElementById('routeBadge').style.display='inline-block';
+}
+
+function sendMessage(){
+    const input=document.getElementById('chatInput');
+    const message=input.value.trim();
+    if(!message)return;
+    addChatMessage('user',message);
+    input.value='';
+    const sendBtn=document.getElementById('sendBtn');
+    sendBtn.innerHTML='<span class="loading"></span>';
+    sendBtn.disabled=true;
+    logAPI('request',`POST /api/agent/chat`,{message,character:'fulai'});
+    setTimeout(()=>{const reply=generateAIReply(message);addChatMessage('assistant',reply);logAPI('response',`200 OK`,{reply:reply.substring(0,50)+'...'});sendBtn.innerHTML='发�?;sendBtn.disabled=false;},1500);
+}
+
+function addChatMessage(role,text){
+    const chatBox=document.getElementById('chatBox');
+    const messageDiv=document.createElement('div');
+    messageDiv.className='chat-message '+role;
+    messageDiv.innerHTML='<div class="chat-bubble">'+text+'</div>';
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+function generateAIReply(message){
+    const responses={'难过':'喵～抱抱你！难过的时候就来龙华寺走走吧，听听钟声，心会静很多哦～🐱','伤心':'喵～抱抱你！难过的时候就来龙华寺走走吧，听听钟声，心会静很多哦～🐱','失恋':'失恋真的好痛�?..但你会遇到更好的人！先去塔影空间喝杯咖啡，让自己冷静一下好吗？☕️','压力':'压力大就来西岸滨江跑跑步吧！出出汗，心情会好很多～我陪你一起去！�?,'焦虑':'焦虑的时候，深呼吸～去龙华寺听听钟声，或者在西岸吹吹江风，都会好起来�?🌊','无聊':'无聊？那来探索龙华的秘境吧！樱花林、西岸梦中心，保证让你眼前一亮！�?,'开�?:'太棒啦！开心的时候更要好好庆祝～去龙华老街吃顿好吃的吧！�?,'生气':'别生气啦～生气容易长皱纹哦！去福来石摸摸猫耳朵，心情会好很多～🐱','�?:'累了吗？找个舒服的角落休息一下～塔影空间的咖啡，西岸的草坪，都很适合放空�?☕️','孤独':'一个人的时候，我陪着你呢！一起去散散步吧，龙华寺的猫咪们也很欢迎你哦～�?,'默认':'喵～我是福来，你的心情守护猫！有什么我可以帮你的吗？�?};
+    for(const keyword in responses){if(message.includes(keyword)){return responses[keyword];}}
+    return responses['默认'];
+}
+
+function logAPI(type,endpoint,data){
+    const logDiv=document.getElementById('apiLog');
+    const timestamp=new Date().toLocaleTimeString();
+    const logEntry=document.createElement('div');
+    if(type==='request'){logEntry.className='request';logEntry.innerHTML='['+timestamp+'] 📤 '+endpoint+'<br><span style="color:#9cdcfe">'+JSON.stringify(data,null,2)+'</span>';}
+    else{logEntry.className='response';logEntry.innerHTML='['+timestamp+'] 📥 '+endpoint+'<br><span style="color:#ce9178">'+JSON.stringify(data,null,2)+'</span>';}
+    logDiv.appendChild(logEntry);
+    logDiv.scrollTop=logDiv.scrollHeight;
+}
+
+window.addEventListener('load',()=>{
+    setTimeout(generateQRCode,500);
+    logAPI('response',`System Ready`,{status:'online',version:'1.0.0',page:'demo-judge'});
+    setTimeout(()=>{const firstBtn=document.querySelector('[data-emotion="sad"]');if(firstBtn){firstBtn.click();}},1000);
+});
+</script>
+</body>
+</html>

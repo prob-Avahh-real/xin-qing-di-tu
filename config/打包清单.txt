@@ -1,0 +1,172 @@
+# 心情地图 - 打包清单
+# 生成时间：2026-04-24 22:40
+# 
+# 使用说明：
+# 1. 只打包"核心文件"列表中的文件
+# 2. 不要打包测试文件、临时文件、备份文件
+# 3. 确保所有核心文件都在同一个目录
+
+========================================
+✅ 核心文件（必须打包，共 18 个）
+========================================
+
+统一导航：
+  ✅ 心情地图 - 统一导航.html
+  ✅ 门票预订 - 完整版.html
+
+主 APP：
+  ✅ business-pro-rich-routes.html（最终版）
+
+积分系统：
+  ✅ points-mall-app-fixed.html（最终版）
+
+特色功能：
+  ✅ wishing-pool.html
+  ✅ knowledge-base.html
+  ✅ poi-detail.html
+
+商户端：
+  ✅ merchant-partnership.html
+  ✅ admin-dashboard.html
+
+评委演示：
+  ✅ demo-judge-fixed.html（最终版）
+  ✅ 开发者工具 - 隐藏入口.html
+
+实用工具：
+  ✅ 停车引导 - 极简版.html
+  ✅ 嵌入式导航.html
+
+导航文档：
+  ✅ 使用指南 - 按场景分类.html
+  ✅ 全局导航中心 - 重新设计.html
+  ✅ 产品架构总览.html
+
+文档（.md 文件）：
+  ✅ 产品架构地图.md
+  ✅ 功能检查报告.md
+  ✅ 团队协作指南.md
+  ✅ USER_MANUAL.md
+  ✅ MERCHANT_SYSTEM.md
+  ✅ POINTS_RULES.md
+
+========================================
+🗑️  排除的文件（不要打包）
+========================================
+
+测试文件（15 个）：
+  ❌ test-*.html
+  ❌ *voice-test.html
+  ❌ *music-test.html
+  ❌ optimized-voice-test.html
+  ❌ cartoon-voice-test.html
+  ❌ cute-child-voice-test.html
+  ❌ young-voice-test.html
+  ❌ multi-voice-test.html
+  ❌ emotional-tts-test*.html
+  ❌ auto-test-report.html
+
+备份文件（8 个）：
+  ❌ *backup.html
+  ❌ *fixed.html（demo-judge-fixed.html 除外）
+  ❌ *v2.html
+  ❌ business-pro-fixed.html
+
+旧版本（12 个）：
+  ❌ business-pro.html
+  ❌ business-pro-12emotions.html
+  ❌ business-pro-personalized.html
+  ❌ mobile-full.html
+  ❌ mobile-lite.html
+  ❌ mobile-ultra-lite.html
+  ❌ points-mall.html
+  ❌ points-mall-v2.html
+  ❌ points-mall-mobile.html
+  ❌ ultimate-full.html
+  ❌ smart-parking.html
+  ❌ parking-stats.html
+
+其他临时文件（10 个）：
+  ❌ icon-generator.html
+  ❌ share-generator.html
+  ❌ poster.html
+  ❌ PPT-*.html
+  ❌ brand-story.html
+  ❌ fulai-ai-doubao.html
+  ❌ emoji*.html
+  ❌ roadshow*.html
+  ❌ 接福来 - 小游戏.html
+  ❌ 餐厅菜单.html
+
+========================================
+📦 打包后测试清单
+========================================
+
+1. 打开 "心情地图 - 统一导航.html"
+   - 检查所有功能入口是否正常
+   - 检查底部 5 Tab 导航
+
+2. 测试主 APP
+   - 打开 "business-pro-rich-routes.html"
+   - 选择心情生成路线
+   - ✅ 检查龙华寺评分是否为 ⭐⭐⭐⭐⭐ (5.0 满分)
+   - ✅ 检查龙龙讲故事是否有声音
+
+3. 测试门票系统
+   - 打开 "门票预订 - 完整版.html"
+   - 选择门票类型
+   - 填写订单
+
+4. 测试积分商城
+   - 打开 "points-mall-app-fixed.html"
+   - 检查 4 个页面（首页/任务/订单/我的）
+
+5. 测试许愿池
+   - 打开 "wishing-pool.html"
+   - 创建许愿瓶
+   - 设置开启时间
+
+6. 测试知识库
+   - 打开 "knowledge-base.html"
+   - 检查 6 个分类
+   - 检查图片是否正常
+
+7. 测试评委演示
+   - 打开 "demo-judge-fixed.html"
+   - 点击情绪按钮
+   - 检查 AI 对话
+   - 扫描二维码
+
+8. 测试开发者工具
+   - 打开 "心情地图 - 统一导航.html"
+   - 连续点击"关于本软件"3 次
+   - 进入开发者工具
+   - 查看 API 日志
+
+========================================
+🎯 重要修复（必须完成）
+========================================
+
+1. 龙华寺评分必须为 5.0 满分
+   位置：business-pro-rich-routes.html
+   修改：score:"⭐⭐⭐⭐" → score:"⭐⭐⭐⭐⭐"
+   原因：龙华寺是核心景点，必须是满分
+
+2. 所有重要景点评分调整
+   - 龙华寺：⭐⭐⭐⭐⭐（5.0，核心景点）
+   - 龙华塔：⭐⭐⭐⭐⭐（5.0，核心景点）
+   - 塔影空间：⭐⭐⭐⭐⭐（5.0，网红打卡点）
+   - 龙美术馆：⭐⭐⭐⭐⭐（5.0，重要文化地标）
+   - 西岸滨江：⭐⭐⭐⭐（4.5，次要景点）
+   - 其他：保持原评分
+
+========================================
+✅ 打包完成！
+========================================
+
+打包后请确保：
+1. 所有核心文件都在
+2. 测试文件都已排除
+3. 龙华寺评分是 5.0 满分
+4. 语音播放功能正常
+5. 所有链接都能正常工作

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者工具 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#1a1a2e;min-height:100vh;padding-bottom:80px;color:white}
+        
+        /* 顶部导航栏 */
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.3)}
+        .header-top{display:flex;align-items:center;justify-content:space-between}
+        .back-btn{background:none;border:none;color:white;font-size:24px;cursor:pointer;padding:8px}
+        .header h1{font-size:1.3rem;font-weight:600}
+        
+        /* 警告提示 */
+        .warning-banner{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;padding:16px;margin:16px;border-radius:12px;text-align:center}
+        .warning-banner h3{font-size:1.1rem;margin-bottom:8px}
+        .warning-banner p{font-size:0.85rem;opacity:0.9}
+        
+        /* 卡片 */
+        .card{background:#2d2d44;border-radius:16px;padding:20px;margin:16px;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .card h3{font-size:1.1rem;color:#f9b572;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .card .icon{font-size:1.5rem}
+        
+        /* 功能按钮 */
+        .feature-btn{background:#3d3d5c;border:none;width:100%;padding:16px;border-radius:12px;margin-bottom:12px;text-align:left;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:space-between}
+        .feature-btn:last-child{margin-bottom:0}
+        .feature-btn:hover{background:#4d4d6c}
+        .feature-btn:active{transform:scale(0.98)}
+        .feature-btn .left{display:flex;align-items:center;gap:12px}
+        .feature-btn .icon{font-size:1.5rem}
+        .feature-btn .text{flex:1}
+        .feature-btn .text .title{font-size:0.95rem;color:white;font-weight:600}
+        .feature-btn .text .desc{font-size:0.75rem;color:#999;margin-top:4px}
+        .feature-btn .arrow{font-size:1.2rem;color:#999}
+        
+        /* API 日志区域 */
+        .log-container{background:#0d0d1a;border-radius:12px;padding:16px;margin-top:16px;max-height:400px;overflow-y:auto;font-family:monospace;font-size:0.8rem}
+        .log-entry{padding:8px;border-bottom:1px solid #3d3d5c}
+        .log-entry:last-child{border-bottom:none}
+        .log-entry .time{color:#999;margin-right:8px}
+        .log-entry .method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.7rem;margin-right:8px}
+        .log-entry .method.get{background:#10b981}
+        .log-entry .method.post{background:#3b82f6}
+        .log-entry .url{color:#f9b572}
+        .log-entry .status{display:inline-block;padding:2px 8px;border-radius:4px;margin-left:8px}
+        .log-entry .status.success{background:#10b981}
+        .log-entry .status.error{background:#ef4444}
+        
+        /* 开关 */
+        .switch-container{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #3d3d5c}
+        .switch-container:last-child{border-bottom:none}
+        .switch-label{flex:1}
+        .switch-label .title{font-size:0.9rem;color:white}
+        .switch-label .desc{font-size:0.75rem;color:#999;margin-top:4px}
+        .switch{width:50px;height:26px;background:#4d4d6c;border-radius:13px;position:relative;cursor:pointer;transition:all 0.3s}
+        .switch.active{background:#10b981}
+        .switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:all 0.3s}
+        .switch.active::after{left:27px}
+        
+        /* 数据展示 */
+        .data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+        .data-card{background:#3d3d5c;padding:16px;border-radius:12px;text-align:center}
+        .data-card .number{font-size:2rem;font-weight:700;color:#f9b572}
+        .data-card .label{font-size:0.8rem;color:#999;margin-top:4px}
+        
+        /* 操作按钮 */
+        .action-btn{background:linear-gradient(135deg,#f9b572,#e87a5d);color:white;border:none;padding:14px;border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer;width:100%;margin-top:12px;transition:all 0.3s}
+        .action-btn:active{transform:scale(0.98)}
+        .action-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626)}
+        
+        /* 空状态 */
+        .empty-state{text-align:center;padding:40px 20px}
+        .empty-state .icon{font-size:3rem;margin-bottom:16px;opacity:0.3}
+        .empty-state .text{font-size:0.9rem;color:#999}
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+    <div class="header-top">
+        <button class="back-btn" onclick="history.back()">←</button>
+        <h1>🔧 开发者工具</h1>
+        <div style="width:40px"></div>
+    </div>
+</header>
+
+<!-- 警告提示 -->
+<div class="warning-banner">
+    <h3>⚠️ 内部工具</h3>
+    <p>此页面仅供开发人员和评委使用<br>普通用户无需访问</p>
+</div>
+
+<!-- 快捷功能 -->
+<div class="card">
+    <h3><span class="icon">🚀</span> 快捷功能</h3>
+    
+    <button class="feature-btn" onclick="openExternal('demo-judge-fixed.html')">
+        <div class="left">
+            <span class="icon">🎭</span>
+            <div class="text">
+                <div class="title">评委演示版</div>
+                <div class="desc">黑客松演示专用</div>
+            </div>
+        </div>
+        <span class="arrow">→</span>
+    </button>
+    
+    <button class="feature-btn" onclick="openExternal('产品架构总览.html')">
+        <div class="left">
+            <span class="icon">🗺️</span>
+            <div class="text">
+                <div class="title">产品架构总览</div>
+                <div class="desc">完整功能地图</div>
+            </div>
+        </div>
+        <span class="arrow">→</span>
+    </button>
+    
+    <button class="feature-btn" onclick="openExternal('功能检查报告.md')">
+        <div class="left">
+            <span class="icon">📊</span>
+            <div class="text">
+                <div class="title">功能检查报告</div>
+                <div class="desc">完整性检查结果</div>
+            </div>
+        </div>
+        <span class="arrow">→</span>
+    </button>
+    
+    <button class="feature-btn" onclick="openExternal('高德地图能力诊断.html')">
+        <div class="left">
+            <span class="icon">🗺️</span>
+            <div class="text">
+                <div class="title">地图能力诊断</div>
+                <div class="desc">API 功能测试</div>
+            </div>
+        </div>
+        <span class="arrow">→</span>
+    </button>
+</div>
+
+<!-- API 日志 -->
+<div class="card">
+    <h3><span class="icon">📡</span> API 调用日志</h3>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:0.85rem;color:#999">实时调试信息（仅演示使用）</span>
+        <button onclick="clearLogs()" style="background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer">清空日志</button>
+    </div>
+    <div class="log-container" id="apiLog">
+        <div class="empty-state">
+            <div class="icon">📡</div>
+            <div class="text">暂无 API 调用记录<br>操作后将显示日志</div>
+        </div>
+    </div>
+</div>
+
+<!-- 数据看板 -->
+<div class="card">
+    <h3><span class="icon">📊</span> 数据看板</h3>
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="number" id="totalOrders">0</div>
+            <div class="label">总订单数</div>
+        </div>
+        <div class="data-card">
+            <div class="number" id="totalTickets">0</div>
+            <div class="label">门票销量</div>
+        </div>
+        <div class="data-card">
+            <div class="number" id="totalPoints">0</div>
+            <div class="label">积分发放</div>
+        </div>
+        <div class="data-card">
+            <div class="number" id="totalWishes">0</div>
+            <div class="label">许愿数量</div>
+        </div>
+    </div>
+    <button class="action-btn" onclick="refreshData()">🔄 刷新数据</button>
+</div>
+
+<!-- 系统设置 -->
+<div class="card">
+    <h3><span class="icon">⚙️</span> 系统设置</h3>
+    
+    <div class="switch-container">
+        <div class="switch-label">
+            <div class="title">调试模式</div>
+            <div class="desc">显示详细的错误信息</div>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+    </div>
+    
+    <div class="switch-container">
+        <div class="switch-label">
+            <div class="title">API 日志</div>
+            <div class="desc">记录所有 API 调用（演示用）</div>
+        </div>
+        <div class="switch active" onclick="toggleSwitch(this)"></div>
+    </div>
+    
+    <div class="switch-container">
+        <div class="switch-label">
+            <div class="title">性能监控</div>
+            <div class="desc">显示页面加载时间</div>
+        </div>
+        <div class="switch" onclick="toggleSwitch(this)"></div>
+    </div>
+</div>
+
+<!-- 数据管理 -->
+<div class="card">
+    <h3><span class="icon">💾</span> 数据管理</h3>
+    <button class="action-btn" onclick="exportData()">📥 导出数据</button>
+    <button class="action-btn danger" onclick="clearAllData()">🗑️ 清空所有数据</button>
+</div>
+
+<script>
+// 打开外部页面
+function openExternal(url) {
+    window.open(url, '_blank');
+}
+
+// 切换开关
+function toggleSwitch(element) {
+    element.classList.toggle('active');
+    const isEnabled = element.classList.contains('active');
+    
+    // 保存设置
+    const setting = element.previousElementSibling.querySelector('.title').textContent.trim();
+    localStorage.setItem('debug_' + setting, isEnabled);
+    
+    showToast(`${setting} 已${isEnabled ? '开启' : '关闭'}`);
+}
+
+// 添加 API 日志
+function addApiLog(method, url, status) {
+    const logContainer = document.getElementById('apiLog');
+    
+    // 如果是第一条，清空空状态
+    if (logContainer.querySelector('.empty-state')) {
+        logContainer.innerHTML = '';
+    }
+    
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+        <span class="time">${new Date().toLocaleTimeString()}</span>
+        <span class="method ${method.toLowerCase()}">${method}</span>
+        <span class="url">${url}</span>
+        <span class="status ${status >= 200 && status < 300 ? 'success' : 'error'}">${status}</span>
+    `;
+    
+    logContainer.insertBefore(entry, logContainer.firstChild);
+    
+    // 限制日志数量
+    while (logContainer.children.length > 100) {
+        logContainer.removeChild(logContainer.lastChild);
+    }
+}
+
+// 清空日志
+function clearLogs() {
+    document.getElementById('apiLog').innerHTML = `
+        <div class="empty-state">
+            <div class="icon">📡</div>
+            <div class="text">暂无 API 调用记录<br>操作后将显示日志</div>
+        </div>
+    `;
+}
+
+// 刷新数据
+function refreshData() {
+    // 从 localStorage 读取数据
+    const orders = JSON.parse(localStorage.getItem('moodmap_orders') || '[]');
+    const points = JSON.parse(localStorage.getItem('moodmap_points') || '0');
+    const wishes = JSON.parse(localStorage.getItem('moodmap_wishes') || '[]');
+    
+    // 计算统计数据
+    const totalOrders = orders.length;
+    const totalTickets = orders.reduce((sum, order) => sum + (order.adultCount || 0) + (order.childCount || 0), 0);
+    const totalPoints = parseInt(points) || 0;
+    const totalWishes = wishes.length;
+    
+    // 更新显示
+    document.getElementById('totalOrders').textContent = totalOrders;
+    document.getElementById('totalTickets').textContent = totalTickets;
+    document.getElementById('totalPoints').textContent = totalPoints;
+    document.getElementById('totalWishes').textContent = totalWishes;
+    
+    showToast('数据已刷新');
+}
+
+// 导出数据
+function exportData() {
+    const data = {
+        orders: JSON.parse(localStorage.getItem('moodmap_orders') || '[]'),
+        points: localStorage.getItem('moodmap_points'),
+        wishes: JSON.parse(localStorage.getItem('moodmap_wishes') || []),
+        settings: {
+            debug: localStorage.getItem('debug_调试模式'),
+            apiLog: localStorage.getItem('debug_API 日志'),
+            performance: localStorage.getItem('debug_性能监控')
+        },
+        exportedAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `moodmap_data_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('数据已导出');
+}
+
+// 清空所有数据
+function clearAllData() {
+    if (confirm('⚠️ 确定要清空所有数据吗？\n\n此操作不可恢复！')) {
+        localStorage.clear();
+        showToast('所有数据已清空');
+        refreshData();
+        clearLogs();
+    }
+}
+
+// 提示
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(249,181,114,0.95);color:white;padding:14px 28px;border-radius:24px;font-size:0.9rem;z-index:1000;white-space:nowrap';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    refreshData();
+    
+    // 模拟一些 API 调用日志
+    setTimeout(() => addApiLog('GET', '/api/route/generate', 200), 500);
+    setTimeout(() => addApiLog('POST', '/api/agent/chat', 200), 1000);
+    setTimeout(() => addApiLog('GET', '/api/poi/longhua_temple', 200), 1500);
+});
+</script>
+
+</body>
+</html>

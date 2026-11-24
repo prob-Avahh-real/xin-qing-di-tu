@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径规划测试 - 修复版</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77&plugin=AMap.Geocoder,AMap.Walking,AMap.Driving,AMap.Transit"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;padding:16px}
+        .container{max-width:900px;margin:0 auto;background:white;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+        .header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:20px;border-radius:16px 16px 0 0}
+        .header h1{font-size:1.5rem;margin-bottom:8px}
+        .header p{opacity:0.9;font-size:0.9rem}
+        .section{padding:20px;border-bottom:1px solid #f0f0f0}
+        .section:last-child{border-bottom:none}
+        .section h2{font-size:1.1rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .input-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+        input,select{padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;flex:1;min-width:150px}
+        input:focus{outline:none;border-color:#F9B572;box-shadow:0 0 0 3px rgba(249,181,114,0.1)}
+        .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 20px;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,93,0.3)}
+        .btn:active{transform:translateY(0)}
+        .btn:disabled{background:#ccc;cursor:not-allowed}
+        #map{width:100%;height:450px;border-radius:12px;margin-top:16px}
+        .result-box{background:#f8f9fa;padding:16px;border-radius:12px;margin-top:16px;min-height:60px}
+        .result-box.error{background:#fee;border:1px solid #fcc}
+        .result-box.success{background:#efe;border:1px solid #cfc}
+        .result-item{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e0e0e0}
+        .result-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+        .label{font-size:0.75rem;color:#888;margin-bottom:4px;text-transform:uppercase;font-weight:600}
+        .value{font-size:0.95rem;color:#333}
+        .value strong{color:#E87A5D}
+        .route-card{background:linear-gradient(135deg,#fef3e4,#fee6d6);padding:16px;border-radius:12px;margin-bottom:12px;cursor:pointer;transition:all 0.2s}
+        .route-card:hover{transform:translateX(4px);box-shadow:0 4px 12px rgba(249,181,114,0.2)}
+        .route-card.selected{border:2px solid #F9B572;transform:translateX(0)}
+        .route-card .distance{font-size:1.2rem;font-weight:700;color:#E87A5D}
+        .route-card .duration{font-size:0.85rem;color:#666;margin-top:4px}
+        .route-card .desc{font-size:0.8rem;color:#888;margin-top:8px}
+        .log-box{background:#1a1a2e;color:#e0e0e0;padding:12px;border-radius:8px;font-family:monospace;font-size:0.8rem;max-height:200px;overflow-y:auto}
+        .log-entry{margin-bottom:4px}
+        .log-entry.error{color:#ff6b6b}
+        .log-entry.success{color:#51cf66}
+        .log-entry.info{color:#74c0fc}
+        .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;margin-left:8px}
+        .badge.blue{background:#e3f2fd;color:#1976d2}
+        .badge.green{background:#e8f5e9;color:#388e3c}
+        .badge.orange{background:#fff3e0;color:#f57c00}
+        .loading{display:flex;align-items:center;gap:8px}
+        .loading-spinner{width:16px;height:16px;border:2px solid #F9B572;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .tips{background:#e8f4f8;padding:12px;border-radius:8px;margin-top:16px;font-size:0.85rem;color:#006064}
+        .tips h3{font-size:0.9rem;margin-bottom:8px;color:#00838f}
+        .tips ul{padding-left:20px;line-height:1.8}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🗺️ 路径规划测试 - 修复版</h1>
+        <p>测试高德地图步行路线规划功能</p>
+    </div>
+    
+    <div class="section">
+        <h2>
+            <span>📍</span>
+            起点和终点
+        </h2>
+        <div class="input-row">
+            <input type="text" id="startPoint" value="龙华寺" placeholder="输入起点">
+            <span style="font-size:1.2rem;font-weight:bold;color:#E87A5D">→</span>
+            <input type="text" id="endPoint" value="龙华塔" placeholder="输入终点">
+        </div>
+        <div class="input-row">
+            <select id="transportMode">
+                <option value="walking">🚶 步行</option>
+                <option value="driving">🚗 驾车</option>
+                <option value="transit">🚇 公交</option>
+            </select>
+            <button class="btn" onclick="startPlanning()">▶ 开始规划</button>
+        </div>
+        <div id="planningResult" class="result-box"></div>
+    </div>
+    
+    <div class="section">
+        <h2>
+            <span>🗺️</span>
+            地图显示
+        </h2>
+        <div id="map"></div>
+    </div>
+    
+    <div class="section">
+        <h2>
+            <span>📋</span>
+            测试日志
+        </h2>
+        <div id="logContainer" class="log-box"></div>
+    </div>
+    
+    <div class="section">
+        <div class="tips">
+            <h3>💡 使用提示</h3>
+            <ul>
+                <li>可以输入具体地址，如"龙华寺"、"龙华塔"、"上海南站"</li>
+                <li>也可以输入坐标，如"121.44,31.18"</li>
+                <li>如果规划失败，请查看日志中的错误信息</li>
+                <li>确保网络连接正常</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+let map = null;
+let planningInProgress = false;
+
+// 日志函数
+function log(message, type = 'info') {
+    const container = document.getElementById('logContainer');
+    const div = document.createElement('div');
+    div.className = `log-entry ${type}`;
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    console.log(message);
+}
+
+// 初始化地图
+function initMap() {
+    log('初始化地图...', 'info');
+    
+    if (!window.AMap) {
+        log('❌ 高德地图 API 未加载', 'error');
+        return false;
+    }
+    
+    try {
+        map = new AMap.Map('map', {
+            zoom: 16,
+            center: [121.444807, 31.180147],
+            mapStyle: 'amap://styles/light',
+            viewMode: '3D'
+        });
+        
+        map.on('complete', () => {
+            log('✅ 地图加载成功', 'success');
+        });
+        
+        map.on('error', (e) => {
+            log('❌ 地图加载失败：' + JSON.stringify(e), 'error');
+        });
+        
+        return true;
+    } catch (e) {
+        log('❌ 地图初始化异常：' + e.message, 'error');
+        return false;
+    }
+}
+
+// 地理编码
+function geocodeAddress(address) {
+    return new Promise((resolve, reject) => {
+        if (!AMap.Geocoder) {
+            reject(new Error('Geocoder 插件不可用'));
+            return;
+        }
+        
+        const geocoder = new AMap.Geocoder({
+            city: '上海'
+        });
+        
+        geocoder.getLocation(address, (status, result) => {
+            if (status === 'complete' && result.geocodes.length) {
+                resolve(result.geocodes[0]);
+            } else {
+                reject(new Error('未找到地址：' + address));
+            }
+        });
+    });
+}
+
+// 开始规划
+async function startPlanning() {
+    if (planningInProgress) {
+        log('⚠️ 规划正在进行中，请稍候...', 'error');
+        return;
+    }
+    
+    const start = document.getElementById('startPoint').value.trim();
+    const end = document.getElementById('endPoint').value.trim();
+    const mode = document.getElementById('transportMode').value;
+    
+    if (!start || !end) {
+        log('❌ 请输入起点和终点', 'error');
+        alert('请输入起点和终点');
+        return;
+    }
+    
+    planningInProgress = true;
+    const resultDiv = document.getElementById('planningResult');
+    resultDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><span>规划中...</span></div>';
+    resultDiv.className = 'result-box';
+    
+    log(`开始规划：${start} → ${end} (${mode})`, 'info');
+    
+    try {
+        // 地理编码获取坐标
+        log('正在获取起点坐标...', 'info');
+        const startGeo = await geocodeAddress(start);
+        log(`✅ 起点坐标：[${startGeo.location.lng}, ${startGeo.location.lat}]`, 'success');
+        
+        log('正在获取终点坐标...', 'info');
+        const endGeo = await geocodeAddress(end);
+        log(`✅ 终点坐标：[${endGeo.location.lng}, ${endGeo.location.lat}]`, 'success');
+        
+        // 在地图上标记
+        if (map) {
+            map.clearMap();
+            new AMap.Marker({
+                position: startGeo.location,
+                title: '起点：' + start,
+                map: map,
+                label: {content: '起', offset: new AMap.Pixel(-6, -20)}
+            });
+            new AMap.Marker({
+                position: endGeo.location,
+                title: '终点：' + end,
+                map: map,
+                label: {content: '终', offset: new AMap.Pixel(-6, -20)}
+            });
+            map.setFitView();
+        }
+        
+        // 路径规划
+        log(`开始${mode}路径规划...`, 'info');
+        
+        let planner;
+        if (mode === 'walking') {
+            planner = new AMap.Walking({map: map});
+        } else if (mode === 'driving') {
+            planner = new AMap.Driving({map: map});
+        } else if (mode === 'transit') {
+            planner = new AMap.Transit({map: map});
+        }
+        
+        planner.search(startGeo.location, endGeo.location, (status, result) => {
+            planningInProgress = false;
+            
+            if (status === 'complete') {
+                log('✅ 路径规划成功！', 'success');
+                displayResult(result, mode);
+            } else {
+                const errorMsg = result?.info || '未知错误';
+                log('❌ 路径规划失败：' + errorMsg, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ 规划失败：${errorMsg}</div>`;
+                resultDiv.className = 'result-box error';
+            }
+        });
+        
+    } catch (e) {
+        planningInProgress = false;
+        log('❌ 规划异常：' + e.message, 'error');
+        resultDiv.innerHTML = `<div class="error">❌ 异常：${e.message}</div>`;
+        resultDiv.className = 'result-box error';
+    }
+}
+
+// 显示结果
+function displayResult(result, mode) {
+    const resultDiv = document.getElementById('planningResult');
+    
+    if (!result.routes || result.routes.length === 0) {
+        resultDiv.innerHTML = '<div class="error">❌ 未找到可行路线</div>';
+        resultDiv.className = 'result-box error';
+        return;
+    }
+    
+    let html = '<h3 style="margin-bottom:12px;font-size:1rem;">推荐路线</h3>';
+    
+    result.routes.forEach((route, index) => {
+        const distance = route.distance || 0;
+        const duration = route.duration || 0;
+        const distanceText = distance >= 1000 ? (distance/1000).toFixed(2) + '公里' : distance + '米';
+        const durationText = duration >= 3600 ? 
+            (duration/3600).toFixed(1) + '小时' : 
+            Math.round(duration/60) + '分钟';
+        
+        html += `
+            <div class="route-card ${index===0?'selected':''}" onclick="selectRoute(${index})">
+                <div class="distance">${distanceText} <span style="font-size:0.8rem;font-weight:400;color:#666">· ${durationText}</span></div>
+                <div class="duration">路线 ${index+1} / 共${result.routes.length}条</div>
+                ${route.steps ? `<div class="desc">共${route.steps.length}步</div>` : ''}
+            </div>
+        `;
+    });
+    
+    html += `
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e0e0e0">
+            <div class="result-item">
+                <div class="label">总距离</div>
+                <div class="value"><strong>${result.routes[0].distance} 米</strong></div>
+            </div>
+            <div class="result-item">
+                <div class="label">预计时间</div>
+                <div class="value"><strong>${Math.round(result.routes[0].duration/60)} 分钟</strong></div>
+            </div>
+            <div class="result-item">
+                <div class="label">路线数量</div>
+                <div class="value"><strong>${result.routes.length} 条</strong></div>
+            </div>
+            <div style="margin-top:16px;text-align:center">
+                <button class="btn" onclick="zoomToRoute()">🗺️ 查看完整路线</button>
+            </div>
+        </div>
+    `;
+    
+    resultDiv.innerHTML = html;
+    resultDiv.className = 'result-box success';
+}
+
+// 选择路线
+function selectRoute(index) {
+    document.querySelectorAll('.route-card').forEach((card, i) => {
+        card.classList.toggle('selected', i === index);
+    });
+    log(`选择路线 ${index+1}`, 'info');
+}
+
+// 缩放查看路线
+function zoomToRoute() {
+    if (map) {
+        map.setFitView();
+        log('已缩放至完整路线', 'success');
+    }
+}
+
+// 页面加载
+window.onload = () => {
+    log('页面加载完成', 'info');
+    log('高德地图 API 版本：' + (AMap ? AMap.version : '未加载'), 'info');
+    initMap();
+};
+</script>
+</body>
+</html>

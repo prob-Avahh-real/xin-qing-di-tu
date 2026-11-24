@@ -1,0 +1,419 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>榫欏崕路鐏靛鍚戝 | 鍟嗘埛鍚堜綔鍏ラ┗</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:linear-gradient(145deg,#f5f0eb,#e8e2dc);color:#3a2c2a;padding-bottom:40px}header{background:linear-gradient(135deg,#E87A5D,#D46A4A);color:white;padding:24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.1)}header h1{font-size:1.8rem;margin-bottom:6px}header p{font-size:0.9rem;opacity:0.9}.container{max-width:800px;margin:0 auto;padding:20px}.status-banner{background:linear-gradient(135deg,#10b981,#059669);color:white;padding:20px;border-radius:24px;margin:20px 0;box-shadow:0 4px 14px rgba(16,185,129,0.3)}.status-banner.pending{background:linear-gradient(135deg,#f59e0b,#d97706)}.status-banner.rejected{background:linear-gradient(135deg,#ef4444,#dc2626)}.status-banner h3{font-size:1.1rem;margin-bottom:8px}.status-banner p{font-size:0.85rem;opacity:0.9}.section{background:white;border-radius:24px;padding:24px;margin:20px 0;box-shadow:0 4px 14px rgba(0,0,0,0.04)}.section-title{font-size:1.1rem;color:#b3704b;margin-bottom:16px;font-weight:600;display:flex;align-items:center;gap:8px}.section-title .icon{font-size:1.4rem}.step-list{counter-reset:step}.step-item{position:relative;padding-left:40px;margin-bottom:20px;counter-increment:step}.step-item::before{content:counter(step);position:absolute;left:0;top:0;width:32px;height:32px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem}.step-item h4{color:#5a4a42;margin-bottom:6px}.step-item p{color:#7a5a48;font-size:0.85rem;line-height:1.6}.input-group{margin-bottom:20px}.input-group label{display:block;font-size:0.85rem;color:#7a5a48;margin-bottom:8px;font-weight:600}.input-group input,.input-group select,.input-group textarea{width:100%;padding:14px 18px;border:2px solid #ffe0d0;border-radius:16px;font-size:0.95rem;background:white;transition:border-color 0.2s}.input-group input:focus,.input-group select:focus,.input-group textarea:focus{outline:none;border-color:#F9B572}.input-group textarea{min-height:100px;resize:vertical}.input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}.file-upload{border:2px dashed #ffe0d0;border-radius:16px;padding:30px;text-align:center;background:#fef7f2;cursor:pointer;transition:all 0.2s}.file-upload:hover{border-color:#F9B572;background:#fef0e6}.file-upload .icon{font-size:2.5rem;margin-bottom:12px}.file-upload p{color:#7a5a48;font-size:0.85rem}.benefit-card{background:linear-gradient(135deg,#fef3e4,#fee6d6);border-radius:20px;padding:20px;margin-bottom:16px}.benefit-card h4{color:#b3704b;margin-bottom:8px;font-size:1rem}.benefit-card ul{list-style:none;padding-left:0}.benefit-card li{padding:6px 0;color:#5a4a42;font-size:0.9rem}.benefit-card li::before{content:"鉁?";color:#10b981;font-weight:700}.submit-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:18px;border-radius:44px;font-size:1.05rem;font-weight:600;cursor:pointer;width:100%;box-shadow:0 6px 16px rgba(249,181,114,0.3);transition:all 0.2s}.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(249,181,114,0.4)}.submit-btn:active{transform:scale(0.98)}.submit-btn:disabled{background:#d1d5db;cursor:not-allowed;transform:none}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:14px 28px;border-radius:12px;font-size:0.9rem;display:none;z-index:1000}.process-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}.process-step{text-align:center;padding:16px;background:#fef7f2;border-radius:16px}.process-step .icon{font-size:2rem;margin-bottom:8px}.process-step .title{font-size:0.85rem;color:#5a4a42;font-weight:600;margin-bottom:4px}.process-step .desc{font-size:0.75rem;color:#a28c7c}.process-step.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}.process-step.active .title,.process-step.active .desc{color:white}.nav-tabs{display:flex;gap:8px;margin-bottom:20px}.nav-tab{flex:1;background:#fef7f2;border:2px solid #ffe0d0;padding:14px;border-radius:16px;font-size:0.9rem;font-weight:600;cursor:pointer;color:#7a5a48;transition:all 0.2s;text-align:center}.nav-tab.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-color:transparent}.form-footer{text-align:center;margin-top:24px;padding-top:24px;border-top:1px solid #f0e6de}.form-footer a{color:#E87A5D;text-decoration:none;font-size:0.85rem}.form-footer a:hover{text-decoration:underline}.dashboard-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}.stat-card{background:linear-gradient(135deg,#fef3e4,#fee6d6);border-radius:20px;padding:16px;text-align:center}.stat-card .number{font-size:1.8rem;font-weight:700;color:#E87A5D;margin-bottom:4px}.stat-card .label{font-size:0.8rem;color:#7a5a48}.review-card{background:#fef7f2;border-radius:16px;padding:16px;margin-bottom:12px;border-left:4px solid #F9B572}.review-card .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.review-card .name{font-weight:600;color:#5a4a42}.review-card .status{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600}.review-card .status.pending{background:#fef3c7;color:#92400e}.review-card .status.approved{background:#d1fae5;color:#059669}.review-card .status.rejected{background:#fee2e2;color:#dc2626}.review-card .info{font-size:0.85rem;color:#7a5a48;margin-bottom:8px}.review-card .actions{display:flex;gap:8px;margin-top:12px}.review-card button{flex:1;padding:8px;border:none;border-radius:12px;font-size:0.8rem;font-weight:600;cursor:pointer}.review-card .btn-approve{background:#10b981;color:white}.review-card .btn-reject{background:#ef4444;color:white}.review-card .btn-view{background:#F9B572;color:white}
+    </style>
+</head>
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+
+    <h1>馃彧 鍟嗘埛鍚堜綔鍏ラ┗</h1>
+    <p>榫欏崕路鐏靛鍚戝 | 鎼烘墜鍏辫耽锛屽叡鍒涚編濂戒綋楠?/p>
+</header>
+
+<div class="container">
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="apply">馃摑 鍚堜綔鐢宠</div>
+        <div class="nav-tab" data-tab="process">馃搳 瀹℃牳杩涘害</div>
+        <div class="nav-tab" data-tab="dashboard">馃搱 鏁版嵁鐪嬫澘</div>
+    </div>
+
+    <!-- 鍚堜綔鐢宠琛ㄥ崟 -->
+    <div id="applyTab" class="tab-content">
+        <div class="status-banner" id="statusBanner" style="display:none">
+            <h3 id="bannerTitle">鉁?宸叉彁浜ょ敵璇?/h3>
+            <p id="bannerDesc">鎴戜滑灏嗗湪 3 涓伐浣滄棩鍐呭鏍革紝璇蜂繚鎸佺數璇濈晠閫?/p>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="icon">馃幆</span> 鍚堜綔娴佺▼</div>
+            <div class="process-flow">
+                <div class="process-step active">
+                    <div class="icon">馃摑</div>
+                    <div class="title">鎻愪氦鐢宠</div>
+                    <div class="desc">濉啓鍩烘湰淇℃伅</div>
+                </div>
+                <div class="process-step">
+                    <div class="icon">馃攳</div>
+                    <div class="title">璧勮川瀹℃牳</div>
+                    <div class="desc">1-3 涓伐浣滄棩</div>
+                </div>
+                <div class="process-step">
+                    <div class="icon">馃</div>
+                    <div class="title">绛剧害鍚堜綔</div>
+                    <div class="desc">纭鍚堜綔缁嗚妭</div>
+                </div>
+                <div class="process-step">
+                    <div class="icon">馃殌</div>
+                    <div class="title">涓婄嚎杩愯惀</div>
+                    <div class="desc">姝ｅ紡鎺ュ緟娓稿</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="icon">馃拵</span> 鍚堜綔鏉冪泭</div>
+            <div class="benefit-card">
+                <h4>馃幆 鍩虹鏉冪泭</h4>
+                <ul>
+                    <li>鍔犲叆榫欏崕瀹樻柟鎺ㄨ崘璺嚎</li>
+                    <li>浜彈骞冲彴娴侀噺鏇濆厜</li>
+                    <li>涓撳睘鍟嗘埛鍚庡彴绠＄悊</li>
+                    <li>瀹氭湡杩愯惀鍩硅鏀寔</li>
+                </ul>
+            </div>
+            <div class="benefit-card">
+                <h4>馃搱 澧炲€兼潈鐩?/h4>
+                <ul>
+                    <li>鏁版嵁鍒嗘瀽鎶ュ憡锛堣劚鏁忥級</li>
+                    <li>绮惧噯瀹㈡埛鎺ㄨ崘</li>
+                    <li>鑱斿悎钀ラ攢娲诲姩</li>
+                    <li>浼樺厛娲诲姩鎶ュ悕鏉?/li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="icon">馃搵</span> 鍏ラ┗鐢宠</div>
+            <form id="applyForm" onsubmit="submitApplication(event)">
+                <div class="input-group">
+                    <label>鍟嗘埛绫诲瀷 *</label>
+                    <select id="businessType" required>
+                        <option value="">璇烽€夋嫨绫诲瀷</option>
+                        <option value="restaurant">馃崪 椁愰ギ搴?/option>
+                        <option value="cafe">鈽?鍜栧暋鍘?鑼堕</option>
+                        <option value="attraction">馃幆 鏅偣/鍦洪</option>
+                        <option value="shop">馃泹锔?闆跺敭搴?/option>
+                        <option value="experience">馃帹 浣撻獙宸ュ潑</option>
+                        <option value="hotel">馃彣 浣忓</option>
+                        <option value="other">鍏朵粬</option>
+                    </select>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>鍟嗘埛鍚嶇О *</label>
+                        <input type="text" id="businessName" placeholder="渚嬪锛氶緳鍗庡绱犳枊棣? required>
+                    </div>
+                    <div class="input-group">
+                        <label>鍝佺墝鍚嶇О</label>
+                        <input type="text" id="brandName" placeholder="渚嬪锛氱櫨骞磋€佸瓧鍙?>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>鍟嗘埛鍦板潃 *</label>
+                    <input type="text" id="address" placeholder="璇︾粏鍦板潃锛岀敤浜庤矾绾胯鍒? required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>鑱旂郴浜哄鍚?*</label>
+                        <input type="text" id="contactName" placeholder="鎮ㄧ殑濮撳悕" required>
+                    </div>
+                    <div class="input-group">
+                        <label>鑱旂郴鐢佃瘽 *</label>
+                        <input type="tel" id="contactPhone" placeholder="鎵嬫満鍙风爜" pattern="[0-9]{11}" required>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>寰俊</label>
+                        <input type="text" id="wechat" placeholder="寰俊鍙?>
+                    </div>
+                    <div class="input-group">
+                        <label>鐢靛瓙閭</label>
+                        <input type="email" id="email" placeholder="閭鍦板潃">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>钀ヤ笟鏃堕棿</label>
+                    <input type="text" id="businessHours" placeholder="渚嬪锛氬懆涓€鑷冲懆鏃?9:00-21:00">
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>浜哄潎娑堣垂 (鍏?</label>
+                        <input type="number" id="avgPrice" placeholder="渚嬪锛?0">
+                    </div>
+                    <div class="input-group">
+                        <label>鍙绾充汉鏁?/label>
+                        <input type="number" id="capacity" placeholder="鍚屾椂鍙帴寰呬汉鏁?>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>鍟嗘埛绠€浠?*</label>
+                    <textarea id="description" placeholder="浠嬬粛鎮ㄧ殑鐗硅壊銆佸巻鍙层€佷寒鐐圭瓑锛屾湁鍔╀簬瀹℃牳閫氳繃" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>鐗硅壊鏈嶅姟/浜у搧</label>
+                    <textarea id="features" placeholder="鍒椾妇 3-5 涓壒鑹诧紝渚嬪锛氱櫨骞磋€佸瓧鍙枫€佺礌楦竴缁濄€佸厤璐硅尪姘寸瓑"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>鎯冲姞鍏ュ摢浜涙儏缁矾绾匡紵锛堝彲澶氶€夛級</label>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="sad"> 馃様 EMO 娌绘剤</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="relax"> 馃槍 鏁ｅ績</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="photo"> 馃摳 鎷嶇収</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="social"> 馃懌 鑱氫細</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="art"> 馃帹 鏂囪壓</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor-pointer"><input type="checkbox" name="emotions" value="date"> 馃挄 绾︿細</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="family"> 馃懆鈥嶐煈┾€嶐煈?浜插瓙</label>
+                        <label style="background:#fef7f2;padding:8px 14px;border-radius:20px;font-size:0.8rem;cursor:pointer"><input type="checkbox" name="emotions" value="food"> 馃崪 缇庨</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>浼樻儬鍒?娲诲姩锛堥€夊～锛?/label>
+                    <textarea id="coupon" placeholder="渚嬪锛氬嚟 app 鍒板簵浜?8 鎶樹紭鎯犮€佸厤璐归棣欍€佷拱涓€璧犱竴绛?></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>涓婁紶璧勮川鐓х墖</label>
+                    <div class="file-upload" onclick="document.getElementById('licenseFile').click()">
+                        <div class="icon">馃搫</div>
+                        <p>鐐瑰嚮涓婁紶钀ヤ笟鎵х収</p>
+                        <p style="color:#a28c7c;font-size:0.75rem;margin-top:6px">鏀寔 JPG銆丳NG锛屾渶澶?5MB</p>
+                        <input type="file" id="licenseFile" accept="image/*" style="display:none" onchange="handleFileSelect(this)">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>涓婁紶鐜鐓х墖锛堟渶澶?3 寮狅級</label>
+                    <div class="file-upload" onclick="document.getElementById('envFiles').click()">
+                        <div class="icon">馃摳</div>
+                        <p>鐐瑰嚮涓婁紶搴楀唴/鏅偣鐜</p>
+                        <p style="color:#a28c7c;font-size:0.75rem;margin-top:6px">鏀寔 JPG銆丳NG锛屾渶澶?5MB/寮?/p>
+                        <input type="file" id="envFiles" accept="image/*" multiple style="display:none" onchange="handleFileSelect(this)">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label style="display:flex;align-items:flex-start;gap:8px">
+                        <input type="checkbox" required style="margin-top:4px">
+                        <span>鎴戝凡闃呰骞跺悓鎰忋€婇緳鍗幝风伒澧冨悜瀵煎晢鎴峰悎浣滃崗璁€嬶紝鎵胯鎻愪緵鐪熷疄淇℃伅鍜屼紭璐ㄦ湇鍔?/span>
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">馃殌 鎻愪氦鍏ラ┗鐢宠</button>
+
+                <div class="form-footer">
+                    <p style="color:#a28c7c;font-size:0.85rem;margin-bottom:8px">鎻愪氦鍚庢垜浠皢鍦?3 涓伐浣滄棩鍐呭鏍?/p>
+                    <p style="color:#a28c7c;font-size:0.85rem">濡傛湁鐤戦棶锛岃鑱旂郴锛歜usiness@pathjoy.com</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 瀹℃牳杩涘害 -->
+    <div id="processTab" class="tab-content" style="display:none">
+        <div class="section">
+            <div class="section-title"><span class="icon">馃搳</span> 瀹℃牳杩涘害鏌ヨ</div>
+            <div class="input-row" style="margin-bottom:20px">
+                <input type="text" id="queryPhone" placeholder="璇疯緭鍏ョ敵璇锋椂濉啓鐨勬墜鏈哄彿" style="padding:12px;border:2px solid #ffe0d0;border-radius:12px">
+                <button onclick="queryStatus()" style="background:#F9B572;color:white;border:none;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer">鏌ヨ</button>
+            </div>
+
+            <div id="queryResult" style="display:none">
+                <div class="review-card">
+                    <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                        <span class="name">榫欏崕瀵虹礌鏂嬮</span>
+                        <span class="status pending">瀹℃牳涓?/span>
+                    </div>
+                    <div class="info">鐢宠鏃堕棿锛?026-04-22 14:30</div>
+                    <div class="info">鍟嗘埛绫诲瀷锛氶楗簵</div>
+                    <div class="info">褰撳墠杩涘害锛氳祫璐ㄥ鏍镐腑</div>
+                    <div class="info">棰勮瀹屾垚锛?026-04-25 鍓?/div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 鏁版嵁鐪嬫澘 -->
+    <div id="dashboardTab" class="tab-content" style="display:none">
+        <div class="section">
+            <div class="section-title"><span class="icon">馃搱</span> 鏁版嵁鐪嬫澘锛堣劚鏁忥級</div>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="number">12</div>
+                    <div class="label">鏈懆鏇濆厜閲?/div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">5</div>
+                    <div class="label">鐐瑰嚮鍒板簵</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">3</div>
+                    <div class="label">鏍搁攢浼樻儬鍒?/div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">4.8</div>
+                    <div class="label">鐢ㄦ埛璇勫垎</div>
+                </div>
+            </div>
+            <p style="color:#a28c7c;font-size:0.85rem;text-align:center">* 涓轰繚鎶ゅ晢鎴烽殣绉侊紝閮ㄥ垎鏁版嵁宸茶劚鏁忓鐞?/p>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="icon">馃幆</span> 宸插姞鍏ヨ矾绾?/div>
+            <div class="review-card">
+                <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                    <span class="name">馃様 EMO 娌绘剤绾?/span>
+                    <span class="status approved">宸蹭笂绾?/span>
+                </div>
+                <div class="info">璺嚎鍚嶇О锛氶緳鍗庡 鈫?绂忔潵鐚?鈫?绱犳枊棣?/div>
+                <div class="info">鍔犲叆鏃堕棿锛?026-04-20</div>
+                <div class="info">鏈懆鏇濆厜锛? 娆?/div>
+            </div>
+            <div class="review-card">
+                <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                    <span class="name">馃崪 缇庨瀵诲懗绾?/span>
+                    <span class="status approved">宸蹭笂绾?/span>
+                </div>
+                <div class="info">璺嚎鍚嶇О锛氶緳鍗庤€佽 鈫?绱犳枊棣?鈫?濉斿奖鍜栧暋</div>
+                <div class="info">鍔犲叆鏃堕棿锛?026-04-21</div>
+                <div class="info">鏈懆鏇濆厜锛? 娆?/div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><span class="icon">馃帀</span> 宸插弬涓庢椿鍔?/div>
+            <div class="review-card">
+                <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+                    <span class="name">2026 榫欏崕榛戝鏉句綋楠屾椿鍔?/span>
+                    <span class="status approved">杩涜涓?/span>
+                </div>
+                <div class="info">娲诲姩鏃堕棿锛?026-04-24 ~ 2026-04-26</div>
+                <div class="info">鍙備笌浜烘暟锛?0+ 榛戝鏉惧弬璧涜€?/div>
+                <div class="info">浼樻儬鍒告牳閿€锛? 寮?/div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Tab 鍒囨崲
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + 'Tab').style.display = 'block';
+    });
+});
+
+// 鏂囦欢閫夋嫨澶勭悊
+function handleFileSelect(input) {
+    const files = input.files;
+    if (files.length > 0) {
+        showToast(`鉁?宸查€夋嫨 ${files.length} 涓枃浠禶);
+    }
+}
+
+// 鎻愪氦鐢宠
+function submitApplication(event) {
+    event.preventDefault();
+    
+    // 鑾峰彇琛ㄥ崟鏁版嵁
+    const formData = {
+        businessType: document.getElementById('businessType').value,
+        businessName: document.getElementById('businessName').value,
+        brandName: document.getElementById('brandName').value,
+        address: document.getElementById('address').value,
+        contactName: document.getElementById('contactName').value,
+        contactPhone: document.getElementById('contactPhone').value,
+        wechat: document.getElementById('wechat').value,
+        email: document.getElementById('email').value,
+        businessHours: document.getElementById('businessHours').value,
+        avgPrice: document.getElementById('avgPrice').value,
+        capacity: document.getElementById('capacity').value,
+        description: document.getElementById('description').value,
+        features: document.getElementById('features').value,
+        coupon: document.getElementById('coupon').value
+    };
+    
+    // 鑾峰彇閫変腑鐨勬儏缁矾绾?    const emotions = [];
+    document.querySelectorAll('input[name="emotions"]:checked').forEach(cb => {
+        emotions.push(cb.value);
+    });
+    formData.emotions = emotions;
+    
+    console.log('鎻愪氦鐢宠:', formData);
+    
+    // 淇濆瓨鍒?localStorage锛堟ā鎷熷悗绔級
+    const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+    applications.push({
+        ...formData,
+        id: 'APP' + Date.now(),
+        status: 'pending',
+        submitTime: new Date().toISOString()
+    });
+    localStorage.setItem('pathjoy_applications', JSON.stringify(applications));
+    
+    // 鏄剧ず鎴愬姛鐘舵€?    document.getElementById('statusBanner').style.display = 'block';
+    document.getElementById('bannerTitle').textContent = '鉁?鐢宠宸叉彁浜?;
+    document.getElementById('bannerDesc').textContent = `鎴戜滑灏嗗湪 3 涓伐浣滄棩鍐呭鏍革紝璇蜂繚鎸?${formData.contactPhone} 鐢佃瘽鐣呴€歚;
+    
+    // 婊氬姩鍒伴《閮?    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 绂佺敤鎻愪氦鎸夐挳
+    document.querySelector('.submit-btn').disabled = true;
+    document.querySelector('.submit-btn').textContent = '鉁?宸叉彁浜?;
+    
+    showToast('鐢宠鎻愪氦鎴愬姛锛佹垜浠細灏藉揩瀹℃牳');
+}
+
+// 鏌ヨ鐘舵€?function queryStatus() {
+    const phone = document.getElementById('queryPhone').value;
+    if (!phone) {
+        showToast('璇疯緭鍏ユ墜鏈哄彿');
+        return;
+    }
+    
+    const applications = JSON.parse(localStorage.getItem('pathjoy_applications') || '[]');
+    const app = applications.find(a => a.contactPhone === phone);
+    
+    if (app) {
+        document.getElementById('queryResult').style.display = 'block';
+        showToast('鏌ヨ鎴愬姛');
+    } else {
+        showToast('鏈壘鍒扮敵璇疯褰?);
+        document.getElementById('queryResult').style.display = 'none';
+    }
+}
+
+// Toast 鎻愮ず
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+</script>
+</body>
+</html>
+

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 智能停车引导</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;padding-top:70px}
+        .container{max-width:900px;margin:0 auto}
+        header{text-align:center;color:white;margin-bottom:20px}
+        header h1{font-size:2rem;margin-bottom:10px}
+        header p{opacity:0.9}
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .recommendation{background:linear-gradient(135deg,#52c41a,#73d13d);color:white;padding:20px;border-radius:16px;margin-bottom:20px;box-shadow:0 4px 20px rgba(82,196,26,0.3)}
+        .recommendation h2{font-size:1.5rem;margin-bottom:10px}
+        .recommendation .reason{opacity:0.9;margin-bottom:15px}
+        .recommendation .highlight{display:flex;gap:15px;flex-wrap:wrap}
+        .recommendation .highlight span{background:rgba(255,255,255,0.2);padding:8px 15px;border-radius:20px;font-weight:600}
+        .parking-list{display:flex;flex-direction:column;gap:12px}
+        .parking-item{background:#f9f9f9;padding:15px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent}
+        .parking-item:hover{border-color:#667eea;transform:translateX(5px)}
+        .parking-item.selected{border-color:#52c41a;background:#f6ffed}
+        .parking-item.recommended{border-color:#52c41a;background:#f6ffed;position:relative}
+        .parking-item.recommended::before{content:'🏆 推荐';position:absolute;top:-10px;right:20px;background:#52c41a;color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600}
+        .parking-info h3{font-size:1.1rem;margin-bottom:5px;color:#333}
+        .parking-info .address{font-size:0.85rem;color:#999;margin-bottom:8px}
+        .parking-info .tags{display:flex;gap:8px;flex-wrap:wrap}
+        .tag{padding:4px 8px;border-radius:4px;font-size:0.75rem}
+        .tag-success{background:#f6ffed;color:#52c41a}
+        .tag-warning{background:#fffbe6;color:#faad14}
+        .tag-danger{background:#fff2f0;color:#f5222d}
+        .tag-info{background:#e6f7ff;color:#1890ff}
+        .parking-stats{display:flex;gap:15px}
+        .stat{font-size:0.85rem}
+        .stat .label{color:#999}
+        .stat .value{font-weight:600}
+        .stat .value.good{color:#52c41a}
+        .stat .value.warning{color:#faad14}
+        .stat .value.bad{color:#f5222d}
+        .distance-badge{background:#667eea;color:white;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;min-width:80px;text-align:center}
+        #mapContainer{width:100%;height:400px;border-radius:12px;margin-bottom:20px}
+        .filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .filter-btn{flex:1;min-width:100px;padding:10px;background:#f5f5f5;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer;transition:all 0.2s}
+        .filter-btn:hover{background:#667eea;color:white}
+        .filter-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+        .nav-btn{background:#667eea;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600}
+        .nav-btn:hover{background:#5568d3}
+    </style>
+</head>
+<body>
+<div id="moodmap-navbar" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 2px 10px rgba(0,0,0,0.2);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;font-family:-apple-system,sans-serif">
+    <div style="display:flex;align-items:center;gap:10px;color:white;font-size:1.1rem;font-weight:600">
+        <span style="font-size:1.5rem">🗺️</span>
+        <span>心情地图</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="business-pro-fixed.html" style="color:white;text-decoration:none;padding:6px 12px;background:rgba(255,255,255,0.2);border-radius:6px;font-size:0.9rem">📱 主 APP</a>
+        <a href="demo-judge-fixed.html" style="color:white;text-decoration:none;padding:6px 12px;background:rgba(255,255,255,0.2);border-radius:6px;font-size:0.9rem">🎭 演示</a>
+        <a href="smart-parking.html" style="color:white;text-decoration:none;padding:6px 12px;background:rgba(255,255,255,0.3);border-radius:6px;font-size:0.9rem;font-weight:600">🅿️ 停车</a>
+        <a href="全局导航中心.html" style="color:white;text-decoration:none;padding:6px 12px;background:rgba(255,255,255,0.2);border-radius:6px;font-size:0.9rem">🗺️ 导航</a>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>🅿️ 智能停车引导</h1>
+        <p>实时推荐最优停车场，快速直达不绕路</p>
+    </header>
+
+    <!-- 智能推荐 -->
+    <div class="recommendation" id="topRecommendation">
+        <h2>🏆 推荐停车场</h2>
+        <div class="reason" id="recommendReason">正在计算最佳停车场...</div>
+        <div class="highlight" id="recommendHighlights">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 筛选器 -->
+    <div class="card">
+        <h3>🔍 筛选偏好</h3>
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterParking('smart')">🤖 智能推荐</button>
+            <button class="filter-btn" onclick="filterParking('nearest')">📍 距离最近</button>
+            <button class="filter-btn" onclick="filterParking('available')">✅ 车位充足</button>
+            <button class="filter-btn" onclick="filterParking('cheap')">💰 价格最低</button>
+            <button class="filter-btn" onclick="filterParking('free')">🆓 免费</button>
+        </div>
+    </div>
+
+    <!-- 地图 -->
+    <div class="card">
+        <h3>🗺️ 停车场分布</h3>
+        <div id="mapContainer"></div>
+    </div>
+
+    <!-- 停车场列表 -->
+    <div class="card">
+        <h3>📋 停车场列表</h3>
+        <div class="parking-list" id="parkingList">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+</div>
+
+<script>
+// 龙华地区停车场数据
+const PARKING_DATA = [
+    {
+        id: 'p001',
+        name: '龙华寺停车场',
+        address: '龙华路 2853 号',
+        lat: 31.180147,
+        lng: 121.444807,
+        total: 150,
+        available: 45,
+        price: 10,
+        type: 'temple',
+        hours: '7:00-17:00',
+        phone: '021-64567890',
+        features: ['近景点', '免费领香', '素斋馆']
+    },
+    {
+        id: 'p002',
+        name: '龙华烈士陵园停车场',
+        address: '龙华西路 180 号',
+        lat: 31.179532,
+        lng: 121.443876,
+        total: 80,
+        available: 62,
+        price: 0,
+        type: 'public',
+        hours: '8:00-16:30',
+        phone: '021-64561234',
+        features: ['免费', '爱国教育', '人少']
+    },
+    {
+        id: 'p003',
+        name: '龙华老街停车场',
+        address: '龙华路 2790 号',
+        lat: 31.181234,
+        lng: 121.443567,
+        total: 120,
+        available: 8,
+        price: 8,
+        type: 'public',
+        hours: '24 小时',
+        phone: '021-64562345',
+        features: ['小吃街', '24 小时', '热闹']
+    },
+    {
+        id: 'p004',
+        name: '塔影空间地下车库',
+        address: '云锦路 701 号',
+        lat: 31.178943,
+        lng: 121.446231,
+        total: 200,
+        available: 135,
+        price: 15,
+        type: 'mall',
+        hours: '9:00-21:00',
+        phone: '021-64563456',
+        features: ['车位充足', '网红打卡', '咖啡']
+    },
+    {
+        id: 'p005',
+        name: '龙美术馆停车场',
+        address: '龙腾大道 3398 号',
+        lat: 31.177234,
+        lng: 121.449123,
+        total: 100,
+        available: 3,
+        price: 12,
+        type: 'public',
+        hours: '10:00-18:00',
+        phone: '021-64564567',
+        features: ['工业风', '展览', '拍照']
+    },
+    {
+        id: 'p006',
+        name: '西岸滨江公园停车场',
+        address: '龙腾大道 2290 号',
+        lat: 31.175234,
+        lng: 121.448765,
+        total: 180,
+        available: 92,
+        price: 10,
+        type: 'public',
+        hours: '6:00-22:00',
+        phone: '021-64565678',
+        features: ['江景', '跑步', '日落']
+    },
+    {
+        id: 'p007',
+        name: '西岸大剧院停车场',
+        address: '龙腾大道 2290 号',
+        lat: 31.174567,
+        lng: 121.450234,
+        total: 250,
+        available: 180,
+        price: 15,
+        type: 'mall',
+        hours: '9:00-22:00',
+        phone: '021-64566789',
+        features: ['车位充足', '剧院', '现代化']
+    },
+    {
+        id: 'p008',
+        name: '西岸梦中心停车场',
+        address: '云锦路 800 号',
+        lat: 31.172000,
+        lng: 121.460000,
+        total: 300,
+        available: 15,
+        price: 12,
+        type: 'mall',
+        hours: '10:00-22:00',
+        phone: '021-64567891',
+        features: ['赛博朋克', '夜景', '年轻人']
+    },
+    {
+        id: 'p009',
+        name: '龙华西路路边停车',
+        address: '龙华西路近龙水北路',
+        lat: 31.182345,
+        lng: 121.442345,
+        total: 50,
+        available: 28,
+        price: 6,
+        type: 'roadside',
+        hours: '7:00-19:00',
+        phone: '-',
+        features: ['便宜', '路边', '方便']
+    },
+    {
+        id: 'p010',
+        name: '云锦路路边停车',
+        address: '云锦路近龙耀路',
+        lat: 31.176789,
+        lng: 121.447890,
+        total: 60,
+        available: 5,
+        price: 6,
+        type: 'roadside',
+        hours: '7:00-19:00',
+        phone: '-',
+        features: ['便宜', '西岸', '紧张']
+    },
+    {
+        id: 'p011',
+        name: '西岸美术馆停车场',
+        address: '龙腾大道 2777 号',
+        lat: 31.176543,
+        lng: 121.447654,
+        total: 150,
+        available: 78,
+        price: 12,
+        type: 'public',
+        hours: '10:00-18:00',
+        phone: '021-64568912',
+        features: ['美术馆', '展览', '充足']
+    },
+    {
+        id: 'p012',
+        name: '龙华寺樱花林临时停车场',
+        address: '龙华寺藏经楼后',
+        lat: 31.180347,
+        lng: 121.445007,
+        total: 40,
+        available: 0,
+        price: 0,
+        type: 'temple',
+        hours: '季节性开放',
+        phone: '021-64567890',
+        features: ['免费', '樱花季', '已满']
+    }
+];
+
+// 用户当前位置（默认龙华寺）
+let userLocation = {lat: 31.180147, lng: 121.444807};
+let currentFilter = 'smart';
+let map;
+let markers = [];
+
+// 计算距离（简化版）
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c * 1000).toFixed(0);
+}
+
+// 智能推荐算法
+function getSmartRecommendation() {
+    let scored = PARKING_DATA.map(p => {
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, p.lat, p.lng);
+        const availability = p.available / p.total;
+        const priceScore = p.price === 0 ? 100 : 100 - p.price;
+        
+        // 综合评分
+        let score = 0;
+        
+        // 距离分（40%）
+        if (distance < 200) score += 40;
+        else if (distance < 500) score += 30;
+        else if (distance < 1000) score += 20;
+        else score += 10;
+        
+        // 可用性分（40%）
+        score += availability * 40;
+        
+        // 价格分（20%）
+        score += (priceScore / 100) * 20;
+        
+        // 已满直接 0 分
+        if (p.available === 0) score = 0;
+        
+        return {...p, distance, score};
+    });
+    
+    scored.sort((a, b) => b.score - a.score);
+    return scored[0];
+}
+
+// 筛选停车场
+function filterParking(type) {
+    currentFilter = type;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    let filtered = [...PARKING_DATA];
+    
+    switch(type) {
+        case 'smart':
+            const rec = getSmartRecommendation();
+            renderParkingList([rec, ...PARKING_DATA.filter(p => p.id !== rec.id)]);
+            updateRecommendation(rec);
+            return;
+        case 'nearest':
+            filtered.sort((a, b) => {
+                const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng);
+                const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
+                return distA - distB;
+            });
+            break;
+        case 'available':
+            filtered.sort((a, b) => b.available - a.available);
+            break;
+        case 'cheap':
+            filtered.sort((a, b) => a.price - b.price);
+            break;
+        case 'free':
+            filtered = filtered.filter(p => p.price === 0);
+            break;
+    }
+    
+    const rec = getSmartRecommendation();
+    renderParkingList(filtered);
+    updateRecommendation(rec);
+}
+
+// 更新推荐
+function updateRecommendation(parking) {
+    const reasonEl = document.getElementById('recommendReason');
+    const highlightsEl = document.getElementById('recommendHighlights');
+    
+    const distance = calculateDistance(userLocation.lat, userLocation.lng, parking.lat, parking.lng);
+    const rate = (parking.available / parking.total * 100).toFixed(0);
+    
+    let reasons = [];
+    if (distance < 200) reasons.push('距离最近');
+    if (parking.available > parking.total * 0.5) reasons.push('车位充足');
+    if (parking.price === 0) reasons.push('免费停车');
+    if (parking.price > 0 && parking.price <= 8) reasons.push('价格实惠');
+    if (rate > 50) reasons.push(`空闲率${rate}%`);
+    
+    reasonEl.innerHTML = `📍 ${parking.name} · ${distance}米 · ${parking.available}/${parking.total}车位 · ${parking.price === 0 ? '免费' : parking.price + '元/小时'}`;
+    
+    highlightsEl.innerHTML = reasons.map(r => `<span>${r}</span>`).join('');
+}
+
+// 渲染列表
+function renderParkingList(parkings) {
+    const listEl = document.getElementById('parkingList');
+    const rec = getSmartRecommendation();
+    
+    listEl.innerHTML = parkings.map(p => {
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, p.lat, p.lng);
+        const rate = (p.available / p.total * 100).toFixed(0);
+        const isRecommended = p.id === rec.id;
+        const isSelected = false;
+        
+        let statusTag;
+        if (p.available === 0) {
+            statusTag = '<span class="tag tag-danger">已满</span>';
+        } else if (rate < 20) {
+            statusTag = '<span class="tag tag-danger">紧张</span>';
+        } else if (rate < 50) {
+            statusTag = '<span class="tag tag-warning">适中</span>';
+        } else {
+            statusTag = '<span class="tag tag-success">充足</span>';
+        }
+        
+        return `
+            <div class="parking-item ${isRecommended ? 'recommended' : ''}" onclick="selectParking('${p.id}')">
+                <div class="parking-info">
+                    <h3>${p.name}</h3>
+                    <div class="address">📍 ${p.address}</div>
+                    <div class="tags">
+                        ${statusTag}
+                        <span class="tag tag-info">${p.price === 0 ? '免费' : p.price + '元/小时'}</span>
+                        ${p.features.map(f => `<span class="tag">${f}</span>`).join('')}
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:15px">
+                    <div class="parking-stats">
+                        <div class="stat">
+                            <div class="label">距离</div>
+                            <div class="value ${distance < 300 ? 'good' : distance < 800 ? 'warning' : 'bad'}">${distance}米</div>
+                        </div>
+                        <div class="stat">
+                            <div class="label">空闲</div>
+                            <div class="value ${rate > 50 ? 'good' : rate > 20 ? 'warning' : 'bad'}">${p.available}/${p.total}</div>
+                        </div>
+                    </div>
+                    <div class="distance-badge">${distance}m</div>
+                    <button class="nav-btn" onclick="event.stopPropagation();navigateTo('${p.id}')">🗺️ 导航</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 选择停车场
+function selectParking(id) {
+    document.querySelectorAll('.parking-item').forEach(item => item.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+}
+
+// 导航到停车场
+function navigateTo(id) {
+    const parking = PARKING_DATA.find(p => p.id === id);
+    if (!parking) return;
+    
+    // 使用高德地图导航
+    const url = `https://uri.amap.com/navigation?from=0,0&to=${parking.lng},${parking.lat}&policy=0`;
+    window.open(url, '_blank');
+}
+
+// 初始化地图
+function initMap() {
+    map = new AMap.Map('mapContainer', {
+        zoom: 15,
+        center: [userLocation.lng, userLocation.lat],
+        mapStyle: 'amap://styles/light'
+    });
+    
+    // 添加用户位置标记
+    new AMap.Marker({
+        position: [userLocation.lng, userLocation.lat],
+        title: '我的位置',
+        map: map,
+        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png'
+    });
+    
+    // 添加停车场标记
+    PARKING_DATA.forEach((p, index) => {
+        const color = p.available === 0 ? 'red' : p.available / p.total > 0.5 ? 'green' : 'orange';
+        const marker = new AMap.Marker({
+            position: [p.lng, p.lat],
+            title: `${p.name} (${p.available}/${p.total})`,
+            map: map
+        });
+        
+        marker.on('click', () => {
+            selectParking(p.id);
+            const item = document.querySelectorAll('.parking-item')[index];
+            if (item) item.scrollIntoView({behavior: 'smooth', block: 'center'});
+        });
+        
+        markers.push(marker);
+    });
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    console.log('✅ 停车引导页面加载完成');
+    
+    try {
+        initMap();
+        const rec = getSmartRecommendation();
+        updateRecommendation(rec);
+        filterParking('smart');
+    } catch (error) {
+        console.error('❌ 地图加载失败:', error);
+        // 地图失败不影响列表显示
+        const rec = getSmartRecommendation();
+        updateRecommendation(rec);
+        filterParking('smart');
+    }
+});
+</script>
+</body>
+</html>

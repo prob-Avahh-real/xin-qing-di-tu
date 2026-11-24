@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 全局导航中心</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;padding-bottom:40px}
+        .container{max-width:1000px;margin:0 auto}
+        
+        /* 顶部标题 */
+        header{text-align:center;color:white;margin-bottom:30px}
+        header h1{font-size:2.2rem;margin-bottom:10px}
+        header p{font-size:1rem;opacity:0.9}
+        header .hint{font-size:0.85rem;opacity:0.8;margin-top:10px;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:20px;display:inline-block}
+        
+        /* 区域划分 */
+        .section{background:white;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #f0f0f0}
+        .section-header .icon{font-size:1.8rem}
+        .section-header h2{font-size:1.3rem;color:#333;font-weight:600}
+        .section-header .desc{font-size:0.85rem;color:#999;margin-left:auto}
+        
+        /* 功能网格 */
+        .feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+        
+        /* 功能卡片 */
+        .feature-card{background:#f9f9f9;border-radius:12px;padding:18px;cursor:pointer;transition:all 0.3s;border:2px solid transparent}
+        .feature-card:hover{background:white;border-color:#667eea;box-shadow:0 4px 15px rgba(102,126,234,0.2);transform:translateY(-3px)}
+        .feature-card .emoji{font-size:2.2rem;margin-bottom:10px;display:block}
+        .feature-card .title{font-size:1rem;font-weight:600;color:#333;margin-bottom:6px}
+        .feature-card .desc{font-size:0.8rem;color:#666;line-height:1.4;margin-bottom:10px}
+        .feature-card .tags{display:flex;gap:6px;flex-wrap:wrap}
+        .feature-card .tag{padding:3px 8px;border-radius:4px;font-size:0.7rem;font-weight:600}
+        .tag-primary{background:#667eea;color:white}
+        .tag-hot{background:#ef4444;color:white}
+        .tag-new{background:#10b981;color:white}
+        .tag-demo{background:#f59e0b;color:white}
+        
+        /* 重点推荐 */
+        .highlight{background:linear-gradient(135deg,#fef3e4,#fee6d6);border:2px solid #F9B572}
+        .highlight:hover{border-color:#E87A5D}
+        
+        /* 分隔线 */
+        .divider{height:2px;background:linear-gradient(90deg,transparent,#e0e0e0,transparent);margin:30px 0}
+        
+        /* 底部提示 */
+        .footer-hint{text-align:center;color:rgba(255,255,255,0.8);font-size:0.85rem;margin-top:20px}
+        .footer-hint a{color:white;text-decoration:underline}
+        
+        @media(max-width:768px){.feature-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.section-header h2{font-size:1.1rem}}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🗺️ 心情地图</h1>
+        <p>今天是什么心情，就去哪里玩</p>
+        <div class="hint">💡 推荐使用：<strong>心情地图 - 统一导航.html</strong>（体验更佳）</div>
+    </header>
+
+    <!-- ⭐ 强烈推荐 -->
+    <div class="section">
+        <div class="section-header">
+            <span class="icon">⭐</span>
+            <h2>强烈推荐</h2>
+            <span class="desc">首次使用从这里开始</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card highlight" onclick="openPage('心情地图 - 统一导航.html')">
+                <span class="emoji">🏠</span>
+                <div class="title">统一导航（推荐）</div>
+                <div class="desc">所有功能的统一入口，体验最佳</div>
+                <div class="tags">
+                    <span class="tag tag-primary">总入口</span>
+                    <span class="tag tag-hot">首选</span>
+                </div>
+            </div>
+            
+            <div class="feature-card highlight" onclick="openPage('demo-judge-fixed.html')">
+                <span class="emoji">🎭</span>
+                <div class="title">评委演示版</div>
+                <div class="desc">黑客松演示专用，完整功能展示</div>
+                <div class="tags">
+                    <span class="tag tag-demo">演示</span>
+                    <span class="tag tag-hot">评委用</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📱 核心功能 -->
+    <div class="section">
+        <div class="section-header">
+            <span class="icon">📱</span>
+            <h2>核心功能</h2>
+            <span class="desc">用户使用的主要功能</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card" onclick="openPage('business-pro-rich-routes.html')">
+                <span class="emoji">🗺️</span>
+                <div class="title">主 APP</div>
+                <div class="desc">12 种情绪路线生成</div>
+                <div class="tags">
+                    <span class="tag tag-primary">核心</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('门票预订 - 完整版.html')">
+                <span class="emoji">🎫</span>
+                <div class="title">门票预订</div>
+                <div class="desc">龙华寺/龙华塔门票购买</div>
+                <div class="tags">
+                    <span class="tag tag-new">新增</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('points-mall-app-fixed.html')">
+                <span class="emoji">🎁</span>
+                <div class="title">积分商城</div>
+                <div class="desc">积分兑换奖励</div>
+                <div class="tags">
+                    <span class="tag tag-primary">核心</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('wishing-pool.html')">
+                <span class="emoji">🌊</span>
+                <div class="title">许愿池</div>
+                <div class="desc">时间胶囊许愿</div>
+                <div class="tags">
+                    <span class="tag tag-primary">特色</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('knowledge-base.html')">
+                <span class="emoji">📚</span>
+                <div class="title">知识库</div>
+                <div class="desc">龙华历史文化</div>
+                <div class="tags">
+                    <span class="tag tag-primary">知识</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('停车引导 - 极简版.html')">
+                <span class="emoji">🅿️</span>
+                <div class="title">停车引导</div>
+                <div class="desc">智能停车推荐</div>
+                <div class="tags">
+                    <span class="tag tag-new">实用</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏪 商户端 -->
+    <div class="section">
+        <div class="section-header">
+            <span class="icon">🏪</span>
+            <h2>商户端</h2>
+            <span class="desc">商户和管理员使用</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card" onclick="openPage('merchant-partnership.html')">
+                <span class="emoji">🏪</span>
+                <div class="title">商户入驻</div>
+                <div class="desc">商户申请入驻</div>
+                <div class="tags">
+                    <span class="tag tag-primary">商户</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('admin-dashboard.html')">
+                <span class="emoji">⚙️</span>
+                <div class="title">管理后台</div>
+                <div class="desc">审核商户/路线/活动</div>
+                <div class="tags">
+                    <span class="tag tag-primary">管理</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🛠️ 工具 -->
+    <div class="section">
+        <div class="section-header">
+            <span class="icon">🛠️</span>
+            <h2>工具</h2>
+            <span class="desc">辅助工具</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card" onclick="openPage('嵌入式导航.html')">
+                <span class="emoji">🗺️</span>
+                <div class="title">嵌入式导航</div>
+                <div class="desc">APP 内路径规划</div>
+                <div class="tags">
+                    <span class="tag tag-new">工具</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('optimized-voice-test.html')">
+                <span class="emoji">🎤</span>
+                <div class="title">语音系统</div>
+                <div class="desc">语音合成测试</div>
+                <div class="tags">
+                    <span class="tag tag-new">测试</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('接福来 - 小游戏.html')">
+                <span class="emoji">🎮</span>
+                <div class="title">小游戏</div>
+                <div class="desc">接福来彩蛋</div>
+                <div class="tags">
+                    <span class="tag tag-new">娱乐</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('icon-generator.html')">
+                <span class="emoji">🎨</span>
+                <div class="title">图标生成器</div>
+                <div class="desc">PWA 图标生成</div>
+                <div class="tags">
+                    <span class="tag tag-new">工具</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📚 文档 -->
+    <div class="section">
+        <div class="section-header">
+            <span class="icon">📚</span>
+            <h2>文档</h2>
+            <span class="desc">项目文档和说明</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card" onclick="openPage('产品架构地图.md')">
+                <span class="emoji">🗺️</span>
+                <div class="title">产品架构地图</div>
+                <div class="desc">完整的产品架构说明</div>
+                <div class="tags">
+                    <span class="tag tag-primary">文档</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('产品架构总览.html')">
+                <span class="emoji">📊</span>
+                <div class="title">架构总览</div>
+                <div class="desc">可视化架构展示</div>
+                <div class="tags">
+                    <span class="tag tag-new">可视化</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('功能检查报告.md')">
+                <span class="emoji">📋</span>
+                <div class="title">功能检查报告</div>
+                <div class="desc">完整性检查结果</div>
+                <div class="tags">
+                    <span class="tag tag-new">报告</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" onclick="openPage('团队协作指南.md')">
+                <span class="emoji">👥</span>
+                <div class="title">团队协作指南</div>
+                <div class="desc">5 人团队协作方案</div>
+                <div class="tags">
+                    <span class="tag tag-new">协作</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔒 隐藏功能 -->
+    <div class="section" style="background:linear-gradient(135deg,#1a1a2e,#16213e)">
+        <div class="section-header">
+            <span class="icon">🔒</span>
+            <h2 style="color:white">开发者工具</h2>
+            <span class="desc" style="color:rgba(255,255,255,0.6)">隐藏入口</span>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card" style="background:rgba(255,255,255,0.1)" onclick="openPage('开发者工具 - 隐藏入口.html')">
+                <span class="emoji">🔧</span>
+                <div class="title" style="color:white">开发者工具</div>
+                <div class="desc" style="color:rgba(255,255,255,0.6)">API 日志/数据看板/系统设置</div>
+                <div class="tags">
+                    <span class="tag tag-demo">隐藏</span>
+                </div>
+            </div>
+            
+            <div class="feature-card" style="background:rgba(255,255,255,0.1)" onclick="openPage('高德地图能力诊断.html')">
+                <span class="emoji">🗺️</span>
+                <div class="title" style="color:white">地图能力诊断</div>
+                <div class="desc" style="color:rgba(255,255,255,0.6)">API 功能测试</div>
+                <div class="tags">
+                    <span class="tag tag-demo">诊断</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部提示 -->
+    <div class="footer-hint">
+        <p>💡 提示：普通用户请使用 <a href="心情地图 - 统一导航.html">统一导航</a> 获得最佳体验</p>
+        <p style="margin-top:8px;font-size:0.8rem">黑客松提交截止：2026-04-25 20:00 | 路演演示：2026-04-26 10:30</p>
+    </div>
+</div>
+
+<script>
+// 打开页面
+function openPage(url) {
+    window.open(url, '_blank');
+}
+
+// 页面加载完成
+window.addEventListener('load', () => {
+    console.log('✅ 全局导航中心已加载');
+    console.log('💡 推荐使用：心情地图 - 统一导航.html');
+});
+</script>
+
+</body>
+</html>

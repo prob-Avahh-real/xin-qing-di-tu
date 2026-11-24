@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 卡通小女生语音测试</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#fff0f5,#ffe4e9);padding:40px 20px}
+        .container{max-width:600px;margin:0 auto;background:white;border-radius:32px;padding:30px;box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+        h1{text-align:center;color:#E87A5D;margin-bottom:20px;font-size:1.8rem}
+        .desc{text-align:center;color:#7a5a48;margin-bottom:24px;line-height:1.6}
+        .control-panel{background:#fef7f2;border-radius:24px;padding:20px;margin-bottom:20px}
+        .control-group{margin-bottom:16px}
+        .control-group label{display:block;font-size:0.85rem;color:#7a5a48;margin-bottom:8px;font-weight:600}
+        .control-group input[type="range"]{width:100%;height:6px;border-radius:3px;background:#ffe0d0;outline:none;-webkit-appearance:none}
+        .control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#F9B572;cursor:pointer}
+        .value-display{text-align:center;font-size:1.5rem;color:#E87A5D;font-weight:700;margin-top:8px}
+        .voice-select{width:100%;padding:12px;border:2px solid #ffe0d0;border-radius:16px;font-size:0.9rem;background:white}
+        .voice-select:focus{outline:none;border-color:#F9B572}
+        .test-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
+        .test-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:16px;border-radius:20px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(249,181,114,0.3)}
+        .test-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(249,181,114,0.4)}
+        .test-btn:active{transform:scale(0.98)}
+        .preset-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+        .preset-btn{flex:1;min-width:80px;background:#fef7f2;border:2px solid #ffe0d0;padding:10px;border-radius:16px;font-size:0.8rem;cursor:pointer;color:#7a5a48;font-weight:500;transition:all 0.2s}
+        .preset-btn:hover{background:#F9B572;color:white;border-color:#F9B572}
+        .preset-btn.active{background:#F9B572;color:white;border-color:#F9B572}
+        .status{text-align:center;padding:12px;margin-top:16px;border-radius:16px;font-size:0.9rem;font-weight:500}
+        .status.playing{background:#d1fae5;color:#059669}
+        .status.stopped{background:#fee2e2;color:#dc2626}
+        .tips{background:#fef3e4;border-radius:16px;padding:16px;margin-top:20px;font-size:0.85rem;color:#b3704b;line-height:1.6}
+        .tips strong{color:#E87A5D}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎤 卡通小女生语音测试</h1>
+    <p class="desc">调整参数，找到最可爱的卡通声音！</p>
+    
+    <div class="control-panel">
+        <div class="control-group">
+            <label>🎼 音调 (Pitch) - 越高越卡通</label>
+            <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.05" value="1.4">
+            <div class="value-display"><span id="pitchValue">1.4</span> 🎵</div>
+        </div>
+        
+        <div class="control-group">
+            <label>⚡ 语速 (Rate) - 越快越活泼</label>
+            <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.05" value="1.1">
+            <div class="value-display"><span id="rateValue">1.1</span> ⚡</div>
+        </div>
+        
+        <div class="control-group">
+            <label>🔊 音量 (Volume)</label>
+            <input type="range" id="volumeSlider" min="0.1" max="1.0" step="0.05" value="1.0">
+            <div class="value-display"><span id="volumeValue">1.0</span> 🔊</div>
+        </div>
+        
+        <div class="control-group">
+            <label>🎙️ 选择语音包</label>
+            <select class="voice-select" id="voiceSelect">
+                <option value="">自动选择最佳女声</option>
+            </select>
+        </div>
+        
+        <div class="preset-btns">
+            <button class="preset-btn active" data-preset="cartoon">🎀 卡通萝莉</button>
+            <button class="preset-btn" data-preset="cute">😊 可爱少女</button>
+            <button class="preset-btn" data-preset="anime">🌸 动漫风</button>
+            <button class="preset-btn" data-preset="custom">⚙️ 自定义</button>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="playTest1()">🎤 测试 1: 欢迎语</button>
+            <button class="test-btn" onclick="playTest2()">🐱 测试 2: 撸猫</button>
+            <button class="test-btn" onclick="playTest3()">📸 测试 3: 拍照</button>
+            <button class="test-btn" onclick="playTest4()">🍜 测试 4: 美食</button>
+        </div>
+        
+        <div id="status" class="status stopped">点击按钮开始测试</div>
+    </div>
+    
+    <div class="tips">
+        <strong>💡 调音建议：</strong><br>
+        • <strong>卡通萝莉：</strong>Pitch 1.4-1.6, Rate 1.1-1.2<br>
+        • <strong>可爱少女：</strong>Pitch 1.2-1.4, Rate 1.0-1.1<br>
+        • <strong>动漫风：</strong>Pitch 1.5-1.8, Rate 1.2-1.3<br>
+        • 不同浏览器语音包效果不同，Chrome/Edge 效果最佳
+    </div>
+</div>
+
+<script>
+let synth = window.speechSynthesis;
+let voices = [];
+let currentVoice = null;
+
+// 初始化语音列表
+function loadVoices() {
+    voices = synth.getVoices();
+    const voiceSelect = document.getElementById('voiceSelect');
+    voiceSelect.innerHTML = '<option value="">🎀 自动选择最佳女声</option>';
+    
+    // 优先选择中文女声
+    const chineseVoices = voices.filter(v => v.lang.includes('zh') || v.lang.includes('CN'));
+    const femaleVoices = chineseVoices.filter(v => 
+        v.name.includes('Female') || 
+        v.name.includes('Girl') || 
+        v.name.includes('Ting') || 
+        v.name.includes('Mei') ||
+        v.name.includes('Xiao')
+    );
+    
+    femaleVoices.forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `🎙️ ${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+    });
+    
+    if (femaleVoices.length === 0) {
+        chineseVoices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `🎙️ ${voice.name} (${voice.lang})`;
+            voiceSelect.appendChild(option);
+        });
+    }
+}
+
+// 预设配置
+const presets = {
+    cartoon: { pitch: 1.5, rate: 1.15, volume: 1.0 },  // 卡通萝莉
+    cute: { pitch: 1.3, rate: 1.05, volume: 1.0 },     // 可爱少女
+    anime: { pitch: 1.6, rate: 1.25, volume: 1.0 },    // 动漫风
+    custom: { pitch: 1.4, rate: 1.1, volume: 1.0 }     // 自定义
+};
+
+// 更新滑块值
+function updateSliderValues() {
+    document.getElementById('pitchValue').textContent = document.getElementById('pitchSlider').value;
+    document.getElementById('rateValue').textContent = document.getElementById('rateSlider').value;
+    document.getElementById('volumeValue').textContent = document.getElementById('volumeSlider').value;
+}
+
+// 应用预设
+function applyPreset(presetName) {
+    const preset = presets[presetName];
+    document.getElementById('pitchSlider').value = preset.pitch;
+    document.getElementById('rateSlider').value = preset.rate;
+    document.getElementById('volumeSlider').value = preset.volume;
+    updateSliderValues();
+    
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === presetName);
+    });
+}
+
+// 播放测试
+function playTest(text) {
+    if (synth.speaking) {
+        synth.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 应用设置
+    utterance.pitch = parseFloat(document.getElementById('pitchSlider').value);
+    utterance.rate = parseFloat(document.getElementById('rateSlider').value);
+    utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+    utterance.lang = 'zh-CN';
+    
+    // 选择语音
+    const voiceIndex = document.getElementById('voiceSelect').value;
+    if (voiceIndex && voices[voiceIndex]) {
+        utterance.voice = voices[voiceIndex];
+    } else {
+        // 自动选择最佳女声
+        const femaleVoice = voices.find(v => 
+            (v.name.includes('Ting') || v.name.includes('Mei') || v.name.includes('Xiao')) &&
+            (v.lang.includes('zh') || v.lang.includes('CN'))
+        );
+        if (femaleVoice) utterance.voice = femaleVoice;
+    }
+    
+    // 状态显示
+    const status = document.getElementById('status');
+    status.textContent = '🔊 正在播放...';
+    status.className = 'status playing';
+    
+    utterance.onend = () => {
+        status.textContent = '✅ 播放完成';
+        setTimeout(() => {
+            status.textContent = '点击按钮开始测试';
+            status.className = 'status stopped';
+        }, 2000);
+    };
+    
+    utterance.onerror = (e) => {
+        status.textContent = '❌ 播放失败：' + e.error;
+        status.className = 'status stopped';
+    };
+    
+    synth.speak(utterance);
+}
+
+// 测试文本
+function playTest1() {
+    playTest('欢迎来到龙华灵境向导！我是你的专属小助手，今天带你玩转龙华哦！');
+}
+
+function playTest2() {
+    playTest('哇！这里有一只超级可爱的猫咪！它的名字叫福来，摸一下左耳朵可以招桃花哦！');
+}
+
+function playTest3() {
+    playTest('这里拍照超级出片！水下倒影加上金色穹顶，随便一拍都是大片呢！');
+}
+
+function playTest4() {
+    playTest('龙华寺的素面超级好吃！百年老字号，一碗下肚暖心又暖胃哦！');
+}
+
+// 事件监听
+document.getElementById('pitchSlider').addEventListener('input', () => {
+    updateSliderValues();
+    applyPreset('custom');
+});
+
+document.getElementById('rateSlider').addEventListener('input', () => {
+    updateSliderValues();
+    applyPreset('custom');
+});
+
+document.getElementById('volumeSlider').addEventListener('input', updateSliderValues);
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+});
+
+// 初始化
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+updateSliderValues();
+applyPreset('cartoon'); // 默认卡通萝莉
+</script>
+</body>
+</html>

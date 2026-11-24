@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>龙华·灵境向导 - 手机版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 16px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .emotion-btn {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .emotion-btn:hover,
+        .emotion-btn.active {
+            border-color: #667eea;
+            background: #f3f4f6;
+            transform: scale(1.05);
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .secondary-btn {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .result-card {
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .route-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .route-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .point-list {
+            list-style: none;
+        }
+
+        .point-item {
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .point-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .point-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .feature-btn {
+            padding: 16px;
+            background: #f9fafb;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .feature-btn .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* 彩蛋弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🐉 龙华·灵境向导</h1>
+            <p>情绪出行规划师 · 手机版</p>
+        </div>
+
+        <!-- 情绪选择 -->
+        <div class="card">
+            <h2 style="font-size: 18px; margin-bottom: 16px; color: #1f2937;">选择你的情绪</h2>
+            <div class="emotion-grid">
+                <button class="emotion-btn" data-emotion="relax">😌 放松</button>
+                <button class="emotion-btn" data-emotion="heal">😢 疗愈</button>
+                <button class="emotion-btn" data-emotion="photo">📸 拍照</button>
+                <button class="emotion-btn" data-emotion="social">👫 社交</button>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="customInput" placeholder="告诉我你的心情或需求...">
+            </div>
+
+            <button class="action-btn" onclick="generateRoute()">✨ 生成我的情绪路线</button>
+            <button class="action-btn secondary-btn" onclick="showToast('🤖 AI 推荐功能开发中...')">🤖 AI 智能推荐</button>
+        </div>
+
+        <!-- 加载动画 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: white;">正在召唤福来...</p>
+        </div>
+
+        <!-- 路线结果 -->
+        <div class="card result-card" id="resultCard">
+            <h2 class="route-title" id="routeTitle">治愈放松之旅</h2>
+            
+            <div class="route-stats">
+                <div class="stat">
+                    <div class="stat-value" id="scoreValue">8.5</div>
+                    <div class="stat-label">体验分</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="photoValue">5</div>
+                    <div class="stat-label">出片点</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="saveValue">50</div>
+                    <div class="stat-label">预估省¥</div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: #1f2937;">路线包括：</h3>
+            <ul class="point-list" id="pointList">
+                <!-- 动态生成 -->
+            </ul>
+        </div>
+
+        <!-- 更多玩法 -->
+        <div class="card">
+            <h2 style="font-size: 18px; margin-bottom: 16px; color: #1f2937;">🎮 更多玩法</h2>
+            <div class="feature-grid">
+                <button class="feature-btn" onclick="showKnowledge()">
+                    <span class="icon">📚</span>
+                    龙华知识库
+                </button>
+                <button class="feature-btn" onclick="showToast('🔍 AR 印章收集开发中...')">
+                    <span class="icon">🔍</span>
+                    AR 印章收集
+                </button>
+                <button class="feature-btn" onclick="shareRoute()">
+                    <span class="icon">📤</span>
+                    分享朋友圈
+                </button>
+                <button class="feature-btn" onclick="showToast('👥 PK 挑战开发中...')">
+                    <span class="icon">👥</span>
+                    发起 PK 挑战
+                </button>
+                <button class="feature-btn" onclick="showEgg()">
+                    <span class="icon">🐱</span>
+                    寻找福来猫
+                </button>
+                <button class="feature-btn" onclick="showToast('🎵 音乐播放开发中...')">
+                    <span class="icon">🎵</span>
+                    背景音乐
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彩蛋弹窗 -->
+    <div class="modal" id="eggModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🐱 龙华寺猫彩蛋</h3>
+            <p class="modal-text">
+                寺里有只大橘猫叫"福来"，摸它耳朵会有好运。
+                <br><br>
+                摸左耳招桃花，摸右耳招财运。
+                <br><br>
+                📍 位置：龙华寺天王殿右侧石阶
+                <br>
+                🏆 奖励：+30 积分
+            </p>
+            <button class="modal-btn" onclick="closeEgg()">知道了</button>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 数据
+        const routes = {
+            relax: {
+                title: '治愈放松之旅',
+                score: 8.5,
+                photos: 5,
+                save: 50,
+                points: [
+                    { name: '龙华寺', desc: '千年古刹，静心祈福' },
+                    { name: '塔影空间', desc: '网红打卡，文艺咖啡' },
+                    { name: '西岸滨江', desc: '江风拂面，日落晚霞' }
+                ]
+            },
+            heal: {
+                title: '心灵疗愈之路',
+                score: 9.0,
+                photos: 4,
+                save: 30,
+                points: [
+                    { name: '龙华烈士陵园', desc: '缅怀先烈，铭记历史' },
+                    { name: '龙华寺', desc: '听钟声，品素面' },
+                    { name: '西岸美术馆', desc: '艺术治愈心灵' }
+                ]
+            },
+            photo: {
+                title: '网红打卡专线',
+                score: 9.2,
+                photos: 10,
+                save: 80,
+                points: [
+                    { name: '塔影空间', desc: '最佳机位：3 楼露台' },
+                    { name: '龙美术馆', desc: '工业风拍照圣地' },
+                    { name: '西岸大剧院', desc: '现代建筑美学' }
+                ]
+            },
+            social: {
+                title: '社交聚会路线',
+                score: 8.8,
+                photos: 6,
+                save: 100,
+                points: [
+                    { name: '龙华老街', desc: '小吃聚集地' },
+                    { name: '塔影空间', desc: '下午茶聊天' },
+                    { name: '西岸营地', desc: '户外活动社交' }
+                ]
+            }
+        };
+
+        let currentEmotion = null;
+
+        // 情绪按钮点击
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentEmotion = this.dataset.emotion;
+            });
+        });
+
+        // 生成路线
+        function generateRoute() {
+            if (!currentEmotion) {
+                showToast('请先选择一个情绪哦~');
+                return;
+            }
+
+            // 显示加载
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+
+            // 模拟 AI 生成（1.5 秒）
+            setTimeout(() => {
+                const route = routes[currentEmotion];
+                
+                document.getElementById('routeTitle').textContent = route.title;
+                document.getElementById('scoreValue').textContent = route.score;
+                document.getElementById('photoValue').textContent = route.photos;
+                document.getElementById('saveValue').textContent = route.save;
+
+                const pointList = document.getElementById('pointList');
+                pointList.innerHTML = route.points.map((point, index) => `
+                    <li class="point-item">
+                        <div class="point-name">${index + 1}. ${point.name}</div>
+                        <div class="point-desc">${point.desc}</div>
+                    </li>
+                `).join('');
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultCard').style.display = 'block';
+                
+                // 滚动到结果
+                document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+                
+                // 播放 TTS 欢迎
+                speakWelcome(route.title);
+            }, 1500);
+        }
+
+        // TTS 语音
+        function speakWelcome(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('为你推荐：' + text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 显示知识库
+        function showKnowledge() {
+            showToast('📚 龙华知识库开发中...');
+        }
+
+        // 分享
+        function shareRoute() {
+            const route = routes[currentEmotion || 'relax'];
+            const text = `🐉 我在龙华·灵境向导发现了一条超棒的路线！\n\n【${route.title}】\n⭐ 体验分：${route.score}/10\n📸 出片点：${route.points.length}个\n\n快来和我一起探索龙华吧！\n#龙华 #上海旅游 #情绪路线`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '龙华·灵境向导',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text);
+                showToast('文案已复制到剪贴板！');
+            }
+        }
+
+        // 显示彩蛋
+        function showEgg() {
+            document.getElementById('eggModal').style.display = 'flex';
+            playMeow();
+        }
+
+        // 关闭彩蛋
+        function closeEgg() {
+            document.getElementById('eggModal').style.display = 'none';
+        }
+
+        // 播放猫叫
+        function playMeow() {
+            // 浏览器限制自动播放，需要用户交互
+            showToast('喵~ 福来向你问好！🐱');
+        }
+
+        // 提示框
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('eggModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEgg();
+            }
+        });
+
+        // 页面加载欢迎
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                showToast('🐉 欢迎来到龙华·灵境向导！');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

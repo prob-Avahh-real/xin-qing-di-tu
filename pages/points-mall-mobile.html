@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>福来的心愿清单</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+        
+        /* 顶部状态栏 */
+        .status-bar{height:44px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;position:relative}
+        .status-bar .mascot{font-size:1.2rem;margin-right:8px}
+        
+        /* 主内容区 - 固定高度，可滚动 */
+        .main-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+        
+        /* 顶部故事区 - 紧凑版 */
+        .story-header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:20px 16px;text-align:center}
+        .story-header .mascot{font-size:3rem;margin-bottom:8px;display:block}
+        .story-header h1{font-size:1.3rem;margin-bottom:6px}
+        .story-header .story{font-size:0.8rem;opacity:0.95;line-height:1.5;margin-bottom:12px}
+        .story-header .deadline{background:rgba(255,255,255,0.2);padding:6px 12px;border-radius:16px;display:inline-block;font-size:0.75rem}
+        
+        /* 功德值卡片 */
+        .points-card{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;margin:12px 16px;padding:16px;border-radius:16px;box-shadow:0 4px 12px rgba(249,181,114,0.3)}
+        .points-card .label{font-size:0.8rem;opacity:0.9;margin-bottom:4px}
+        .points-card .number{font-size:2.5rem;font-weight:700;line-height:1}
+        
+        /* 倒计时 - 紧凑版 */
+        .countdown{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);color:white;margin:12px 16px;padding:12px;border-radius:16px;text-align:center}
+        .countdown .title{font-size:0.75rem;margin-bottom:8px;opacity:0.9}
+        .countdown-timer{display:flex;justify-content:center;gap:12px}
+        .countdown-item{text-align:center}
+        .countdown-item .number{font-size:1.5rem;font-weight:700;color:#F9B572}
+        .countdown-item .label{font-size:0.65rem;opacity:0.8}
+        
+        /* 进度条 */
+        .progress{background:white;margin:12px 16px;padding:12px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .progress-header{display:flex;justify-content:space-between;margin-bottom:8px}
+        .progress-header .title{font-size:0.8rem;color:#5a4a42;font-weight:600}
+        .progress-header .current{font-size:0.8rem;color:#E87A5D;font-weight:700}
+        .progress-bar{height:8px;background:#f0e6de;border-radius:4px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#F9B572,#E87A5D);border-radius:4px;transition:width 0.5s}
+        
+        /* 分类标签 */
+        .tabs{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .tab{background:white;border:1px solid #ffe0d0;padding:8px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;color:#7a5a48;white-space:nowrap;flex-shrink:0}
+        .tab.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-color:transparent}
+        
+        /* 奖励网格 */
+        .rewards{padding:0 16px}
+        .reward-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-bottom:16px}
+        .reward-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .reward-card .image{height:100px;background:linear-gradient(135deg,#fef3e4,#fee6d6);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative}
+        .reward-card .badge{position:absolute;top:6px;right:6px;background:#F9B572;color:white;padding:2px 6px;border-radius:8px;font-size:0.6rem;font-weight:600}
+        .reward-card .badge.hot{background:#ef4444}
+        .reward-card .content{padding:10px}
+        .reward-card .title{font-size:0.8rem;font-weight:600;color:#5a4a42;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .reward-card .desc{font-size:0.65rem;color:#7a5a48;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .reward-card .footer{display:flex;justify-content:space-between;align-items:center}
+        .reward-card .points{color:#E87A5D;font-weight:700;font-size:0.8rem}
+        .reward-card .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:4px 10px;border-radius:12px;font-size:0.65rem;font-weight:600}
+        .reward-card .btn:disabled{background:#d1d5db}
+        
+        /* 任务列表 */
+        .tasks{padding:0 16px 16px}
+        .task-item{background:white;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+        .task-item .icon{font-size:1.5rem}
+        .task-item .info{flex:1;min-width:0}
+        .task-item .title{font-size:0.8rem;font-weight:600;color:#5a4a42;margin-bottom:2px}
+        .task-item .desc{font-size:0.65rem;color:#7a5a48;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .task-item .points{color:#E87A5D;font-weight:700;font-size:0.75rem;margin:0 8px}
+        .task-item .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:6px 12px;border-radius:12px;font-size:0.65rem;font-weight:600;flex-shrink:0}
+        .task-item .btn.completed{background:#10b981}
+        
+        /* 底部导航栏 - 固定 */
+        .tab-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:white;border-top:1px solid #e0e0e0;display:flex;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom)}
+        .tab-item{flex:1;text-align:center;color:#999;font-size:0.7rem;transition:all 0.2s}
+        .tab-item.active{color:#E87A5D}
+        .tab-item .icon{font-size:1.5rem;display:block;margin-bottom:4px}
+        
+        /* 提示框 */
+        .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 20px;border-radius:12px;font-size:0.8rem;z-index:1000;display:none}
+        
+        /* 隐藏滚动条但保留功能 */
+        .main-content::-webkit-scrollbar{display:none}
+        .tabs::-webkit-scrollbar{display:none}
+    </style>
+</head>
+<body>
+
+<!-- 顶部状态栏 -->
+<div class="status-bar">
+    <span class="mascot">🐱</span>
+    <span>福来的心愿清单</span>
+</div>
+
+<!-- 主内容区 -->
+<div class="main-content" id="mainContent">
+    <!-- 故事区 -->
+    <div class="story-header">
+        <span class="mascot">🐱</span>
+        <h1>帮福来实现心愿</h1>
+        <p class="story">
+            我是福来，龙华寺的守护猫。<br>
+            农历三月初三（5 月 1 日）龙华庙会要到了！<br>
+            我想攒够功德实现心愿...<br>
+            你愿意帮我吗？
+        </p>
+        <div class="deadline">⏰ 5 月 1 日庙会开启</div>
+    </div>
+    
+    <!-- 功德值卡片 -->
+    <div class="points-card">
+        <div class="label">我的功德值</div>
+        <div class="number" id="myPoints">470</div>
+    </div>
+    
+    <!-- 倒计时 -->
+    <div class="countdown">
+        <div class="title">🎊 距离庙会还有</div>
+        <div class="countdown-timer" id="countdownTimer">
+            <div class="countdown-item">
+                <div class="number" id="days">7</div>
+                <div class="label">天</div>
+            </div>
+            <div class="countdown-item">
+                <div class="number" id="hours">0</div>
+                <div class="label">时</div>
+            </div>
+            <div class="countdown-item">
+                <div class="number" id="minutes">0</div>
+                <div class="label">分</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 进度条 -->
+    <div class="progress">
+        <div class="progress-header">
+            <span class="title">🎯 心愿进度</span>
+            <span class="current" id="progressCurrent">470/1000</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:47%"></div>
+        </div>
+    </div>
+    
+    <!-- 分类标签 -->
+    <div class="tabs" id="rewardTabs">
+        <div class="tab active" data-category="all">全部</div>
+        <div class="tab" data-category="cultural">文创</div>
+        <div class="tab" data-category="experience">体验</div>
+        <div class="tab" data-category="digital">数字</div>
+        <div class="tab" data-category="merit">捐赠</div>
+    </div>
+    
+    <!-- 奖励列表 -->
+    <div class="rewards">
+        <div class="reward-grid" id="rewardGrid"></div>
+    </div>
+    
+    <!-- 任务列表 -->
+    <div class="tasks">
+        <div style="font-size:0.85rem;font-weight:600;color:#5a4a42;padding:12px 0;margin-bottom:8px">📋 赚功德任务</div>
+        <div id="taskList"></div>
+    </div>
+</div>
+
+<!-- 底部导航栏 -->
+<div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('home')">
+        <span class="icon">🏠</span>
+        <span>首页</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('tasks')">
+        <span class="icon">📋</span>
+        <span>任务</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('orders')">
+        <span class="icon">📦</span>
+        <span>订单</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('profile')">
+        <span class="icon">👤</span>
+        <span>我的</span>
+    </div>
+</div>
+
+<!-- 提示框 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// 数据
+let userPoints = parseInt(localStorage.getItem('pathjoy_merit_points')) || 470;
+let userTasks = JSON.parse(localStorage.getItem('pathjoy_merit_tasks')) || [];
+
+// 奖励数据
+const REWARDS = [
+    {id:1,title:'福来守护猫公仔',desc:'高 20cm，柔软舒适',points:200,category:'cultural',image:'🐱',badge:'hot'},
+    {id:2,title:'龙华塔祈福手串',desc:'开光加持，玛瑙材质',points:300,category:'cultural',image:'📿',badge:'hot'},
+    {id:3,title:'素斋制作体验课',desc:'跟法师学习素斋烹饪',points:500,category:'experience',image:'🍚',badge:'new'},
+    {id:4,title:'禅修体验营',desc:'半日禅修，冥想指导',points:800,category:'experience',image:'🧘',badge:''},
+    {id:5,title:'电子祈福牌',desc:'可定制祝福语，永久保存',points:99,category:'digital',image:'🏮',badge:''},
+    {id:6,title:'明信片套装',desc:'12 张精美明信片',points:150,category:'cultural',image:'📮',badge:''},
+    {id:7,title:'庙会纪念章',desc:'纯铜材质，限量 1000 枚',points:250,category:'cultural',image:'🏅',badge:'new'},
+    {id:8,title:'功德箱捐赠',desc:'支持古建维护',points:10,category:'merit',image:'🙏',badge:''},
+    {id:9,title:'福来盲盒',desc:'随机一款，共 6 款',points:180,category:'cultural',image:'🎁',badge:'hot'},
+    {id:10,title:'亲子非遗课',desc:'学习传统手工艺',points:350,category:'experience',image:'👨‍👩‍👧',badge:''}
+];
+
+// 任务数据
+const TASKS = [
+    {id:1,title:'完成情感路线打卡',desc:'完成全部景点打卡',points:100,icon:'🗺️'},
+    {id:2,title:'拍照打卡景点',desc:'拍照并上传',points:50,icon:'📸'},
+    {id:3,title:'阅读知识库',desc:'阅读龙华文化文章',points:30,icon:'📚'},
+    {id:4,title:'体验语音导览',desc:'播放景点语音讲解',points:40,icon:'🎭'},
+    {id:5,title:'发现隐藏彩蛋',desc:'找到隐藏彩蛋景点',points:80,icon:'🔍'},
+    {id:6,title:'分享到朋友圈',desc:'生成图片并分享',points:60,icon:'📤'},
+    {id:7,title:'参与公益活动',desc:'参与素斋/祭扫等',points:100,icon:'🙏'},
+    {id:8,title:'邀请好友',desc:'邀请好友注册使用',points:150,icon:'👥'}
+];
+
+// 初始化
+function init() {
+    updatePoints();
+    renderRewards('all');
+    renderTasks();
+    setupTabs();
+    startCountdown();
+}
+
+// 更新功德值
+function updatePoints() {
+    document.getElementById('myPoints').textContent = userPoints;
+    localStorage.setItem('pathjoy_merit_points', userPoints.toString());
+    
+    const progress = Math.min((userPoints / 1000) * 100, 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressCurrent').textContent = userPoints + '/1000';
+}
+
+// 渲染奖励
+function renderRewards(category) {
+    const grid = document.getElementById('rewardGrid');
+    const filtered = category === 'all' ? REWARDS : REWARDS.filter(r => r.category === category);
+    
+    grid.innerHTML = filtered.map(r => `
+        <div class="reward-card" onclick="exchange(${r.id})">
+            <div class="image">
+                ${r.image}
+                ${r.badge ? `<span class="badge ${r.badge}">${r.badge === 'hot' ? '热门' : '新品'}</span>` : ''}
+            </div>
+            <div class="content">
+                <div class="title">${r.title}</div>
+                <div class="desc">${r.desc}</div>
+                <div class="footer">
+                    <span class="points">${r.points}功德</span>
+                    <button class="btn" ${userPoints < r.points ? 'disabled' : ''}>
+                        ${userPoints < r.points ? '不足' : '兑换'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染任务
+function renderTasks() {
+    const list = document.getElementById('taskList');
+    list.innerHTML = TASKS.map(t => {
+        const completed = userTasks.includes(t.id);
+        return `
+            <div class="task-item">
+                <span class="icon">${t.icon}</span>
+                <div class="info">
+                    <div class="title">${t.title}</div>
+                    <div class="desc">${t.desc}</div>
+                </div>
+                <span class="points">+${t.points}</span>
+                <button class="btn ${completed ? 'completed' : ''}" onclick="completeTask(${t.id})" ${completed ? 'disabled' : ''}>
+                    ${completed ? '✅' : '去做'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+// 完成任务
+function completeTask(id) {
+    const task = TASKS.find(t => t.id === id);
+    userTasks.push(id);
+    userPoints += task.points;
+    localStorage.setItem('pathjoy_merit_tasks', JSON.stringify(userTasks));
+    updatePoints();
+    renderTasks();
+    renderRewards(document.querySelector('.tab.active')?.dataset.category || 'all');
+    showToast(`✅ +${task.points}功德`);
+}
+
+// 兑换奖励
+function exchange(id) {
+    const reward = REWARDS.find(r => r.id === id);
+    if (userPoints < reward.points) {
+        showToast('❌ 功德不足');
+        return;
+    }
+    
+    if (confirm(`兑换「${reward.title}」？\n消耗${reward.points}功德`)) {
+        userPoints -= reward.points;
+        updatePoints();
+        renderRewards(document.querySelector('.tab.active')?.dataset.category || 'all');
+        showToast('✅ 兑换成功');
+        
+        const orders = JSON.parse(localStorage.getItem('pathjoy_orders') || '[]');
+        orders.push({rewardId:reward.id,title:reward.title,points:reward.points,date:new Date().toISOString()});
+        localStorage.setItem('pathjoy_orders', JSON.stringify(orders));
+    }
+}
+
+// 切换分类
+function setupTabs() {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            renderRewards(this.dataset.category);
+        });
+    });
+}
+
+// 底部导航切换
+function switchTab(tab) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    if (tab === 'tasks') {
+        document.getElementById('taskList').scrollIntoView({behavior:'smooth'});
+    } else if (tab === 'orders' || tab === 'profile') {
+        showToast('🚧 开发中...');
+    } else {
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+}
+
+// 倒计时
+function startCountdown() {
+    const target = new Date('2026-05-01T00:00:00');
+    function update() {
+        const now = new Date();
+        const diff = target - now;
+        if (diff <= 0) {
+            document.getElementById('countdownTimer').innerHTML = '<div style="font-size:1.2rem;color:#F9B572">🎊 庙会已开始！</div>';
+            return;
+        }
+        document.getElementById('days').textContent = Math.floor(diff/(1000*60*60*24));
+        document.getElementById('hours').textContent = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        document.getElementById('minutes').textContent = Math.floor((diff%(1000*60*60))/(1000*60));
+    }
+    update();
+    setInterval(update, 60000);
+}
+
+// 提示框
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 2000);
+}
+
+init();
+</script>
+</body>
+</html>

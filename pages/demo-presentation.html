@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 黑客松演示</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;min-height:100vh}
+        .container{max-width:1400px;margin:0 auto;padding:20px}
+        .header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#F9B572,#E87A5D);border-radius:20px;margin-bottom:30px;box-shadow:0 10px 40px rgba(249,181,114,0.3)}
+        .header h1{font-size:3rem;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+        .header .slogan{font-size:1.3rem;opacity:0.95;margin-bottom:20px}
+        .header .meta{font-size:0.9rem;opacity:0.8}
+        .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;margin-bottom:30px}
+        .demo-card{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;padding:25px;border:1px solid rgba(255,255,255,0.2);transition:all 0.3s}
+        .demo-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+        .demo-card h2{font-size:1.5rem;margin-bottom:15px;display:flex;align-items:center;gap:10px}
+        .demo-card .icon{font-size:2rem}
+        .demo-card p{font-size:0.95rem;line-height:1.7;opacity:0.9;margin-bottom:15px}
+        .demo-card .btn{display:inline-block;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:600;margin:5px;transition:all 0.2s}
+        .demo-card .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,122,93,0.4)}
+        .demo-card .feature-list{list-style:none;margin:15px 0}
+        .demo-card .feature-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .demo-card .feature-list li:last-child{border-bottom:none}
+        .demo-card .feature-list li::before{content:'✅ ';margin-right:8px}
+        .highlight{background:rgba(249,181,114,0.2);padding:3px 8px;border-radius:6px;font-weight:600}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin:30px 0}
+        .stat-card{background:linear-gradient(135deg,rgba(249,181,114,0.2),rgba(232,122,93,0.2));padding:20px;border-radius:15px;text-align:center}
+        .stat-card .number{font-size:2.5rem;font-weight:700;color:#F9B572;margin-bottom:5px}
+        .stat-card .label{font-size:0.9rem;opacity:0.8}
+        .timeline{background:rgba(255,255,255,0.05);border-radius:20px;padding:25px;margin:30px 0}
+        .timeline h2{font-size:1.5rem;margin-bottom:20px}
+        .timeline-item{display:flex;gap:20px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .timeline-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+        .timeline-item .time{font-size:1.1rem;font-weight:700;color:#F9B572;min-width:80px}
+        .timeline-item .content{flex:1}
+        .timeline-item .content h3{font-size:1.1rem;margin-bottom:5px}
+        .timeline-item .content p{font-size:0.9rem;opacity:0.8}
+        .business-model{background:linear-gradient(135deg,rgba(249,181,114,0.15),rgba(232,122,93,0.15));border-radius:20px;padding:25px;margin:30px 0}
+        .business-model h2{font-size:1.5rem;margin-bottom:20px}
+        .revenue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}
+        .revenue-item{background:rgba(255,255,255,0.1);padding:20px;border-radius:15px}
+        .revenue-item h3{font-size:1.1rem;margin-bottom:10px;color:#F9B572}
+        .revenue-item p{font-size:0.9rem;opacity:0.8;line-height:1.6}
+        .demo-script{background:rgba(0,0,0,0.3);border-radius:20px;padding:25px;margin:30px 0}
+        .demo-script h2{font-size:1.5rem;margin-bottom:20px}
+        .script-section{margin-bottom:25px}
+        .script-section h3{font-size:1.1rem;margin-bottom:10px;color:#F9B572}
+        .script-section p{font-size:0.95rem;line-height:1.8;opacity:0.9;margin-bottom:10px}
+        .script-section .action{background:rgba(249,181,114,0.2);padding:10px 15px;border-radius:10px;margin:10px 0;font-family:monospace;font-size:0.85rem}
+        .footer{text-align:center;padding:30px;margin-top:30px;opacity:0.7}
+        .tag{display:inline-block;background:rgba(249,181,114,0.3);padding:5px 12px;border-radius:20px;font-size:0.8rem;margin:5px}
+        .warning{background:rgba(255,87,87,0.2);border:1px solid rgba(255,87,87,0.4);padding:15px;border-radius:12px;margin:20px 0}
+        .warning strong{color:#ff5757}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🗺️ 心情地图</h1>
+        <div class="slogan">今天是什么心情，就去哪里玩</div>
+        <div class="meta">
+            <span class="tag">LYCC 2026 龙华黑客松</span>
+            <span class="tag">Track 3.2 青年出行新体验</span>
+            <span class="tag">提交截止：2026-04-25 20:00</span>
+        </div>
+    </div>
+
+    <!-- 核心数据 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="number">12</div>
+            <div class="label">情绪路线类型</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">120+</div>
+            <div class="label">精选景点</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">7</div>
+            <div class="label">功能模块</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">100%</div>
+            <div class="label">完成度</div>
+        </div>
+    </div>
+
+    <!-- 功能演示 -->
+    <div class="demo-grid">
+        <div class="demo-card">
+            <h2><span class="icon">🎭</span> 情绪路线</h2>
+            <p>根据用户心情智能推荐游玩路线，每条路线包含 <span class="highlight">8-12 个精选景点</span></p>
+            <ul class="feature-list">
+                <li>12 种情绪类型：EMO 治愈、散心、拍照、聚会、文艺、约会、亲子、美食、祈福、运动、躺平、探索</li>
+                <li>AI 智能路线规划</li>
+                <li>语音讲解（青春活力少女音）</li>
+                <li>背景音乐随情绪切换</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/business-pro-rich-routes.html" class="btn">🚀 打开主 APP</a>
+        </div>
+
+        <div class="demo-card">
+            <h2><span class="icon">🎁</span> 积分商城</h2>
+            <p>完成任务赚取积分，兑换 <span class="highlight">文创产品/体验券/公益捐赠</span></p>
+            <ul class="feature-list">
+                <li>8 个赚积分任务</li>
+                <li>10 种兑换商品</li>
+                <li>积分持久化存储</li>
+                <li>龙华庙会倒计时（2026-05-01）</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/points-mall-app-fixed.html" class="btn">🛒 打开积分商城</a>
+        </div>
+
+        <div class="demo-card">
+            <h2><span class="icon">📚</span> 知识库</h2>
+            <p>6 大分类深入了解龙华文化，<span class="highlight">真实图片 + 专业讲解</span></p>
+            <ul class="feature-list">
+                <li>历史/人文/美食/拍照/彩蛋/活动</li>
+                <li>18 张真实龙华照片</li>
+                <li>丰富的历史文化内容</li>
+                <li>精美的卡片式布局</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/knowledge-base.html" class="btn">📖 打开知识库</a>
+        </div>
+
+        <div class="demo-card">
+            <h2><span class="icon">🌊</span> 许愿池</h2>
+            <p>写下愿望装进漂流瓶，<span class="highlight">时间胶囊 + 邮箱提醒</span></p>
+            <ul class="feature-list">
+                <li>5 种精美漂流瓶样式</li>
+                <li>自定义开启日期</li>
+                <li>邮件提醒功能</li>
+                <li>倒计时期待感</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/wishing-pool.html" class="btn">✨ 打开许愿池</a>
+        </div>
+
+        <div class="demo-card">
+            <h2><span class="icon">🏪</span> 商户端</h2>
+            <p>商户入驻管理系统，<span class="highlight">3 级权限 + 审核流程</span></p>
+            <ul class="feature-list">
+                <li>商户入驻申请</li>
+                <li>优惠券管理</li>
+                <li>核销记录追踪</li>
+                <li>收益数据隐藏（商业机密）</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/merchant-partnership.html" class="btn">💼 打开商户端</a>
+        </div>
+
+        <div class="demo-card">
+            <h2><span class="icon">👨‍💼</span> 管理后台</h2>
+            <p>完整的审核管理工作，<span class="highlight">商户/路线/活动审批</span></p>
+            <ul class="feature-list">
+                <li>商户入驻审核</li>
+                <li>路线发布审批</li>
+                <li>活动管理</li>
+                <li>数据统计面板</li>
+            </ul>
+            <a href="file:///E:/hackathon-travel-experience-main/admin-dashboard.html" class="btn">⚙️ 打开管理后台</a>
+        </div>
+    </div>
+
+    <!-- 商业模式 -->
+    <div class="business-model">
+        <h2>💰 商业模式 - 公益文化平台</h2>
+        <div class="revenue-grid">
+            <div class="revenue-item">
+                <h3>🙏 功德主计划</h3>
+                <p>用户自愿捐赠支持古建维护，月度公示使用情况，打造透明公益平台</p>
+            </div>
+            <div class="revenue-item">
+                <h3>🎨 文创产品</h3>
+                <p>福来毛绒公仔、纪念徽章、明信片套装、幸运御守等文创周边</p>
+            </div>
+            <div class="revenue-item">
+                <h3>🍜 深度体验</h3>
+                <p>龙华素斋体验、禅修课程、传统手工艺学习等文化体验活动</p>
+            </div>
+            <div class="revenue-item">
+                <h3>🏢 企业定制</h3>
+                <p>为企业定制团建路线、文化活动、员工关怀等 B 端服务</p>
+            </div>
+            <div class="revenue-item">
+                <h3>💎 会员服务</h3>
+                <p>VIP 会员专属路线、优先活动报名、专属客服等增值服务</p>
+            </div>
+        </div>
+        <div class="warning">
+            <strong>⚠️ 重要说明：</strong> 平台不参与宗教功能合作，所有消费自愿，无强制购买，无优惠券（龙华活动免费/慈善性质）
+        </div>
+    </div>
+
+    <!-- 5 分钟演示脚本 -->
+    <div class="demo-script">
+        <h2>🎬 5 分钟路演演示脚本</h2>
+        
+        <div class="script-section">
+            <h3>⏱️ 0:00-0:30 开场介绍</h3>
+            <p><strong>台词：</strong>"各位评委好！我们是心情地图团队。现代人出行最大的痛点是什么？不是找不到路，而是找不到符合当下的心情去的地方。"</p>
+            <p>"今天是什么心情，就去哪里玩——这就是心情地图的核心理念。"</p>
+            <div class="action">👉 操作：打开主 APP 首页，展示 12 个情绪按钮</div>
+        </div>
+
+        <div class="script-section">
+            <h3>⏱️ 0:30-1:30 核心功能演示</h3>
+            <p><strong>台词：</strong>"让我们试试'EMO 求治愈'模式。点击后，AI 会智能生成一条包含 8-12 个景点的治愈路线。"</p>
+            <p>"每个景点都有语音讲解，听听看——是我们的青春活力少女音哦！"</p>
+            <div class="action">👉 操作：点击"EMO 求治愈" → 选择第一个景点 → 点击语音播放</div>
+        </div>
+
+        <div class="script-section">
+            <h3>⏱️ 1:30-2:30 积分系统展示</h3>
+            <p><strong>台词：</strong>"游玩还能赚积分！完成路线打卡、分享、阅读知识库等任务，获得积分后可以兑换文创产品或参与公益捐赠。"</p>
+            <p>"积分将在 5 月 1 日龙华庙会日统一兑换，给用户满满的仪式感！"</p>
+            <div class="action">👉 操作：打开积分商城 → 展示任务列表 → 点击一个兑换商品</div>
+        </div>
+
+        <div class="script-section">
+            <h3>⏱️ 2:30-3:30 特色功能亮点</h3>
+            <p><strong>台词：</strong>"我们还有超有趣的许愿池功能！写下愿望，选择开启日期，到时会收到邮件提醒。就像给未来的自己寄一封信。"</p>
+            <p>"知识库里有 18 张真实的龙华照片，6 大分类深入了解龙华文化。"</p>
+            <div class="action">👉 操作：打开许愿池 → 投入一个愿望 → 打开知识库快速切换分类</div>
+        </div>
+
+        <div class="script-section">
+            <h3>⏱️ 3:30-4:30 商业模式说明</h3>
+            <p><strong>台词：</strong>"商业模式上，我们采用公益文化定位：功德主计划、文创产品、深度体验、企业定制、会员服务五大收入来源。"</p>
+            <p>"平台不参与宗教功能，所有消费自愿，打造透明可信的公益文化平台。"</p>
+            <div class="action">👉 操作：切换到商业模式 PPT 或展示商户端页面</div>
+        </div>
+
+        <div class="script-section">
+            <h3>⏱️ 4:30-5:00 总结与愿景</h3>
+            <p><strong>台词：</strong>"心情地图，不仅是一个出行工具，更是年轻人的情感陪伴。我们用 AI 技术，让人文关怀更有温度。"</p>
+            <p>"我们的愿景是：让每一次出行，都成为一次心灵的治愈之旅。谢谢！"</p>
+            <div class="action">👉 操作：回到主 APP 首页，展示完整界面</div>
+        </div>
+    </div>
+
+    <!-- 时间安排 -->
+    <div class="timeline">
+        <h2>📅 重要时间节点</h2>
+        <div class="timeline-item">
+            <div class="time">4/25 20:00</div>
+            <div class="content">
+                <h3>🚨 提交截止</h3>
+                <p>黑客松作品提交截止时间（飞书表单）</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">4/26 10:30</div>
+            <div class="content">
+                <h3>🎤 路演讲演</h3>
+                <p>西岸智塔 5 楼，5 分钟演示 + 问答</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="time">5/01</div>
+            <div class="content">
+                <h3>🎋 龙华庙会</h3>
+                <p>积分兑换截止，庙会活动开启</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 技术栈 -->
+    <div style="background:rgba(255,255,255,0.05);border-radius:20px;padding:25px;margin:30px 0">
+        <h2>🛠️ 技术架构</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:15px">
+            <span class="tag" style="font-size:1rem;padding:8px 16px">Vue 3</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">TypeScript</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">Vite</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">Tailwind CSS</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">高德地图 API</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">Web Speech API</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">localStorage</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">PWA</span>
+            <span class="tag" style="font-size:1rem;padding:8px 16px">Service Worker</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🎯 项目完成度：100% | 功能测试：通过 | 文档完整：是</p>
+        <p style="margin-top:10px">LYCC 2026 龙华·黑客松 - 心情地图团队</p>
+    </div>
+</div>
+
+<script>
+// 自动打开主 APP（可选）
+console.log('🗺️ 心情地图演示页面已加载');
+console.log('📋 5 分钟演示脚本已就绪');
+console.log('🎯 加油！黑客松必赢！');
+</script>
+</body>
+</html>

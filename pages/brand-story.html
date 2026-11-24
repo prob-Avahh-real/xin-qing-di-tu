@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华·灵境向导 | 有温度的出行伴侣</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:linear-gradient(180deg,#FFF5F0,#FFE8E0 30%,#FFD5C8 100%);color:#5a4a42;overflow-x:hidden}.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden}.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.1;z-index:-1}.hero-bg .pagoda{position:absolute;top:10%;right:15%;width:200px;height:300px;background:linear-gradient(180deg,#E87A5D,#D46A4A);clip-path:polygon(50% 0%,70% 20%,65% 35%,75% 45%,70% 60%,75% 75%,70% 90%,30% 90%,30% 75%,25% 60%,30% 45%,25% 35%,30% 20%);opacity:0.3}.hero-bg .flower{position:absolute;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,#ffb7b7,#ff9a9a)}.hero h1{font-size:3rem;margin-bottom:16px;color:#E87A5D;position:relative;z-index:1}.hero h1 .subtitle{font-size:1.2rem;color:#b3704b;display:block;margin-top:12px;font-weight:400}.hero p{font-size:1.1rem;max-width:600px;line-height:1.8;color:#7a5a48;margin-bottom:30px;position:relative;z-index:1}.scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);animation:bounce 2s infinite}.scroll-hint .arrow{width:24px;height:24px;border-right:3px solid #E87A5D;border-bottom:3px solid #E87A5D;transform:rotate(45deg)}@keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}.story-section{padding:80px 20px;background:white;position:relative}.story-container{max-width:900px;margin:0 auto}.story-section h2{font-size:2.2rem;color:#E87A5D;text-align:center;margin-bottom:60px;position:relative}.story-section h2::after{content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);width:60px;height:4px;background:linear-gradient(90deg,#F9B572,#E87A5D);border-radius:2px}.timeline{position:relative;padding-left:40px}.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#F9B572,#E87A5D,#D46A4A);border-radius:2px}.timeline-item{position:relative;padding-left:30px;margin-bottom:60px}.timeline-item::before{content:'';position:absolute;left:-44px;top:0;width:20px;height:20px;background:linear-gradient(135deg,#F9B572,#E87A5D);border-radius:50%;border:4px solid white;box-shadow:0 0 0 3px #F9B572}.timeline-item .year{font-size:1.4rem;font-weight:700;color:#E87A5D;margin-bottom:8px}.timeline-item h3{font-size:1.3rem;color:#5a4a42;margin-bottom:12px}.timeline-item p{color:#7a5a48;line-height:1.8;margin-bottom:12px}.timeline-item .quote{background:linear-gradient(135deg,#fef3e4,#fee6d6);padding:20px;border-radius:16px;border-left:4px solid #E87A5D;font-style:italic;color:#b3704b;margin-top:16px}.feature-grid{padding:80px 20px;background:linear-gradient(180deg,#FFF5F0,#FFE8E0)}.feature-grid .container{max-width:1100px;margin:0 auto}.feature-grid h2{text-align:center;font-size:2.2rem;color:#E87A5D;margin-bottom:24px}.feature-grid .subtitle{text-align:center;color:#7a5a48;margin-bottom:60px;max-width:600px;margin-left:auto;margin-right:auto}.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px}.feature-card{background:white;border-radius:28px;padding:32px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.06);transition:all 0.3s}.feature-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(0,0,0,0.12)}.feature-card .icon{font-size:4rem;margin-bottom:20px;display:block}.feature-card h3{font-size:1.4rem;color:#5a4a42;margin-bottom:12px}.feature-card p{color:#7a5a48;line-height:1.7}.feature-card .highlight{background:linear-gradient(135deg,#fef3e4,#fee6d6);padding:12px;border-radius:12px;margin-top:16px;font-size:0.85rem;color:#b3704b}.play-section{padding:80px 20px;background:white}.play-section .container{max-width:1000px;margin:0 auto}.play-section h2{text-align:center;font-size:2.2rem;color:#E87A5D;margin-bottom:24px}.play-section .subtitle{text-align:center;color:#7a5a48;margin-bottom:60px}.play-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}.play-card{background:linear-gradient(135deg,#fef7f2,#fef0e6);border-radius:24px;padding:28px;border-left:5px solid #F9B572;transition:all 0.3s}.play-card:hover{transform:translateX(8px)}.play-card .icon{font-size:3rem;margin-bottom:12px;display:block}.play-card h3{font-size:1.2rem;color:#5a4a42;margin-bottom:8px}.play-card p{color:#7a5a48;line-height:1.6;margin-bottom:12px}.play-card .reward{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:8px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;display:inline-block}.ip-section{padding:80px 20px;background:linear-gradient(135deg,#FFF5F0,#FFE8E0)}.ip-section .container{max-width:900px;margin:0 auto;text-align:center}.ip-section h2{font-size:2.2rem;color:#E87A5D;margin-bottom:24px}.ip-section .subtitle{color:#7a5a48;margin-bottom:48px}.ip-character{background:white;border-radius:32px;padding:40px;margin-bottom:30px;box-shadow:0 8px 24px rgba(0,0,0,0.08)}.ip-character .avatar{font-size:6rem;margin-bottom:20px;display:block}.ip-character h3{font-size:1.8rem;color:#5a4a42;margin-bottom:12px}.ip-character p{color:#7a5a48;line-height:1.8;margin-bottom:16px}.ip-character .story{background:linear-gradient(135deg,#fef3e4,#fee6d6);padding:20px;border-radius:16px;font-style:italic;color:#b3704b;margin-top:16px}.emotion-wall{padding:80px 20px;background:white}.emotion-wall .container{max-width:900px;margin:0 auto}.emotion-wall h2{text-align:center;font-size:2.2rem;color:#E87A5D;margin-bottom:24px}.emotion-wall .subtitle{text-align:center;color:#7a5a48;margin-bottom:60px}.wall-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}.wall-card{background:linear-gradient(135deg,#fef7f2,#fef0e6);border-radius:20px;padding:24px;text-align:center;transition:all 0.3s;cursor:pointer}.wall-card:hover{transform:scale(1.05);box-shadow:0 8px 24px rgba(0,0,0,0.08)}.wall-card .emotion{font-size:3.5rem;margin-bottom:12px;display:block}.wall-card .name{font-size:1.1rem;color:#5a4a42;font-weight:600;margin-bottom:8px}.wall-card .desc{font-size:0.85rem;color:#7a5a48;line-height:1.5}.cta-section{padding:100px 20px;background:linear-gradient(135deg,#E87A5D,#D46A4A);color:white;text-align:center}.cta-section h2{font-size:2.5rem;margin-bottom:16px}.cta-section p{font-size:1.1rem;opacity:0.9;margin-bottom:30px;max-width:500px;margin-left:auto;margin-right:auto}.cta-btn{background:white;color:#E87A5D;padding:18px 48px;border-radius:44px;font-size:1.1rem;font-weight:600;text-decoration:none;display:inline-block;transition:all 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.15)}.cta-btn:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.2)}.footer{background:#5a4a42;color:white;padding:40px 20px;text-align:center}.footer p{opacity:0.8;font-size:0.9rem}.floating{animation:float 3s ease-in-out infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    </style>
+</head>
+<body>
+<!-- 首页英雄区 -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="pagoda"></div>
+        <div class="flower" style="top:20%;left:10%"></div>
+        <div class="flower" style="top:60%;left:80%"></div>
+        <div class="flower" style="top:80%;left:30%"></div>
+    </div>
+    <h1>🐉 龙华·灵境向导
+        <span class="subtitle">有温度的出行伴侣 · 懂你的情绪向导</span>
+    </h1>
+    <p>这不是一个冰冷的导航工具，而是一个有情怀、有故事的旅伴。<br>1700 年龙华寺的晨钟暮鼓，西岸滨江的落日余晖，还有那只叫"福来"的猫咪...<br>每一次出发，都是与更好的自己相遇。</p>
+    <div class="scroll-hint"><div class="arrow"></div></div>
+</section>
+
+<!-- 品牌故事 -->
+<section class="story-section">
+    <div class="story-container">
+        <h2>📜 我们的故事</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="year">262 年</div>
+                <h3>龙华寺始建</h3>
+                <p>三国吴赤乌五年，龙华寺肇建。1700 多年来，钟声回荡在黄浦江畔，见证朝代更迭，守护一方安宁。</p>
+                <div class="quote">"龙华千载仰高风，塔影波光映碧空"</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">宋代</div>
+                <h3>龙华塔屹立</h3>
+                <p>北宋太平兴国二年，龙华塔拔地而起。七层八面，飞檐翘角，成为吴淞江上的航标，也是游子的精神寄托。</p>
+                <div class="quote">"塔影入波清见底，钟声过江远闻名"</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2024 年</div>
+                <h3>福来猫走红</h3>
+                <p>龙华寺的流浪猫"福来"被爱心人士喂养，成为网红寺猫。它不知道，自己治愈了无数年轻人的心。</p>
+                <div class="quote">"摸一摸福来的耳朵，桃花运就会来哦"</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2026 年</div>
+                <h3>灵境向导诞生</h3>
+                <p>我们想做的，不只是一个 APP，而是一个能听懂你情绪的伙伴。EMO 时带你去撸猫，开心时陪你看日落，迷茫时让你登高望远...</p>
+                <div class="quote">"科技有温度，出行有情怀"</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 特色功能 -->
+<section class="feature-grid">
+    <div class="container">
+        <h2>✨ 有温度的设计</h2>
+        <p class="subtitle">每一个功能，都承载着人文关怀；每一次互动，都充满趣味惊喜。</p>
+        <div class="features">
+            <div class="feature-card">
+                <span class="icon">🎭</span>
+                <h3>情绪识别</h3>
+                <p>不是简单的分类，而是真正理解你的心情。EMO 时不劝你开心，只是默默带你去最治愈的地方。</p>
+                <div class="highlight">💬 "我知道你很难过，让福来抱抱你"</div>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🙏</span>
+                <h3>祈福许愿</h3>
+                <p>电子许愿墙、在线求签、功德 +1 打卡。传统与现代的完美融合，让信仰触手可及。</p>
+                <div class="highlight">🎋 今日运势：宜出行，忌焦虑</div>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🏮</span>
+                <h3>文化故事</h3>
+                <p>每个景点都有故事，每块砖瓦都有历史。听 AI 讲述龙华的前世今生，让旅行更有深度。</p>
+                <div class="highlight">📖 龙华塔的七层，代表七级浮屠</div>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🎮</span>
+                <h3>趣味互动</h3>
+                <p>寻找福来猫、收集勋章、桃花运势、登高挑战...旅行不再是走马观花，而是探索与发现。</p>
+                <div class="highlight">🎯 成就：已打卡 5 个秘境地点</div>
+            </div>
+            <div class="feature-card">
+                <span class="icon">💌</span>
+                <h3>时间胶囊</h3>
+                <p>写给未来的信，存在龙华塔下。一年后的今天，你会收到这份来自过去的礼物。</p>
+                <div class="highlight">⏳ 2027-04-24 开启，还有 365 天</div>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🌸</span>
+                <h3>季节限定</h3>
+                <p>春天看桃花，夏天听蝉鸣，秋天赏银杏，冬天观雪景。四季轮转，龙华总有惊喜。</p>
+                <div class="highlight">🌺 桃花季限定路线已上线</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 趣味玩法 -->
+<section class="play-section">
+    <div class="container">
+        <h2>🎪 趣味玩法</h2>
+        <p class="subtitle">旅行不只是看风景，更是玩游戏、集勋章、收获惊喜。</p>
+        <div class="play-grid">
+            <div class="play-card">
+                <span class="icon">🐱</span>
+                <h3>寻找福来</h3>
+                <p>在龙华寺找到福来猫的 5 个隐藏打卡点，合影打卡，解锁"铲屎官"勋章。</p>
+                <span class="reward">🏆 奖励：福来限定头像框</span>
+            </div>
+            <div class="play-card">
+                <span class="icon">🗼</span>
+                <h3>登高挑战</h3>
+                <p>爬完龙华塔 7 层，打卡拍照，获得"登高望远"成就。站在塔顶俯瞰龙华全景。</p>
+                <span class="reward">🏆 奖励：塔顶俯瞰限定壁纸</span>
+            </div>
+            <div class="play-card">
+                <span class="icon">🍜</span>
+                <h3>素斋修行</h3>
+                <p>在龙华寺素斋馆吃素斋，打卡"功德 +1"，连续 7 天解锁"素食达人"勋章。</p>
+                <span class="reward">🏆 奖励：素斋 8 折优惠券</span>
+            </div>
+            <div class="play-card">
+                <span class="icon">🌸</span>
+                <h3>桃花运势</h3>
+                <p>在桃花树下求签，测测今日桃花运。单身可求良缘，恋爱可求长久。</p>
+                <span class="reward">🏆 奖励：桃花限定头像框</span>
+            </div>
+            <div class="play-card">
+                <span class="icon">📸</span>
+                <h3>打卡集章</h3>
+                <p>收集 12 个情绪路线的限定印章，集齐召唤"龙华通"终极成就。</p>
+                <span class="reward">🏆 奖励：实体纪念证书</span>
+            </div>
+            <div class="play-card">
+                <span class="icon">💌</span>
+                <h3>时光邮局</h3>
+                <p>写一封信给未来的自己，存在龙华塔下。约定一年后，回来取信。</p>
+                <span class="reward">🏆 奖励：未来信件提醒</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- IP 形象 -->
+<section class="ip-section">
+    <div class="container">
+        <h2>🐱 遇见福来</h2>
+        <p class="subtitle">它是龙华寺的网红猫，也是我们的吉祥物。它说："每个人都需要被治愈。"</p>
+        <div class="ip-character">
+            <span class="avatar floating">🐱</span>
+            <h3>福来 Fulai</h3>
+            <p>品种：中华田园橘猫<br>年龄：3 岁<br>职位：龙华寺首席治愈官<br>爱好：晒太阳、被摸耳朵、吃猫条</p>
+            <div class="story">
+                "我本来是一只流浪猫，被寺里的师父收养了。每天坐在天王殿门口，看来来往往的人。有的人开心，有的人难过。我学会了在他们难过的时候蹭蹭他们的裤腿。师父说，这是'佛缘'。我觉得，这只是猫的本能吧。"
+            </div>
+        </div>
+        <div class="ip-character" style="background:linear-gradient(135deg,#fef7f2,#fef0e6)">
+            <span class="avatar">🐉</span>
+            <h3>龙龙 Longlong</h3>
+            <p>品种：中国龙（虚拟）<br>年龄：1764 岁<br>职位：龙华文化守护者<br>爱好：讲历史、背古诗、保护文物</p>
+            <div class="story">
+                "我从宋代就守护着龙华塔，看着一代又一代人长大、变老。现在有了这个 APP，我可以给更多人讲龙华的故事了。想听吗？我可以从三国时期开始讲..."
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 情绪墙 -->
+<section class="emotion-wall">
+    <div class="container">
+        <h2>💭 今天是什么心情？</h2>
+        <p class="subtitle">每一种情绪都值得被看见，被理解，被温柔对待。</p>
+        <div class="wall-grid">
+            <div class="wall-card">
+                <span class="emotion">😔</span>
+                <div class="name">EMO 求治愈</div>
+                <div class="desc">难过的时候，让福来抱抱你</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">😌</span>
+                <div class="name">一个人散心</div>
+                <div class="desc">静静地看着江水，放空自己</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">📸</span>
+                <div class="name">想出片打卡</div>
+                <div class="desc">这里每一角都是大片</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">👫</span>
+                <div class="name">朋友聚会嗨</div>
+                <div class="desc">和喜欢的人，去有趣的地方</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🎨</span>
+                <div class="name">文艺求灵感</div>
+                <div class="desc">艺术是灵魂的避难所</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">💕</span>
+                <div class="name">约会谈恋爱</div>
+                <div class="desc">在日落时分，说喜欢你</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">👨‍👩‍👧</span>
+                <div class="name">带娃遛家庭</div>
+                <div class="desc">陪伴是最长情的告白</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🗺️</span>
+                <div class="name">探索新发现</div>
+                <div class="desc">世界那么大，我想去看看</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🍜</span>
+                <div class="name">吃货寻美食</div>
+                <div class="desc">唯有美食与爱不可辜负</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🙏</span>
+                <div class="name">祈福求好运</div>
+                <div class="desc">心诚则灵，愿所愿皆成</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🚴</span>
+                <div class="name">运动出点汗</div>
+                <div class="desc">多巴胺是最好的抗抑郁药</div>
+            </div>
+            <div class="wall-card">
+                <span class="emotion">🌅</span>
+                <div class="name">躺平放松</div>
+                <div class="desc">偶尔躺平，是为了更好地出发</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <h2>🌟 开始你的龙华之旅</h2>
+    <p>这不仅仅是一次出行，更是一场心灵的邂逅。</p>
+    <a href="business-pro-personalized.html" class="cta-btn">✨ 开启旅程</a>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>🐉 龙华·灵境向导 | PathJoy © 2026</p>
+    <p>科技有温度 · 出行有情怀 · 生活有乐趣</p>
+    <p style="margin-top:16px;font-size:0.8rem;opacity:0.6">特别鸣谢：龙华寺、福来猫、所有热爱生活的人们</p>
+</footer>
+
+<script>
+// 滚动动画
+const observerOptions = { threshold: 0.1 };
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.feature-card, .play-card, .wall-card, .ip-character, .timeline-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'all 0.6s ease-out';
+    observer.observe(el);
+});
+
+// 点击情绪卡片跳转
+document.querySelectorAll('.wall-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const emotion = card.querySelector('.name').textContent.trim();
+        // 跳转到个性化页面并选择对应情绪
+        window.location.href = 'business-pro-personalized.html#emotion=' + emotion;
+    });
+});
+</script>
+</body>
+</html>

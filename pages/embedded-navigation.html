@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>龙华·灵境向导 - 路径规划</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77"></script>
+    <script src="https://webapi.amap.com/ui/1.0/main.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+        
+        /* 顶部状态栏 */
+        .status-bar{height:44px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;flex-shrink:0}
+        .status-bar .mascot{font-size:1.2rem;margin-right:8px}
+        
+        /* 地图容器 */
+        .map-wrapper{flex:1;position:relative;overflow:hidden}
+        #mapContainer{width:100%;height:100%}
+        
+        /* 底部卡片 */
+        .bottom-card{position:absolute;bottom:0;left:0;right:0;background:white;border-radius:24px 24px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.1);max-height:45vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .bottom-card::-webkit-scrollbar{display:none}
+        
+        .card-header{padding:16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px}
+        .card-header .icon{font-size:1.5rem}
+        .card-header .title{flex:1;font-size:0.95rem;font-weight:600;color:#333}
+        .card-header .close{background:#f5f5f5;border:none;padding:8px 16px;border-radius:20px;font-size:0.8rem;color:#666;cursor:pointer}
+        
+        .route-info{padding:16px}
+        .route-item{background:#f8f9fa;border-radius:16px;padding:16px;margin-bottom:12px}
+        .route-item .name{font-size:0.9rem;font-weight:600;color:#333;margin-bottom:4px}
+        .route-item .distance{font-size:0.75rem;color:#999;margin-bottom:8px}
+        .route-item .steps{font-size:0.8rem;color:#666;line-height:1.5}
+        .route-item .steps ol{padding-left:20px;margin:0}
+        .route-item .steps li{margin-bottom:6px}
+        
+        .route-tabs{display:flex;gap:8px;padding:0 16px 16px;overflow-x:auto}
+        .route-tab{background:#f8f9fa;border:2px solid #e9ecef;padding:8px 16px;border-radius:20px;font-size:0.8rem;font-weight:600;color:#666;white-space:nowrap;flex-shrink:0;cursor:pointer}
+        .route-tab.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-color:transparent}
+        
+        /* 导航控制按钮 */
+        .nav-controls{position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:10}
+        .nav-btn{width:44px;height:44px;background:white;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.15);border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .nav-btn:active{background:#f5f5f5}
+        
+        /* 起点终点选择 */
+        .route-planner{position:absolute;top:16px;left:16px;right:60px;background:white;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10;overflow:hidden}
+        .route-input{padding:12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px}
+        .route-input:last-child{border-bottom:none}
+        .route-input .label{font-size:0.7rem;color:#999;width:20px}
+        .route-input input{flex:1;border:none;font-size:0.9rem;padding:4px 0;outline:none}
+        .route-input input::placeholder{color:#ccc}
+        .plan-btn{width:100%;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer}
+        .plan-btn:disabled{background:#d1d5db}
+        
+        /* 加载提示 */
+        .loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:20px 40px;border-radius:16px;font-size:0.9rem;display:none;z-index:100}
+        
+        /* 提示框 */
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:12px;font-size:0.85rem;z-index:1000;display:none}
+    </style>
+</head>
+<body>
+
+<!-- 顶部状态栏 -->
+<div class="status-bar">
+    <span class="mascot">🗺️</span>
+    <span>路径规划</span>
+</div>
+
+<!-- 地图容器 -->
+<div class="map-wrapper">
+    <div id="mapContainer"></div>
+    
+    <!-- 路线规划器 -->
+    <div class="route-planner" id="routePlanner">
+        <div class="route-input">
+            <span class="label">🟢</span>
+            <input type="text" id="startInput" placeholder="起点（当前位置）" value="龙华寺">
+        </div>
+        <div class="route-input">
+            <span class="label">🔴</span>
+            <input type="text" id="endInput" placeholder="终点">
+        </div>
+        <button class="plan-btn" onclick="planRoute()" id="planBtn" disabled>开始规划</button>
+    </div>
+    
+    <!-- 导航控制按钮 -->
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="zoomIn()" title="放大">+</button>
+        <button class="nav-btn" onclick="zoomOut()" title="缩小">-</button>
+        <button class="nav-btn" onclick="togglePlanner()" title="隐藏规划器">📍</button>
+    </div>
+    
+    <!-- 加载提示 -->
+    <div class="loading" id="loading">正在规划路线...</div>
+</div>
+
+<!-- 底部路线详情 -->
+<div class="bottom-card" id="bottomCard" style="display:none">
+    <div class="card-header">
+        <span class="icon">🚶</span>
+        <span class="title" id="routeTitle">步行路线</span>
+        <button class="close" onclick="closeRoute()">收起</button>
+    </div>
+    
+    <div class="route-tabs">
+        <div class="route-tab active" data-mode="walk">🚶 步行</div>
+        <div class="route-tab" data-mode="transit">🚇 公交</div>
+        <div class="route-tab" data-mode="drive">🚗 驾车</div>
+    </div>
+    
+    <div class="route-info" id="routeInfo"></div>
+</div>
+
+<!-- 提示框 -->
+<div class="toast" id="toast"></div>
+
+<script>
+let map;
+let driving;
+let markerStart;
+let markerEnd;
+let polyline;
+
+// 初始化地图
+function initMap() {
+    map = new AMap.Map('mapContainer', {
+        zoom: 15,
+        center: [121.4500, 31.1830], // 龙华寺
+        mapStyle: 'amap://styles/light'
+    });
+    
+    // 添加当前位置标记
+    markerStart = new AMap.Marker({
+        position: [121.4500, 31.1830],
+        title: '起点：龙华寺',
+        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+        map: map
+    });
+    
+    // 监听终点输入
+    document.getElementById('endInput').addEventListener('input', function() {
+        const btn = document.getElementById('planBtn');
+        btn.disabled = !this.value.trim();
+    });
+    
+    // 路线模式切换
+    document.querySelectorAll('.route-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.route-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            planRoute();
+        });
+    });
+}
+
+// 规划路线
+async function planRoute() {
+    const start = document.getElementById('startInput').value.trim();
+    const end = document.getElementById('endInput').value.trim();
+    
+    if (!start || !end) {
+        showToast('请输入起点和终点');
+        return;
+    }
+    
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('planBtn').disabled = true;
+    
+    try {
+        // 地理编码获取坐标
+        const geocoder = new AMap.Geocoder({
+            city: '上海'
+        });
+        
+        const [startGeoc, endGeoc] = await Promise.all([
+            geocoder.getLocation(start),
+            geocoder.getLocation(end)
+        ]);
+        
+        if (startGeoc.geocodes.length === 0 || endGeoc.geocodes.length === 0) {
+            showToast('未找到地点，请检查输入');
+            return;
+        }
+        
+        const startLoc = startGeoc.geocodes[0].location;
+        const endLoc = endGeoc.geocodes[0].location;
+        
+        // 更新标记
+        if (markerStart) map.remove(markerStart);
+        if (markerEnd) map.remove(markerEnd);
+        if (polyline) map.remove(polyline);
+        
+        markerStart = new AMap.Marker({
+            position: startLoc,
+            title: '起点',
+            icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+            map: map
+        });
+        
+        markerEnd = new AMap.Marker({
+            position: endLoc,
+            title: '终点',
+            icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
+            map: map
+        });
+        
+        // 获取路线模式
+        const mode = document.querySelector('.route-tab.active').dataset.mode;
+        
+        // 路径规划
+        if (mode === 'walk') {
+            driving = new AMap.Walking({
+                map: map,
+                panel: 'routeInfo',
+                hideMarkers: true,
+                isOutline: true,
+                outlineColor: '#3388ff'
+            });
+        } else if (mode === 'transit') {
+            driving = new AMap.Transit({
+                map: map,
+                panel: 'routeInfo',
+                hideMarkers: true
+            });
+        } else if (mode === 'drive') {
+            driving = new AMap.Driving({
+                map: map,
+                panel: 'routeInfo',
+                hideMarkers: true,
+                isOutline: true,
+                outlineColor: '#3388ff'
+            });
+        }
+        
+        driving.search(startLoc, endLoc, (status, result) => {
+            document.getElementById('loading').style.display = 'none';
+            
+            if (status === 'complete') {
+                document.getElementById('bottomCard').style.display = 'block';
+                document.getElementById('routeTitle').textContent = 
+                    mode === 'walk' ? '🚶 步行路线' : 
+                    mode === 'transit' ? '🚇 公交路线' : '🚗 驾车路线';
+                map.setFitView();
+                showToast('路线规划成功');
+            } else {
+                showToast('未找到路线');
+            }
+            document.getElementById('planBtn').disabled = false;
+        });
+        
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('planBtn').disabled = false;
+        showToast('规划失败，请重试');
+    }
+}
+
+// 放大
+function zoomIn() {
+    map.zoomIn();
+}
+
+// 缩小
+function zoomOut() {
+    map.zoomOut();
+}
+
+// 切换规划器
+function togglePlanner() {
+    const planner = document.getElementById('routePlanner');
+    planner.style.display = planner.style.display === 'none' ? 'block' : 'none';
+}
+
+// 收起路线
+function closeRoute() {
+    document.getElementById('bottomCard').style.display = 'none';
+}
+
+// 提示框
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 2000);
+}
+
+// 快速设置终点
+function setDestination(name, lng, lat) {
+    document.getElementById('endInput').value = name;
+    document.getElementById('planBtn').disabled = false;
+    
+    // 添加标记
+    if (markerEnd) map.remove(markerEnd);
+    markerEnd = new AMap.Marker({
+        position: [lng, lat],
+        title: name,
+        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
+        map: map
+    });
+    
+    map.setCenter([lng, lat]);
+    showToast('已设置终点：' + name);
+}
+
+// 初始化
+initMap();
+
+// 暴露给外部调用
+window.setDestination = setDestination;
+</script>
+</body>
+</html>

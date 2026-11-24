@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙华寺 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        
+        /* 顶部导航 */
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px;text-align:center}
+        .header h1{font-size:1.3rem;font-weight:600}
+        
+        /* 底部标签栏 */
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e0e0e0;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+        .tabs-inner{display:flex;gap:8px;max-width:600px;margin:0 auto;overflow-x:auto;padding:0 8px}
+        .tab-btn{flex-shrink:0;background:#f5f5f5;border:none;padding:8px 16px;border-radius:20px;font-size:0.85rem;color:#666;cursor:pointer;transition:all 0.3s;white-space:nowrap}
+        .tab-btn.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        
+        /* 内容区域 */
+        main{max-width:600px;margin:0 auto;padding:16px}
+        .section{display:none}
+        .section.active{display:block}
+        
+        /* 卡片 */
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .card h3{font-size:1.1rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .card h3 .icon{font-size:1.5rem}
+        
+        /* 故事卡片 */
+        .story-card{text-align:center}
+        .longlong-avatar{font-size:4rem;margin-bottom:16px;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .story-text{background:#f9f5f0;border-radius:12px;padding:20px;font-size:0.95rem;line-height:1.8;color:#333;margin-bottom:16px;text-align:left;white-space:pre-line}
+        .voice-btn{background:#f5eee9;border:none;padding:12px 32px;border-radius:36px;font-size:0.95rem;color:#E87A5D;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.3s;margin:8px 0}
+        .voice-btn:hover{background:#E87A5D;color:white}
+        .voice-btn.playing{background:#E87A5D;color:white;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        
+        /* 导航按钮组 */
+        .nav-buttons{margin-top:20px;padding-top:20px;border-top:1px solid #e0e0e0}
+        .nav-buttons h4{font-size:1rem;color:#333;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:14px 20px;border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;margin-bottom:10px;width:100%;text-align:left}
+        .nav-btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,0.3)}
+        .nav-btn:active{transform:scale(0.98)}
+        .nav-btn .icon{font-size:1.5rem}
+        .nav-btn .text{flex:1}
+        .nav-btn .arrow{font-size:1.2rem;opacity:0.8}
+        
+        /* 路线推荐卡片 */
+        .route-recommend{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border-radius:12px;padding:16px;margin-top:16px}
+        .route-recommend h4{font-size:1rem;margin-bottom:8px}
+        .route-recommend p{font-size:0.9rem;opacity:0.9;margin-bottom:12px}
+        .route-btn{background:white;color:#E87A5D;border:none;padding:10px 24px;border-radius:24px;font-size:0.9rem;font-weight:600;cursor:pointer}
+        
+        /* Toast */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:24px;font-size:0.9rem;display:none;z-index:1000;white-space:nowrap}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1>🗺️ 龙华寺</h1>
+</header>
+
+<!-- 底部标签栏 -->
+<nav class="tabs">
+    <div class="tabs-inner">
+        <button class="tab-btn active" onclick="switchTab('story')"><span class="icon">📖</span> 龙龙讲故事</button>
+        <button class="tab-btn" onclick="switchTab('photo')"><span class="icon">📸</span> 拍照点</button>
+        <button class="tab-btn" onclick="switchTab('danmu')"><span class="icon">💬</span> 弹幕</button>
+        <button class="tab-btn" onclick="switchTab('play')"><span class="icon">🎮</span> 挑战</button>
+        <button class="tab-btn" onclick="switchTab('egg')"><span class="icon">🎁</span> 彩蛋</button>
+    </div>
+</nav>
+
+<main>
+    <!-- 龙龙讲故事 -->
+    <section id="story" class="section active">
+        <div class="card">
+            <h3><span class="icon">📖</span> 龙龙讲故事</h3>
+            <div class="story-card">
+                <div class="longlong-avatar">🐉</div>
+                <div class="story-text" id="storyText">加载中...</div>
+                <button class="voice-btn" id="playBtn" onclick="togglePlay()">
+                    <span>🔊</span> <span id="playBtnText">听龙龙讲</span>
+                </button>
+                
+                <!-- 语音设置 -->
+                <div style="margin-top:16px;text-align:left;background:#f9f5f0;border-radius:8px;padding:12px">
+                    <div style="font-size:0.85rem;color:#666;margin-bottom:8px">🎛️ 语音设置</div>
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <label style="font-size:0.85rem;color:#666">语速:</label>
+                        <input type="range" id="rateSlider" min="0.5" max="1.5" step="0.1" value="0.9" style="flex:1">
+                        <span id="rateValue" style="font-size:0.85rem;color:#666;width:40px">0.9</span>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+                        <label style="font-size:0.85rem;color:#666">音调:</label>
+                        <input type="range" id="pitchSlider" min="0.5" max="1.5" step="0.1" value="1.1" style="flex:1">
+                        <span id="pitchValue" style="font-size:0.85rem;color:#666;width:40px">1.1</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="nav-buttons">
+                <h4>🧭 接下来去哪？</h4>
+                
+                <button class="nav-btn" onclick="goToPOI('longhua_pagoda')">
+                    <span class="icon">🏯</span>
+                    <span class="text">
+                        <div style="font-weight:600">龙华塔</div>
+                        <div style="font-size:0.8rem;opacity:0.9">登塔俯瞰，风景绝佳</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+                
+                <button class="nav-btn" onclick="goToRoute('sad')">
+                    <span class="icon">😌</span>
+                    <span class="text">
+                        <div style="font-weight:600">治愈路线</div>
+                        <div style="font-size:0.8rem;opacity:0.9">18 个景点，3-4 小时</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+                
+                <button class="nav-btn" onclick="goToFunction('tickets')">
+                    <span class="icon">🎫</span>
+                    <span class="text">
+                        <div style="font-weight:600">门票预订</div>
+                        <div style="font-size:0.8rem;opacity:0.9">官方优惠，扫码入园</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+                
+                <button class="nav-btn" onclick="goToFunction('parking')">
+                    <span class="icon">🅿️</span>
+                    <span class="text">
+                        <div style="font-weight:600">停车引导</div>
+                        <div style="font-size:0.8rem;opacity:0.9">最近停车场，5 元/小时</div>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+            
+            <!-- 路线推荐 -->
+            <div class="route-recommend">
+                <h4>💡 推荐路线</h4>
+                <p>龙华寺静心之旅 → 龙华塔 → 塔影空间 → 龙华老街</p>
+                <button class="route-btn" onclick="goToRoute('sad')">查看完整路线</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 拍照点 -->
+    <section id="photo" class="section">
+        <div class="card">
+            <h3><span class="icon">📸</span> 最佳拍照点</h3>
+            <div id="photoGrid">
+                <div style="margin-bottom:12px">
+                    <div style="background:linear-gradient(135deg,#f5f7fa,#c3cfe2);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;font-size:2rem">📸</div>
+                    <div style="margin-top:8px;font-size:0.9rem;color:#666">山门广场 - 拍全景最佳位置</div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <div style="background:linear-gradient(135deg,#f5f7fa,#c3cfe2);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;font-size:2rem">📸</div>
+                    <div style="margin-top:8px;font-size:0.9rem;color:#666">大雄宝殿 - 拍建筑细节</div>
+                </div>
+                <div style="margin-bottom:12px">
+                    <div style="background:linear-gradient(135deg,#f5f7fa,#c3cfe2);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;font-size:2rem">📸</div>
+                    <div style="margin-top:8px;font-size:0.9rem;color:#666">猫咪福来 - 下午 3 点最活跃</div>
+                </div>
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="nav-buttons">
+                <h4>📍 拍完照去哪？</h4>
+                <button class="nav-btn" onclick="goToPOI('cat_fulai')">
+                    <span class="icon">🐱</span>
+                    <span class="text">去找猫咪福来</span>
+                    <span class="arrow">→</span>
+                </button>
+                <button class="nav-btn" onclick="goToRoute('photo')">
+                    <span class="icon">📸</span>
+                    <span class="text">查看完整拍照路线</span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 弹幕 -->
+    <section id="danmu" class="section">
+        <div class="card">
+            <h3><span class="icon">💬</span> 年轻人都在说什么</h3>
+            <div id="danmuContainer" style="display:flex;flex-direction:column;gap:12px">
+                <!-- 弹幕数据由 JS 加载 -->
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="nav-buttons">
+                <h4>💬 你也来说两句</h4>
+                <button class="nav-btn" onclick="postDanmu()">
+                    <span class="icon">✏️</span>
+                    <span class="text">发布弹幕</span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 挑战 -->
+    <section id="play" class="section">
+        <div class="card">
+            <h3><span class="icon">🎮</span> 互动挑战</h3>
+            <div id="challengeGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+                <div style="background:#f5eee9;border-radius:12px;padding:16px;text-align:center">
+                    <div style="font-size:2rem;margin-bottom:8px">📸</div>
+                    <div style="font-size:0.9rem;font-weight:600">拍照打卡</div>
+                    <div style="font-size:0.8rem;color:#666;margin-top:4px">+50 积分</div>
+                </div>
+                <div style="background:#f5eee9;border-radius:12px;padding:16px;text-align:center">
+                    <div style="font-size:2rem;margin-bottom:8px">🙏</div>
+                    <div style="font-size:0.9rem;font-weight:600">祈福许愿</div>
+                    <div style="font-size:0.8rem;color:#666;margin-top:4px">+30 积分</div>
+                </div>
+                <div style="background:#f5eee9;border-radius:12px;padding:16px;text-align:center">
+                    <div style="font-size:2rem;margin-bottom:8px">📖</div>
+                    <div style="font-size:0.9rem;font-weight:600">听故事</div>
+                    <div style="font-size:0.8rem;color:#666;margin-top:4px">+20 积分</div>
+                </div>
+                <div style="background:#f5eee9;border-radius:12px;padding:16px;text-align:center">
+                    <div style="font-size:2rem;margin-bottom:8px">🎁</div>
+                    <div style="font-size:0.9rem;font-weight:600">找彩蛋</div>
+                    <div style="font-size:0.8rem;color:#666;margin-top:4px">+100 积分</div>
+                </div>
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="nav-buttons">
+                <h4>🏆 积分有什么用？</h4>
+                <button class="nav-btn" onclick="goToFunction('mall')">
+                    <span class="icon">🎁</span>
+                    <span class="text">积分商城</span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 彩蛋 -->
+    <section id="egg" class="section">
+        <div class="card">
+            <h3><span class="icon">🎁</span> 隐藏彩蛋</h3>
+            <div id="eggContainer">
+                <div style="text-align:center;padding:20px;color:#666">
+                    <div style="font-size:3rem;margin-bottom:12px">🔍</div>
+                    <div>在寺里找找看，有惊喜哦！</div>
+                </div>
+            </div>
+            
+            <!-- 导航按钮 -->
+            <div class="nav-buttons">
+                <h4>🗺️ 更多彩蛋在</h4>
+                <button class="nav-btn" onclick="goToRoute('explore')">
+                    <span class="icon">🗺️</span>
+                    <span class="text">探索路线 - 18 个彩蛋点</span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 完整的 POI 数据
+const POI_DATA = {
+    longhua_temple: {
+        name: '龙华寺',
+        story: `🐉 龙龙来啦！让我给你讲讲龙华寺的故事～
+
+龙华寺是上海最古老的寺庙，距今已经有 1700 多年历史啦！
+
+相传在三国时期，孙权为孝敬他的母亲，特地建造了这座寺庙。
+
+寺名"龙华"来源于佛经中的"弥勒下生，龙华三会"。
+
+龙华寺的建筑布局非常讲究。
+
+沿中轴线依次是山门、弥勒殿、天王殿、大雄宝殿、三圣殿和方丈室。
+
+每当除夕之夜，寺里的钟声会敲响 108 下。
+
+寓意消除 108 种烦恼。
+
+现在的龙华寺里住着好几只可爱的猫咪。
+
+它们可是寺庙的"守护神"哦！
+
+其中以橘猫"福来"最为出名。
+
+每年春天，龙华寺的桃花盛开。
+
+粉红色的花朵与古寺相映成趣。
+
+是上海最美的春景之一。`,
+        nextPOIs: ['longhua_pagoda', 'cat_fulai'],
+        route: 'sad'
+    },
+    longhua_pagoda: {
+        name: '龙华塔',
+        story: `🐉 龙龙带你登龙华塔！
+
+龙华塔是上海地区保存最完好的宋代古塔。
+
+距今已有近千年历史！
+
+龙华塔始建于北宋太平兴国二年。
+
+也就是公元 977 年。
+
+是吴越王钱俶为供奉佛舍利而建。
+
+塔高 40.64 米。
+
+七层八角。
+
+砖木结构。
+
+飞檐翘角。
+
+每层都有平座。
+
+可以凭栏远眺。
+
+登上龙华塔，可以俯瞰整个龙华地区的美景。
+
+向北看：龙华寺全景尽收眼底。
+
+向南看：黄浦江蜿蜒流过。
+
+向东看：现代化高楼林立。
+
+向西看：古镇风貌一览无余。`,
+        nextPOIs: ['ta_ying_space', 'longhua_old_street'],
+        route: 'photo'
+    }
+};
+
+// 弹幕数据
+const DANMU_DATA = [
+    {text: '下午 3 点光线最好！', time: '10:30', likes: 128},
+    {text: '穿白色衣服更出片！', time: '11:15', likes: 95},
+    {text: '龙龙讲故事超好听', time: '12:00', likes: 256},
+    {text: '免费领香，不用自己买', time: '13:20', likes: 189},
+    {text: '猫咪福来在殿后，带猫条！', time: '14:05', likes: 312}
+];
+
+let isPlaying = false;
+let currentUtterance = null;
+
+// 切换标签
+function switchTab(tabId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// 优化版：智能断句播放
+function playStoryWithPauses(text) {
+    // 将故事按句子拆分
+    const sentences = text.split(/(?<=[.!?!.])/).filter(s => s.trim().length > 0);
+    
+    let sentenceIndex = 0;
+    
+    function playNextSentence() {
+        if (sentenceIndex >= sentences.length || !isPlaying) {
+            stopStory();
+            return;
+        }
+        
+        const sentence = sentences[sentenceIndex].trim();
+        if (sentence.length === 0) {
+            sentenceIndex++;
+            playNextSentence();
+            return;
+        }
+        
+        currentUtterance = new SpeechSynthesisUtterance(sentence);
+        
+        // 获取用户设置的参数
+        const rate = parseFloat(document.getElementById('rateSlider').value);
+        const pitch = parseFloat(document.getElementById('pitchSlider').value);
+        
+        // 优化参数：更慢、更自然
+        currentUtterance.rate = rate;  // 0.9 = 稍慢，更清晰
+        currentUtterance.pitch = pitch; // 1.1 = 自然音调
+        currentUtterance.volume = 1.0;
+        currentUtterance.lang = 'zh-CN';
+        
+        // 查找中文语音
+        const voices = speechSynthesis.getVoices();
+        const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+        if (zhVoice) {
+            currentUtterance.voice = zhVoice;
+        }
+        
+        currentUtterance.onend = () => {
+            sentenceIndex++;
+            // 句间停顿 500ms
+            setTimeout(playNextSentence, 500);
+        };
+        
+        currentUtterance.onerror = (e) => {
+            console.error('播放失败:', e);
+            stopStory();
+        };
+        
+        speechSynthesis.speak(currentUtterance);
+    }
+    
+    playNextSentence();
+}
+
+// 播放/暂停切换
+function togglePlay() {
+    if (isPlaying) {
+        stopStory();
+    } else {
+        startStory();
+    }
+}
+
+// 开始播放
+function startStory() {
+    const storyText = document.getElementById('storyText').textContent;
+    
+    if (!storyText || storyText === '加载中...' || storyText.trim().length < 10) {
+        showToast('❌ 故事内容尚未加载');
+        return;
+    }
+    
+    isPlaying = true;
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('playBtnText').textContent = '播放中...';
+    
+    showToast('🔊 龙龙正在讲故事...');
+    
+    // 使用优化版播放
+    playStoryWithPauses(storyText);
+}
+
+// 停止播放
+function stopStory() {
+    isPlaying = false;
+    
+    if (speechSynthesis.speaking || speechSynthesis.pending) {
+        speechSynthesis.cancel();
+    }
+    
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('playBtnText').textContent = '听龙龙讲';
+    
+    showToast('⏹️ 已停止');
+}
+
+// 导航功能
+function goToPOI(poiId) {
+    showToast(`🚀 前往${poiId === 'longhua_pagoda' ? '龙华塔' : '其他景点'}...`);
+    // 实际应用中跳转到对应页面
+    setTimeout(() => {
+        alert(`跳转至：${poiId}\n\n实际会打开对应 POI 详情页`);
+    }, 500);
+}
+
+function goToRoute(emotion) {
+    showToast(`🗺️ 生成${emotion === 'sad' ? '治愈' : '其他'}路线...`);
+    setTimeout(() => {
+        alert(`跳转至：${emotion}路线\n\n实际会打开路线详情页`);
+    }, 500);
+}
+
+function goToFunction(func) {
+    const funcNames = {
+        'tickets': '门票预订',
+        'parking': '停车引导',
+        'mall': '积分商城'
+    };
+    showToast(`🎯 打开${funcNames[func] || func}...`);
+    setTimeout(() => {
+        alert(`跳转至：${funcNames[func] || func}\n\n实际会打开对应功能页`);
+    }, 500);
+}
+
+function postDanmu() {
+    const text = prompt('请输入弹幕内容：');
+    if (text) {
+        DANMU_DATA.unshift({text, time: new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}), likes: 0});
+        renderDanmu();
+        showToast('✅ 发布成功');
+    }
+}
+
+// 渲染弹幕
+function renderDanmu() {
+    const container = document.getElementById('danmuContainer');
+    container.innerHTML = DANMU_DATA.map(d => `
+        <div style="background:#f5f5f5;border-radius:8px;padding:12px">
+            <div style="font-size:0.9rem;color:#333">${d.text}</div>
+            <div style="font-size:0.8rem;color:#999;margin-top:4px;display:flex;justify-content:space-between">
+                <span>${d.time}</span>
+                <span>👍 ${d.likes}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 显示 Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// 加载 POI 数据
+function loadPOIData(poiId) {
+    const data = POI_DATA[poiId] || POI_DATA.longhua_temple;
+    
+    if (data) {
+        document.getElementById('storyText').textContent = data.story;
+        document.querySelector('.header h1').textContent = '🗺️ ' + data.name;
+    }
+}
+
+// 滑块事件
+document.getElementById('rateSlider').addEventListener('input', (e) => {
+    document.getElementById('rateValue').textContent = e.target.value;
+});
+
+document.getElementById('pitchSlider').addEventListener('input', (e) => {
+    document.getElementById('pitchValue').textContent = e.target.value;
+});
+
+// 页面加载
+window.addEventListener('load', () => {
+    console.log('✅ 页面加载完成');
+    
+    // 预加载语音
+    if ('speechSynthesis' in window) {
+        try {
+            speechSynthesis.getVoices();
+        } catch (e) {}
+    }
+    
+    // 加载 POI 数据
+    loadPOIData('longhua_temple');
+    
+    // 渲染弹幕
+    renderDanmu();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,680 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>蹇冩儏鍦板浘路璁告効姹?/title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;overflow-x:hidden;color:white;position:relative}
+        
+        /* 鏄熺┖鑳屾櫙 */
+        .stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+        .star{position:absolute;background:white;border-radius:50%;animation:twinkle 2s infinite}
+        @keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
+        
+        /* 姘撮潰鏁堟灉 */
+        .water{position:fixed;bottom:0;left:0;width:100%;height:40%;background:linear-gradient(180deg,rgba(15,52,96,0.3) 0%,rgba(15,52,96,0.8) 100%);z-index:1;animation:wave 3s ease-in-out infinite}
+        @keyframes wave{0%,100%{transform:translateY(-10px)}50%{transform:translateY(10px)}}
+        
+        .container{max-width:600px;margin:0 auto;padding:20px;position:relative;z-index:10;padding-bottom:100px}
+        
+        /* 椤堕儴鏍囬 */
+        .header{text-align:center;padding:40px 20px 20px}
+        .header h1{font-size:2rem;margin-bottom:8px;background:linear-gradient(135deg,#f9b572,#e87a5d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .header p{color:rgba(255,255,255,0.7);font-size:0.9rem}
+        
+        /* 搴曢儴瀵艰埅 */
+        .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(26,26,46,0.95);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.1);padding:10px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:100}
+        .nav-tabs{display:flex;justify-content:space-around;max-width:600px;margin:0 auto}
+        .nav-tab{flex:1;text-align:center;padding:8px 0;cursor:pointer;transition:all 0.3s;opacity:0.6}
+        .nav-tab.active{opacity:1}
+        .nav-tab .icon{font-size:1.5rem;display:block;margin-bottom:4px}
+        .nav-tab .label{font-size:0.7rem}
+        
+        /* 椤甸潰 */
+        .page{display:none}
+        .page.active{display:block}
+        
+        /* 璁告効鍗＄墖 */
+        .wish-card{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:24px;padding:24px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.2)}
+        .wish-card .icon{font-size:3rem;text-align:center;margin-bottom:16px;display:block}
+        .wish-card h3{font-size:1.2rem;text-align:center;margin-bottom:8px}
+        .wish-card p{color:rgba(255,255,255,0.7);text-align:center;font-size:0.9rem;margin-bottom:20px}
+        .wish-card .btn{background:linear-gradient(135deg,#f9b572,#e87a5d);color:white;border:none;padding:14px 40px;border-radius:24px;font-size:1rem;font-weight:600;cursor:pointer;display:block;margin:0 auto;transition:all 0.3s}
+        .wish-card .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(249,181,114,0.4)}
+        
+        /* 璁告効琛ㄥ崟 */
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;font-size:0.85rem;color:rgba(255,255,255,0.8);margin-bottom:8px}
+        .form-group textarea,.form-group input,.form-group select{width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px;color:white;font-size:1rem;font-family:inherit;resize:vertical}
+        .form-group textarea:focus,.form-group input:focus,.form-group select:focus{outline:none;border-color:#f9b572;background:rgba(255,255,255,0.15)}
+        .form-group textarea::placeholder{color:rgba(255,255,255,0.4)}
+        .form-group input[type="date"],.form-group input[type="time"]{color-scheme:dark}
+        .form-group option{background:#1a1a2e;color:white}
+        
+        /* 婕傛祦鐡跺姩鐢?*/
+        .bottle-animation{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5rem;z-index:1000;pointer-events:none;display:none}
+        .bottle-animation.animate{display:block;animation:throw 2s ease-in-out}
+        @keyframes throw{0%{transform:translate(-50%,-50%) scale(0.5);opacity:0}20%{transform:translate(-50%,-300%) scale(1);opacity:1}100%{transform:translate(-50%,500%) scale(0.3);opacity:0}}
+        
+        /* 璁告効姹?*/
+        .wish-pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px;margin-top:20px}
+        .wish-bottle{background:linear-gradient(135deg,rgba(249,181,114,0.2),rgba(232,122,93,0.2));border:1px solid rgba(249,181,114,0.3);border-radius:20px;padding:16px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+        .wish-bottle:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(249,181,114,0.3)}
+        .wish-bottle .bottle-icon{font-size:2.5rem;margin-bottom:8px;display:block}
+        .wish-bottle .date{font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:4px}
+        .wish-bottle .status{position:absolute;top:8px;right:8px;font-size:0.65rem;padding:2px 6px;border-radius:8px}
+        .wish-bottle .status.pending{background:rgba(249,181,114,0.3)}
+        .wish-bottle .status.opened{background:rgba(16,185,129,0.3)}
+        .wish-bottle .status.expired{background:rgba(239,68,68,0.3)}
+        
+        /* 璁告効璇︽儏寮圭獥 */
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+        .modal.active{display:flex}
+        .modal-content{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:24px;padding:30px;max-width:400px;width:100%;border:1px solid rgba(249,181,114,0.3);position:relative;max-height:80vh;overflow-y:auto}
+        .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;opacity:0.7}
+        .modal-close:hover{opacity:1}
+        .modal-icon{font-size:4rem;text-align:center;margin-bottom:16px;display:block}
+        .modal h2{font-size:1.3rem;text-align:center;margin-bottom:16px}
+        .modal .wish-text{background:rgba(255,255,255,0.05);padding:20px;border-radius:16px;margin-bottom:20px;line-height:1.6;color:rgba(255,255,255,0.9)}
+        .modal .info{display:flex;justify-content:space-between;margin-bottom:20px}
+        .modal .info-item{text-align:center;flex:1}
+        .modal .info-item .label{font-size:0.7rem;color:rgba(255,255,255,0.5);margin-bottom:4px}
+        .modal .info-item .value{font-size:0.9rem;color:rgba(255,255,255,0.8)}
+        .modal .countdown{background:linear-gradient(135deg,rgba(249,181,114,0.2),rgba(232,122,93,0.2));padding:16px;border-radius:16px;text-align:center;margin-bottom:20px}
+        .modal .countdown .timer{font-size:1.5rem;font-weight:700;color:#f9b572}
+        .modal .countdown .label{font-size:0.75rem;color:rgba(255,255,255,0.6);margin-top:4px}
+        .modal .btn-group{display:flex;gap:12px}
+        .modal .btn{flex:1;padding:14px;border:none;border-radius:16px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .modal .btn-primary{background:linear-gradient(135deg,#f9b572,#e87a5d);color:white}
+        .modal .btn-secondary{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2)}
+        .modal .btn:disabled{opacity:0.5;cursor:not-allowed}
+        
+        /* 绌虹姸鎬?*/
+        .empty-state{text-align:center;padding:60px 20px}
+        .empty-state .icon{font-size:4rem;margin-bottom:16px;opacity:0.5}
+        .empty-state .text{font-size:0.9rem;color:rgba(255,255,255,0.5)}
+        
+        /* 閫氱煡 */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(249,181,114,0.95);color:white;padding:14px 28px;border-radius:24px;font-size:0.9rem;z-index:1001;display:none;white-space:nowrap}
+        .toast.show{display:block;animation:fadeInUp 0.3s}
+        @keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    </style>
+</head>
+<style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+
+
+<!-- 鏄熺┖鑳屾櫙 -->
+<div class="stars" id="stars"></div>
+
+<!-- 姘撮潰鏁堟灉 -->
+<div class="water"></div>
+
+<!-- 婕傛祦鐡跺姩鐢?-->
+<div class="bottle-animation" id="bottleAnimation">馃嵕</div>
+
+<!-- 鎻愮ず妗?-->
+<div class="toast" id="toast"></div>
+
+<div class="container">
+    <!-- 澶撮儴 -->
+    <style>.back-btn-fixed{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;padding:10px 18px;border-radius:24px;font-size:0.85rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(249,181,114,0.4);z-index:9999;transition:all 0.2s;}.back-btn-fixed:hover{transform:scale(1.05);box-shadow:0 5px 16px rgba(249,181,114,0.5);}</style>
+<button class='back-btn-fixed' onclick='window.location.href=''心情地图 - 导航中心.html'''>🏠 返回导航</button>
+>
+        <h1>馃帇 璁告効姹?/h1>
+        <p>鎶婂績鎰胯杩涙紓娴佺摱锛岀瓑寰呮椂闂村紑鍚?/p>
+    </div>
+    
+    <!-- 璁告効椤甸潰 -->
+    <div class="page active" id="page-make">
+        <div class="wish-card">
+            <span class="icon">鉁?/span>
+            <h3>璁镐笅涓€涓績鎰?/h3>
+            <p>鍐欎笅浣犵殑鎰挎湜锛岃瀹氬紑鍚椂闂?br>鏃堕棿鍒扮殑鏃跺€欙紝鎴戜滑浼氭彁閱掍綘</p>
+        </div>
+        
+        <form id="wishForm" onsubmit="submitWish(event)">
+            <div class="form-group">
+                <label>馃挱 浣犵殑蹇冩効鏄粈涔堬紵</label>
+                <textarea id="wishText" rows="4" placeholder="鎴戝笇鏈?..&#10;&#10;鍙互鍐欙細&#10;- 涓€涓洰鏍囷紙3 涓湀鍐呭浼氭父娉筹級&#10;- 涓€涓湡寰咃紙涓嬫鍐嶆潵榫欏崕瀵猴級&#10;- 涓€涓绂忥紙瀹朵汉鍋ュ悍骞冲畨锛? required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>馃搮 浠€涔堟椂鍊欐墦寮€杩欎釜蹇冩効锛?/label>
+                <input type="date" id="openDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label>馃帹 閫夋嫨涓€涓紓娴佺摱</label>
+                <select id="bottleType">
+                    <option value="classic">馃嵕 缁忓吀閫忔槑鐡?/option>
+                    <option value="blue">馃挋 娣辨捣钃濈摱</option>
+                    <option value="pink">馃挅 妯辫姳绮夌摱</option>
+                    <option value="gold">鉁?鏄熺┖閲戠摱</option>
+                    <option value="green">馃挌 妫灄缁跨摱</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>馃摟 鎺ユ敹鎷嗗皝鎻愰啋锛堝彲閫夛級</label>
+                <input type="email" id="email" placeholder="鏃堕棿鍒扮殑鏃跺€欙紝鎴戜滑鍙戦偖浠舵彁閱掍綘">
+                <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:6px">馃挕 濉啓閭鍚庯紝蹇冩効鍒版湡鏃朵細鏀跺埌閭欢鎻愰啋</div>
+            </div>
+            
+            <button type="submit" class="btn">馃寠 鎶曞叆璁告効姹?/button>
+        </form>
+    </div>
+    
+    <!-- 鎴戠殑璁告効椤甸潰 -->
+    <div class="page" id="page-my">
+        <div class="wish-card">
+            <span class="icon">馃摐</span>
+            <h3>鎴戠殑璁告効</h3>
+            <p id="wishCount">浣犲凡缁忔湁 0 涓績鎰垮湪姹犱腑</p>
+        </div>
+        
+        <div class="wish-pool" id="myWishes">
+            <!-- 鍔ㄦ€佸姞杞?-->
+        </div>
+        
+        <div class="empty-state" id="emptyState" style="display:none">
+            <span class="icon">馃寠</span>
+            <p class="text">杩樻病鏈夎涓嬪績鎰?br>鍘荤涓€涓〉闈㈣涓効鍚?/p>
+        </div>
+    </div>
+    
+    <!-- 鎺㈢储椤甸潰 -->
+    <div class="page" id="page-explore">
+        <div class="wish-card">
+            <span class="icon">馃敭</span>
+            <h3>鎺㈢储浠栦汉鐨勫績鎰?/h3>
+            <p>鐪嬬湅鍒汉璁镐笅浜嗕粈涔堢編濂界殑鎰挎湜</p>
+        </div>
+        
+        <div class="wish-pool" id="publicWishes">
+            <!-- 鍔ㄦ€佸姞杞藉叕寮€蹇冩効 -->
+        </div>
+    </div>
+</div>
+
+<!-- 搴曢儴瀵艰埅 -->
+<div class="nav">
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchPage('make')" data-page="make">
+            <span class="icon">鉁?/span>
+            <span class="label">璁告効</span>
+        </div>
+        <div class="nav-tab" onclick="switchPage('my')" data-page="my">
+            <span class="icon">馃摐</span>
+            <span class="label">鎴戠殑</span>
+        </div>
+        <div class="nav-tab" onclick="switchPage('explore')" data-page="explore">
+            <span class="icon">馃敭</span>
+            <span class="label">鎺㈢储</span>
+        </div>
+    </div>
+</div>
+
+<!-- 璁告効璇︽儏寮圭獥 -->
+<div class="modal" id="wishModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">脳</button>
+        <span class="modal-icon" id="modalIcon">馃嵕</span>
+        <h2 id="modalTitle">蹇冩効璇︽儏</h2>
+        
+        <div class="wish-text" id="modalWishText">
+            <!-- 蹇冩効鍐呭 -->
+        </div>
+        
+        <div class="info">
+            <div class="info-item">
+                <div class="label">璁告効鏃堕棿</div>
+                <div class="value" id="modalCreateDate">--</div>
+            </div>
+            <div class="info-item">
+                <div class="label">寮€鍚椂闂?/div>
+                <div class="value" id="modalOpenDate">--</div>
+            </div>
+            <div class="info-item">
+                <div class="label">鐘舵€?/div>
+                <div class="value" id="modalStatus">--</div>
+            </div>
+        </div>
+        
+        <!-- 閭鎻愰啋淇℃伅 -->
+        <div class="info" id="emailInfo" style="display:none;background:rgba(249,181,114,0.1);padding:16px;border-radius:16px;margin-bottom:20px">
+            <div class="info-item" style="flex:2">
+                <div class="label">馃摟 鎷嗗皝鎻愰啋閭</div>
+                <div class="value" id="modalEmail" style="color:#f9b572">--</div>
+            </div>
+            <div class="info-item" style="flex:1">
+                <div class="label">閭欢鐘舵€?/div>
+                <div class="value" id="modalEmailStatus">--</div>
+            </div>
+        </div>
+        
+        <div class="countdown" id="countdownBox">
+            <div class="timer" id="countdownTimer">--</div>
+            <div class="label" id="countdownLabel">璺濈寮€鍚繕鏈?/div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-secondary" id="editBtn" onclick="editWish()" disabled>鉁忥笍 缂栬緫</button>
+            <button class="btn btn-primary" id="openBtn" onclick="openWish()" disabled>馃巵 寮€鍚績鎰?/button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 鍒濆鍖栨槦绌?function initStars() {
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starsContainer.appendChild(star);
+    }
+}
+
+// 璁剧疆鏈€灏忔棩鏈熶负浠婂ぉ
+function initMinDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('openDate').min = today;
+    // 榛樿璁剧疆涓?7 澶╁悗
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('openDate').value = nextWeek.toISOString().split('T')[0];
+}
+
+// 椤甸潰鍒囨崲
+function switchPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelector('[data-page="' + page + '"]').classList.add('active');
+    
+    if (page === 'my') {
+        loadMyWishes();
+    } else if (page === 'explore') {
+        loadPublicWishes();
+    }
+}
+
+// 鎻愪氦蹇冩効
+function submitWish(event) {
+    event.preventDefault();
+    
+    const wishText = document.getElementById('wishText').value.trim();
+    const openDate = document.getElementById('openDate').value;
+    const bottleType = document.getElementById('bottleType').value;
+    const email = document.getElementById('email').value.trim();
+    
+    if (!wishText || !openDate) {
+        showToast('璇峰～鍐欏畬鏁翠俊鎭?);
+        return;
+    }
+    
+    // 楠岃瘉閭鏍煎紡锛堝鏋滃～鍐欎簡锛?    if (email && !isValidEmail(email)) {
+        showToast('璇疯緭鍏ユ湁鏁堢殑閭鍦板潃');
+        return;
+    }
+    
+    // 鍒涘缓蹇冩効瀵硅薄
+    const wish = {
+        id: Date.now(),
+        text: wishText,
+        openDate: openDate,
+        bottleType: bottleType,
+        email: email, // 娣诲姞閭
+        createdAt: new Date().toISOString(),
+        isPublic: Math.random() > 0.5, // 50% 姒傜巼鍏紑
+        isOpened: false,
+        emailSent: false // 閭欢鏄惁宸插彂閫?    };
+    
+    // 淇濆瓨鍒?localStorage
+    const wishes = getWishes();
+    wishes.push(wish);
+    localStorage.setItem('wishing_pool_wishes', JSON.stringify(wishes));
+    
+    // 妯℃嫙鍙戦€侀偖浠?    if (email) {
+        simulateSendEmail(wish);
+    }
+    
+    // 鎾斁鍔ㄧ敾
+    playBottleAnimation();
+    
+    // 鏄剧ず鎴愬姛鎻愮ず
+    setTimeout(() => {
+        showToast('鉁?蹇冩効宸叉姇鍏ヨ鎰挎睜' + (email ? '锛屽埌鏈熶細鍙戦偖浠舵彁閱掍綘' : ''));
+        document.getElementById('wishForm').reset();
+        initMinDate();
+        switchPage('my');
+    }, 1500);
+}
+
+// 楠岃瘉閭鏍煎紡
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// 妯℃嫙鍙戦€侀偖浠讹紙婕旂ず鐢級
+function simulateSendEmail(wish) {
+    console.log('馃摟 妯℃嫙鍙戦€侀偖浠?', {
+        to: wish.email,
+        subject: `馃巵 浣犵殑蹇冩効 "${wish.text.substring(0, 20)}..." 宸插埌鏈燂紒`,
+        openDate: wish.openDate,
+        body: `
+浜茬埍鐨勬湅鍙嬶紝
+
+浣犱簬 ${new Date(wish.createdAt).toLocaleDateString()} 璁镐笅鐨勫績鎰垮凡鍒版湡锛?
+馃帇 蹇冩効鍐呭锛?{wish.text}
+馃搮 寮€鍚椂闂达細${wish.openDate}
+
+鐜板湪灏辨墦寮€蹇冩効锛岀湅鐪嬪疄鐜颁簡鍚楋紵
+
+---
+蹇冩儏鍦板浘路璁告効姹?        `.trim()
+    });
+    
+    // 鏍囪涓哄緟鍙戦€?    wish.emailSent = true;
+    localStorage.setItem('wishing_pool_wishes', JSON.stringify(getWishes()));
+}
+
+// 鑾峰彇蹇冩効鍒楄〃
+function getWishes() {
+    const wishes = localStorage.getItem('wishing_pool_wishes');
+    return wishes ? JSON.parse(wishes) : [];
+}
+
+// 鍔犺浇鎴戠殑璁告効
+function loadMyWishes() {
+    const wishes = getWishes();
+    const container = document.getElementById('myWishes');
+    const emptyState = document.getElementById('emptyState');
+    const wishCount = document.getElementById('wishCount');
+    
+    wishCount.textContent = `浣犲凡缁忔湁 ${wishes.length} 涓績鎰垮湪姹犱腑`;
+    
+    if (wishes.length === 0) {
+        emptyState.style.display = 'block';
+        container.innerHTML = '';
+        return;
+    }
+    
+    emptyState.style.display = 'none';
+    container.innerHTML = wishes.map(wish => {
+        const bottle = getBottleIcon(wish.bottleType);
+        const status = getWishStatus(wish.openDate);
+        const daysLeft = getDaysLeft(wish.openDate);
+        
+        return `
+            <div class="wish-bottle" onclick="viewWish(${wish.id})">
+                <span class="bottle-icon">${bottle}</span>
+                <div class="date">${wish.openDate}</div>
+                <div class="date">${daysLeft}</div>
+                <span class="status ${status.class}">${status.text}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// 鍔犺浇鍏紑蹇冩効
+function loadPublicWishes() {
+    const wishes = getWishes().filter(w => w.isPublic && !w.isOpened);
+    const container = document.getElementById('publicWishes');
+    
+    if (wishes.length === 0) {
+        container.innerHTML = '<div class="empty-state"><span class="icon">馃寠</span><p class="text">鏆傛椂杩樻病鏈夊叕寮€鐨勫績鎰?/p></div>';
+        return;
+    }
+    
+    container.innerHTML = wishes.map(wish => {
+        const bottle = getBottleIcon(wish.bottleType);
+        return `
+            <div class="wish-bottle" onclick="viewPublicWish(${wish.id})">
+                <span class="bottle-icon">${bottle}</span>
+                <div class="date">璁稿叧浜庯細${formatDate(wish.createdAt)}</div>
+                <span class="status pending">鏈紑鍚?/span>
+            </div>
+        `;
+    }).join('');
+}
+
+// 鏌ョ湅蹇冩効璇︽儏
+let currentWish = null;
+let countdownInterval = null;
+
+function viewWish(wishId) {
+    const wishes = getWishes();
+    const wish = wishes.find(w => w.id === wishId);
+    if (!wish) return;
+    
+    currentWish = wish;
+    const modal = document.getElementById('wishModal');
+    
+    document.getElementById('modalIcon').textContent = getBottleIcon(wish.bottleType);
+    document.getElementById('modalTitle').textContent = '蹇冩効璇︽儏';
+    document.getElementById('modalWishText').textContent = wish.text;
+    document.getElementById('modalCreateDate').textContent = formatDate(wish.createdAt);
+    document.getElementById('modalOpenDate').textContent = wish.openDate;
+    
+    const status = getWishStatus(wish.openDate);
+    document.getElementById('modalStatus').textContent = status.text;
+    document.getElementById('modalStatus').style.color = status.color;
+    
+    // 鏄剧ず閭淇℃伅
+    const emailInfo = document.getElementById('emailInfo');
+    if (wish.email) {
+        emailInfo.style.display = 'flex';
+        document.getElementById('modalEmail').textContent = wish.email;
+        document.getElementById('modalEmailStatus').textContent = wish.emailSent ? '鉁?宸插彂閫? : '鈴?寰呭彂閫?;
+        document.getElementById('modalEmailStatus').style.color = wish.emailSent ? '#10b981' : '#f9b572';
+    } else {
+        emailInfo.style.display = 'none';
+    }
+    
+    // 鏇存柊鎸夐挳鐘舵€?    const canOpen = new Date(wish.openDate) <= new Date();
+    document.getElementById('editBtn').disabled = !canOpen || wish.isOpened;
+    document.getElementById('openBtn').disabled = !canOpen || wish.isOpened;
+    
+    if (wish.isOpened) {
+        document.getElementById('countdownBox').style.display = 'none';
+        document.getElementById('openBtn').textContent = '鉁?宸插紑鍚?;
+    } else if (canOpen) {
+        document.getElementById('countdownBox').style.display = 'block';
+        document.getElementById('countdownTimer').textContent = '宸插埌鏈燂紒';
+        document.getElementById('countdownLabel').textContent = '鍙互寮€鍚績鎰夸簡';
+        
+        // 濡傛灉鍒版湡涓旀湁閭锛屽彂閫侀偖浠?        if (wish.email && !wish.emailSent) {
+            simulateSendEmail(wish);
+            document.getElementById('modalEmailStatus').textContent = '鉁?宸插彂閫?;
+            document.getElementById('modalEmailStatus').style.color = '#10b981';
+            showToast('馃摟 鎷嗗皝鎻愰啋宸插彂閫佸埌閭');
+        }
+    } else {
+        document.getElementById('countdownBox').style.display = 'block';
+        updateCountdown(wish.openDate);
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => updateCountdown(wish.openDate), 1000);
+    }
+    
+    modal.classList.add('active');
+}
+
+// 鏌ョ湅鍏紑蹇冩効锛堜笉鑳界紪杈戯級
+function viewPublicWish(wishId) {
+    const wishes = getWishes();
+    const wish = wishes.find(w => w.id === wishId);
+    if (!wish) return;
+    
+    currentWish = wish;
+    const modal = document.getElementById('wishModal');
+    
+    document.getElementById('modalIcon').textContent = getBottleIcon(wish.bottleType);
+    document.getElementById('modalTitle').textContent = '浠栦汉鐨勫績鎰?;
+    document.getElementById('modalWishText').textContent = wish.text;
+    document.getElementById('modalCreateDate').textContent = formatDate(wish.createdAt);
+    document.getElementById('modalOpenDate').textContent = wish.openDate;
+    document.getElementById('modalStatus').textContent = '鏈紑鍚?;
+    
+    // 闅愯棌閭淇℃伅锛堝叕寮€蹇冩効涓嶆樉绀洪偖绠憋級
+    document.getElementById('emailInfo').style.display = 'none';
+    
+    document.getElementById('countdownBox').style.display = 'none';
+    document.getElementById('editBtn').style.display = 'none';
+    document.getElementById('openBtn').style.display = 'none';
+    
+    modal.classList.add('active');
+}
+
+// 鏇存柊鍊掕鏃?function updateCountdown(openDate) {
+    const target = new Date(openDate).getTime();
+    const now = new Date().getTime();
+    const diff = target - now;
+    
+    if (diff <= 0) {
+        document.getElementById('countdownTimer').textContent = '宸插埌鏈燂紒';
+        document.getElementById('countdownLabel').textContent = '鍙互寮€鍚績鎰夸簡';
+        if (countdownInterval) clearInterval(countdownInterval);
+        return;
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    document.getElementById('countdownTimer').textContent = `${days}澶?${hours}灏忔椂 ${minutes}鍒哷;
+}
+
+// 寮€鍚績鎰?function openWish() {
+    if (!currentWish) return;
+    
+    const wishes = getWishes();
+    const index = wishes.findIndex(w => w.id === currentWish.id);
+    if (index === -1) return;
+    
+    wishes[index].isOpened = true;
+    localStorage.setItem('wishing_pool_wishes', JSON.stringify(wishes));
+    
+    document.getElementById('openBtn').textContent = '鉁?宸插紑鍚?;
+    document.getElementById('openBtn').disabled = true;
+    document.getElementById('editBtn').disabled = true;
+    
+    showToast('馃巵 蹇冩効宸插紑鍚紒');
+    
+    setTimeout(() => {
+        closeModal();
+        loadMyWishes();
+    }, 1500);
+}
+
+// 缂栬緫蹇冩効
+function editWish() {
+    if (!currentWish) return;
+    // TODO: 瀹炵幇缂栬緫鍔熻兘
+    showToast('缂栬緫鍔熻兘寮€鍙戜腑...');
+}
+
+// 鍏抽棴寮圭獥
+function closeModal() {
+    document.getElementById('wishModal').classList.remove('active');
+    if (countdownInterval) clearInterval(countdownInterval);
+    document.getElementById('editBtn').style.display = 'block';
+    document.getElementById('openBtn').style.display = 'block';
+}
+
+// 鎾斁婕傛祦鐡跺姩鐢?function playBottleAnimation() {
+    const bottle = document.getElementById('bottleAnimation');
+    bottle.classList.remove('animate');
+    void bottle.offsetWidth; // 瑙﹀彂閲嶇粯
+    bottle.classList.add('animate');
+}
+
+// 鑾峰彇鐡跺瓙鍥炬爣
+function getBottleIcon(type) {
+    const icons = {
+        classic: '馃嵕',
+        blue: '馃挋',
+        pink: '馃挅',
+        gold: '鉁?,
+        green: '馃挌'
+    };
+    return icons[type] || '馃嵕';
+}
+
+// 鑾峰彇蹇冩効鐘舵€?function getWishStatus(openDate) {
+    const now = new Date();
+    const target = new Date(openDate);
+    const diff = target - now;
+    
+    if (diff < 0) {
+        return { text: '鍙紑鍚?, class: 'opened', color: '#10b981' };
+    } else if (diff < 3 * 24 * 60 * 60 * 1000) {
+        return { text: '鍗冲皢鍒版湡', class: 'pending', color: '#f9b572' };
+    } else {
+        return { text: '鏈埌鏈?, class: 'expired', color: '#666' };
+    }
+}
+
+// 鑾峰彇鍓╀綑澶╂暟
+function getDaysLeft(openDate) {
+    const diff = new Date(openDate) - new Date();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if (days < 0) return '宸插埌鏈?;
+    if (days === 0) return '浠婂ぉ寮€鍚?;
+    if (days === 1) return '鏄庡ぉ寮€鍚?;
+    return `${days}澶╁悗寮€鍚痐;
+}
+
+// 鏍煎紡鍖栨棩鏈?function formatDate(isoString) {
+    const date = new Date(isoString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month}/${day} ${hours}:${minutes}`;
+}
+
+// 鎻愮ず妗?function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// 鍒濆鍖?initStars();
+initMinDate();
+
+// 妫€鏌ユ槸鍚﹂渶瑕佸彂閫侀偖浠讹紙椤甸潰鍔犺浇鏃讹級
+checkExpiredWishes();
+
+// 姣忓垎閽熸鏌ヤ竴娆″埌鏈熷績鎰?setInterval(checkExpiredWishes, 60000);
+
+// 妫€鏌ュ埌鏈熷績鎰垮苟鍙戦€侀偖浠?function checkExpiredWishes() {
+    const wishes = getWishes();
+    const now = new Date();
+    let needsSave = false;
+    
+    wishes.forEach(wish => {
+        const openDate = new Date(wish.openDate);
+        // 濡傛灉鍒版湡銆佹湁閭銆佷笖鏈彂閫侀偖浠?        if (openDate <= now && wish.email && !wish.emailSent) {
+            simulateSendEmail(wish);
+            needsSave = true;
+            console.log(`馃摟 鍙戦€佸埌鏈熸彁閱掑埌锛?{wish.email}`);
+        }
+    });
+    
+    if (needsSave) {
+        localStorage.setItem('wishing_pool_wishes', JSON.stringify(wishes));
+    }
+}
+</script>
+</body>
+</html>
+

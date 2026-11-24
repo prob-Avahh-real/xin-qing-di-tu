@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径规划测试</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=03e7166e1e73fbe7d922efa31319be77"></script>
+    <style>
+        body{margin:0;padding:20px;font-family:Arial,sans-serif;background:#f5f5f5}
+        .container{max-width:800px;margin:0 auto;background:white;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+        h1{color:#333;margin-bottom:20px}
+        .test-section{margin-bottom:30px;padding:20px;background:#f8f9fa;border-radius:12px}
+        .test-section h2{font-size:1.2rem;margin-bottom:15px;color:#555}
+        .btn{background:#F9B572;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;cursor:pointer;margin:5px}
+        .btn:hover{background:#E87A5D}
+        #map{width:100%;height:400px;border-radius:12px;margin:20px 0}
+        .result{background:white;padding:15px;border-radius:8px;margin-top:15px;max-height:300px;overflow-y:auto}
+        .error{background:#fee;border:1px solid #fcc;padding:10px;border-radius:8px;color:#c00;margin:10px 0}
+        .success{background:#efe;border:1px solid #cfc;padding:10px;border-radius:8px;color:#090;margin:10px 0}
+        .log{font-family:monospace;font-size:0.85rem;color:#666;margin:10px 0}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🗺️ 路径规划测试</h1>
+    
+    <!-- 测试 1：地图初始化 -->
+    <div class="test-section">
+        <h2>测试 1：地图初始化</h2>
+        <button class="btn" onclick="testMapInit()">▶ 测试地图加载</button>
+        <div id="mapTestResult"></div>
+    </div>
+    
+    <!-- 测试 2：地理编码 -->
+    <div class="test-section">
+        <h2>测试 2：地理编码（地址→坐标）</h2>
+        <input type="text" id="testAddress" value="龙华寺" style="padding:8px;width:300px;margin-right:10px;border:1px solid #ddd;border-radius:4px">
+        <button class="btn" onclick="testGeocode()">▶ 测试地理编码</button>
+        <div id="geocodeResult"></div>
+    </div>
+    
+    <!-- 测试 3：路径规划 -->
+    <div class="test-section">
+        <h2>测试 3：步行路径规划</h2>
+        <div style="margin-bottom:10px">
+            <input type="text" id="startPoint" value="龙华寺" style="padding:8px;width:200px;margin-right:10px;border:1px solid #ddd;border-radius:4px">
+            <span>→</span>
+            <input type="text" id="endPoint" value="龙华塔" style="padding:8px;width:200px;margin-left:10px;border:1px solid #ddd;border-radius:4px">
+        </div>
+        <button class="btn" onclick="testRoutePlanning()">▶ 测试路径规划</button>
+        <div id="routeResult"></div>
+    </div>
+    
+    <!-- 地图容器 -->
+    <div id="map"></div>
+    
+    <!-- 日志 -->
+    <div class="test-section">
+        <h2>📋 测试日志</h2>
+        <div id="logContainer" class="result"></div>
+    </div>
+</div>
+
+<script>
+let map = null;
+
+// 日志函数
+function log(message, type = 'info') {
+    const container = document.getElementById('logContainer');
+    const div = document.createElement('div');
+    div.className = 'log';
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    if (type === 'error') div.style.color = '#c00';
+    if (type === 'success') div.style.color = '#090';
+    container.appendChild(div);
+    console.log(message);
+}
+
+// 测试 1：地图初始化
+function testMapInit() {
+    log('开始测试地图初始化...');
+    const resultDiv = document.getElementById('mapTestResult');
+    
+    try {
+        if (!AMap) {
+            throw new Error('高德地图 API 未加载');
+        }
+        
+        map = new AMap.Map('map', {
+            zoom: 15,
+            center: [121.4500, 31.1830],
+            mapStyle: 'amap://styles/light'
+        });
+        
+        map.on('complete', () => {
+            log('✅ 地图加载成功！', 'success');
+            resultDiv.innerHTML = '<div class="success">✅ 地图加载成功！</div>';
+        });
+        
+        map.on('error', (e) => {
+            log('❌ 地图加载失败：' + e.message, 'error');
+            resultDiv.innerHTML = '<div class="error">❌ 地图加载失败：' + e.message + '</div>';
+        });
+        
+        log('地图初始化中...');
+        
+    } catch (e) {
+        log('❌ 地图初始化异常：' + e.message, 'error');
+        resultDiv.innerHTML = '<div class="error">❌ 异常：' + e.message + '</div>';
+    }
+}
+
+// 测试 2：地理编码
+async function testGeocode() {
+    const address = document.getElementById('testAddress').value;
+    log(`开始测试地理编码：${address}...`);
+    const resultDiv = document.getElementById('geocodeResult');
+    resultDiv.innerHTML = '<div class="log">查询中...</div>';
+    
+    try {
+        if (!AMap.Geocoder) {
+            throw new Error('Geocoder 插件不可用');
+        }
+        
+        const geocoder = new AMap.Geocoder({
+            city: '上海'
+        });
+        
+        geocoder.getLocation(address, (status, result) => {
+            if (status === 'complete' && result.geocodes.length) {
+                const loc = result.geocodes[0].location;
+                const formatted = result.geocodes[0].formattedAddress;
+                
+                log(`✅ 地理编码成功：${address} → [${loc.lng}, ${loc.lat}]`, 'success');
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ 查询成功<br>
+                        <strong>地址：</strong>${address}<br>
+                        <strong>坐标：</strong>[${loc.lng}, ${loc.lat}]<br>
+                        <strong>格式化地址：</strong>${formatted}
+                    </div>
+                `;
+                
+                // 在地图上标记
+                if (map) {
+                    new AMap.Marker({
+                        position: loc,
+                        title: address,
+                        map: map
+                    });
+                    map.setCenter(loc);
+                    map.setZoom(16);
+                }
+            } else {
+                log('❌ 未找到地址', 'error');
+                resultDiv.innerHTML = '<div class="error">❌ 未找到地址</div>';
+            }
+        });
+        
+    } catch (e) {
+        log('❌ 地理编码异常：' + e.message, 'error');
+        resultDiv.innerHTML = '<div class="error">❌ 异常：' + e.message + '</div>';
+    }
+}
+
+// 测试 3：路径规划
+function testRoutePlanning() {
+    const start = document.getElementById('startPoint').value;
+    const end = document.getElementById('endPoint').value;
+    log(`开始测试路径规划：${start} → ${end}...`);
+    const resultDiv = document.getElementById('routeResult');
+    resultDiv.innerHTML = '<div class="log">规划中...</div>';
+    
+    try {
+        if (!AMap.Walking) {
+            throw new Error('Walking 路径规划插件不可用');
+        }
+        
+        // 先地理编码获取坐标
+        const geocoder = new AMap.Geocoder({city: '上海'});
+        
+        Promise.all([
+            new Promise(resolve => geocoder.getLocation(start, (s, r) => resolve(r.geocodes[0]?.location))),
+            new Promise(resolve => geocoder.getLocation(end, (s, r) => resolve(r.geocodes[0]?.location)))
+        ]).then(([startLoc, endLoc]) => {
+            if (!startLoc || !endLoc) {
+                throw new Error('无法获取起点或终点坐标');
+            }
+            
+            log(`起点坐标：[${startLoc.lng}, ${startLoc.lat}]`);
+            log(`终点坐标：[${endLoc.lng}, ${endLoc.lat}]`);
+            
+            // 路径规划
+            const walking = new AMap.Walking({
+                map: map,
+                panel: 'routeResult'
+            });
+            
+            walking.search(startLoc, endLoc, (status, result) => {
+                if (status === 'complete') {
+                    log('✅ 路径规划成功！', 'success');
+                    
+                    if (result.routes && result.routes.length) {
+                        const route = result.routes[0];
+                        const distance = route.distance;
+                        const duration = route.duration;
+                        
+                        log(`距离：${distance}米`, 'success');
+                        log(`预计时间：${Math.round(duration/60)}分钟`, 'success');
+                        
+                        resultDiv.innerHTML += `
+                            <div class="success">
+                                <strong>✅ 规划成功</strong><br>
+                                距离：${distance}米<br>
+                                预计：${Math.round(duration/60)}分钟<br>
+                                查看地图上的路线
+                            </div>
+                        `;
+                        
+                        map.setFitView();
+                    }
+                } else {
+                    log('❌ 路径规划失败：' + (result.info || '未知错误'), 'error');
+                    resultDiv.innerHTML = '<div class="error">❌ 路径规划失败：' + (result.info || '未知错误') + '</div>';
+                }
+            });
+        }).catch(e => {
+            throw e;
+        });
+        
+    } catch (e) {
+        log('❌ 路径规划异常：' + e.message, 'error');
+        resultDiv.innerHTML = '<div class="error">❌ 异常：' + e.message + '</div>';
+    }
+}
+
+// 页面加载后自动测试地图
+window.onload = () => {
+    log('页面加载完成，开始测试...');
+    log('高德地图 API 版本：' + (AMap ? AMap.version : '未加载'));
+};
+</script>
+</body>
+</html>

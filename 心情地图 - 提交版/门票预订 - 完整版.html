@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>门票预订 - 心情地图</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        
+        /* 顶部导航栏 */
+        .header{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;padding:20px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+        .header-top{display:flex;align-items:center;justify-content:space-between}
+        .back-btn{background:none;border:none;color:white;font-size:24px;cursor:pointer;padding:8px}
+        .header h1{font-size:1.3rem;font-weight:600}
+        
+        /* 门票卡片 */
+        .ticket-card{background:white;border-radius:16px;margin:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);position:relative}
+        .ticket-card .banner{height:120px;background:linear-gradient(135deg,#F9B572,#E87A5D);display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative}
+        .ticket-card .banner .discount{position:absolute;top:12px;right:12px;background:#ef4444;color:white;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:700}
+        .ticket-card .content{padding:20px}
+        .ticket-card .title{font-size:1.3rem;font-weight:700;color:#333;margin-bottom:8px}
+        .ticket-card .subtitle{font-size:0.85rem;color:#666;margin-bottom:16px}
+        .ticket-card .price-section{display:flex;align-items:baseline;gap:8px;margin-bottom:16px}
+        .ticket-card .price{font-size:1.8rem;font-weight:700;color:#E87A5D}
+        .ticket-card .original-price{font-size:0.9rem;color:#999;text-decoration:line-through}
+        .ticket-card .features{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+        .ticket-card .feature{background:#fef3e4;padding:6px 12px;border-radius:8px;font-size:0.75rem;color:#7a5a48;font-weight:600}
+        .ticket-card .info{background:#f9f9f9;padding:12px;border-radius:8px;margin-bottom:16px}
+        .ticket-card .info p{font-size:0.8rem;color:#666;line-height:1.6;margin-bottom:8px}
+        .ticket-card .info p:last-child{margin-bottom:0}
+        .ticket-card .btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;width:100%;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .ticket-card .btn:active{transform:scale(0.98)}
+        
+        /* 购票表单弹窗 */
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:flex-end;justify-content:center}
+        .modal.active{display:flex}
+        .modal-content{background:white;width:100%;max-width:600px;border-radius:24px 24px 0 0;padding:24px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease-out}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+        .modal-header h2{font-size:1.3rem;color:#333}
+        .modal-close{background:none;border:none;font-size:24px;color:#999;cursor:pointer;padding:8px}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:0.85rem;color:#666;margin-bottom:8px;font-weight:600}
+        .form-group input,.form-group select{width:100%;padding:14px;border:1px solid #e0e0e0;border-radius:12px;font-size:1rem;font-family:inherit;background:white}
+        .form-group input:focus,.form-group select:focus{outline:none;border-color:#F9B572;box-shadow:0 0 0 3px rgba(249,181,114,0.1)}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .order-summary{background:#f9f9f9;padding:16px;border-radius:12px;margin-bottom:20px}
+        .order-summary .row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.9rem}
+        .order-summary .row:last-child{margin-bottom:0;padding-top:8px;border-top:1px solid #e0e0e0;font-weight:700;font-size:1rem}
+        .payment-methods{display:flex;gap:12px;margin-bottom:20px}
+        .payment-method{flex:1;border:2px solid #e0e0e0;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all 0.3s}
+        .payment-method.active{border-color:#F9B572;background:#fef3e4}
+        .payment-method .icon{font-size:1.5rem;margin-bottom:4px;display:block}
+        .payment-method .label{font-size:0.75rem;color:#666;font-weight:600}
+        .submit-btn{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white;border:none;width:100%;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer}
+        
+        /* 订单成功弹窗 */
+        .success-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);z-index:1001;display:none;align-items:center;justify-content:center;padding:20px}
+        .success-modal.active{display:flex}
+        .success-content{background:white;border-radius:24px;padding:30px;max-width:400px;width:100%;text-align:center}
+        .success-icon{font-size:5rem;margin-bottom:20px;display:block;animation:bounce 0.6s ease-out}
+        @keyframes bounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+        .success-content h2{font-size:1.5rem;color:#333;margin-bottom:8px}
+        .success-content .desc{font-size:0.9rem;color:#666;margin-bottom:20px}
+        .ticket-qr{background:#f9f9f9;padding:20px;border-radius:12px;margin-bottom:20px}
+        .ticket-qr .qr-placeholder{width:200px;height:200px;margin:0 auto;background:white;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#999}
+        .ticket-info{background:#fef3e4;padding:16px;border-radius:12px;margin-bottom:20px;text-align:left}
+        .ticket-info .row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.85rem}
+        .ticket-info .row .label{color:#7a5a48}
+        .ticket-info .row .value{color:#333;font-weight:600}
+        .success-btn{background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;width:100%;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:12px}
+        .secondary-btn{background:#f5f5f5;color:#333;border:2px solid #e0e0e0;width:100%;padding:16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer}
+        
+        /* 空状态 */
+        .empty-state{text-align:center;padding:60px 20px}
+        .empty-state .icon{font-size:4rem;margin-bottom:16px;opacity:0.3}
+        .empty-state .text{font-size:0.9rem;color:#999}
+        
+        /* 底部提示 */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:14px 28px;border-radius:24px;font-size:0.9rem;z-index:1002;display:none;white-space:nowrap}
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+    <div class="header-top">
+        <button class="back-btn" onclick="history.back()">←</button>
+        <h1>🎫 门票预订</h1>
+        <div style="width:40px"></div>
+    </div>
+</header>
+
+<!-- 门票列表 -->
+<div id="ticketList">
+    <!-- 龙华寺门票 -->
+    <div class="ticket-card">
+        <div class="banner">
+            🏯
+            <span class="discount">热门</span>
+        </div>
+        <div class="content">
+            <h2 class="title">龙华寺门票</h2>
+            <p class="subtitle">千年古刹·上海地区历史最悠久的古刹</p>
+            <div class="price-section">
+                <span class="price">¥10</span>
+                <span class="original-price">原价 ¥15</span>
+            </div>
+            <div class="features">
+                <span class="feature">✅ 当天有效</span>
+                <span class="feature">✅ 随时退票</span>
+                <span class="feature">✅ 电子票</span>
+                <span class="feature">✅ 扫码入园</span>
+            </div>
+            <div class="info">
+                <p><strong>开放时间：</strong>06:00-17:00 (16:30 停止入园)</p>
+                <p><strong>地址：</strong>上海市徐汇区龙华路 2853 号</p>
+                <p><strong>简介：</strong>龙华寺始建于三国吴赤乌五年（公元 242 年），距今已有 1780 多年历史，是上海地区历史最久、规模最大的古刹。</p>
+            </div>
+            <button class="btn" onclick="openBooking('龙华寺', 10, '¥15')">立即预订</button>
+        </div>
+    </div>
+    
+    <!-- 龙华塔登塔票 -->
+    <div class="ticket-card">
+        <div class="banner" style="background:linear-gradient(135deg,#10b981,#059669)">
+            🗼
+            <span class="discount">限流</span>
+        </div>
+        <div class="content">
+            <h2 class="title">龙华塔登塔票</h2>
+            <p class="subtitle">宋代古塔·登顶俯瞰龙华全景</p>
+            <div class="price-section">
+                <span class="price">¥20</span>
+                <span class="original-price">原价 ¥25</span>
+            </div>
+            <div class="features">
+                <span class="feature">✅ 含导游讲解</span>
+                <span class="feature">✅ 限流预约</span>
+                <span class="feature">✅ 电子票</span>
+                <span class="feature">✅ 登塔观景</span>
+            </div>
+            <div class="info">
+                <p><strong>开放时间：</strong>08:00-16:00 (15:30 停止入园)</p>
+                <p><strong>地址：</strong>上海市徐汇区龙华路 2853 号 (龙华寺前)</p>
+                <p><strong>简介：</strong>龙华塔始建于北宋太平兴国二年（公元 977 年），塔高 40.64 米，七层八角，可登临远眺上海全景。</p>
+            </div>
+            <button class="btn" onclick="openBooking('龙华塔登塔票', 20, '¥25')">立即预订</button>
+        </div>
+    </div>
+    
+    <!-- 龙华套票 -->
+    <div class="ticket-card">
+        <div class="banner" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
+            🎫
+            <span class="discount">省¥5</span>
+        </div>
+        <div class="content">
+            <h2 class="title">龙华套票（寺庙 + 登塔）</h2>
+            <p class="subtitle">超值组合·一次游玩两个景点</p>
+            <div class="price-section">
+                <span class="price">¥25</span>
+                <span class="original-price">原价 ¥30</span>
+            </div>
+            <div class="features">
+                <span class="feature">✅ 省¥5</span>
+                <span class="feature">✅ 含导游讲解</span>
+                <span class="feature">✅ 电子票</span>
+                <span class="feature">✅ 一票通玩</span>
+            </div>
+            <div class="info">
+                <p><strong>开放时间：</strong>06:00-17:00 (16:30 停止入园)</p>
+                <p><strong>地址：</strong>上海市徐汇区龙华路 2853 号</p>
+                <p><strong>简介：</strong>包含龙华寺门票 + 龙华塔登塔票，超值组合，适合深度游玩龙华景区。</p>
+            </div>
+            <button class="btn" onclick="openBooking('龙华套票', 25, '¥30')">立即预订</button>
+        </div>
+    </div>
+    
+    <!-- 庙会活动票 -->
+    <div class="ticket-card">
+        <div class="banner" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+            🎪
+            <span class="discount">限时</span>
+        </div>
+        <div class="content">
+            <h2 class="title">龙华庙会体验票</h2>
+            <p class="subtitle">国家级非物质文化遗产·传统民俗体验</p>
+            <div class="price-section">
+                <span class="price">¥50</span>
+                <span class="original-price">原价 ¥80</span>
+            </div>
+            <div class="features">
+                <span class="feature">✅ 非遗体验</span>
+                <span class="feature">✅ 民俗表演</span>
+                <span class="feature">✅ 特色小吃</span>
+                <span class="feature">✅ 文创市集</span>
+            </div>
+            <div class="info">
+                <p><strong>活动时间：</strong>2026 年 5 月 1 日 -5 月 15 日（农历三月初三起 15 天）</p>
+                <p><strong>地址：</strong>上海市徐汇区龙华路 2853 号 (龙华寺及周边)</p>
+                <p><strong>简介：</strong>龙华庙会是上海地区最具影响力的传统庙会之一，起源于明代，距今已有 400 多年历史。庙会期间有舞龙舞狮、戏曲表演、民俗展示、特色小吃等活动。</p>
+            </div>
+            <button class="btn" onclick="openBooking('龙华庙会体验票', 50, '¥80')">立即预订</button>
+        </div>
+    </div>
+    
+    <!-- 购票说明 -->
+    <div class="ticket-card" style="margin-top:24px">
+        <div class="content">
+            <h2 style="font-size:1.1rem;margin-bottom:12px">📋 购票说明</h2>
+            <div style="font-size:0.85rem;color:#666;line-height:1.8">
+                <p style="margin-bottom:8px">• <strong>门票有效期：</strong>购买当天有效，过期自动退款</p>
+                <p style="margin-bottom:8px">• <strong>入园方式：</strong>电子票扫码入园，无需取票</p>
+                <p style="margin-bottom:8px">• <strong>退票政策：</strong>支持随时退票，无手续费</p>
+                <p style="margin-bottom:8px">• <strong>特殊说明：</strong>特殊节日价格可能调整，以实际支付为准</p>
+                <p style="margin-bottom:8px">• <strong>优惠政策：</strong>学生/老人凭有效证件享半价优惠</p>
+                <p>• <strong>咨询电话：</strong>021-64561234（9:00-17:00）</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 购票表单弹窗 -->
+<div class="modal" id="bookingModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📝 填写订单</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        
+        <form id="bookingForm">
+            <input type="hidden" id="ticketName">
+            <input type="hidden" id="ticketPrice">
+            
+            <div class="form-group">
+                <label>门票信息</label>
+                <div style="background:#f9f9f9;padding:12px;border-radius:8px;font-weight:600;color:#333" id="ticketInfo"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>参观日期 *</label>
+                <input type="date" id="visitDate" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>成人票数量</label>
+                    <select id="adultCount">
+                        <option value="1">1 张</option>
+                        <option value="2">2 张</option>
+                        <option value="3">3 张</option>
+                        <option value="4">4 张</option>
+                        <option value="5">5 张</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>儿童票数量</label>
+                    <select id="childCount">
+                        <option value="0">0 张</option>
+                        <option value="1">1 张</option>
+                        <option value="2">2 张</option>
+                        <option value="3">3 张</option>
+                        <option value="4">4 张</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>姓名 *</label>
+                <input type="text" id="userName" placeholder="请输入姓名" required>
+            </div>
+            
+            <div class="form-group">
+                <label>手机号 *</label>
+                <input type="tel" id="userPhone" placeholder="请输入手机号" pattern="[0-9]{11}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>身份证号（可选）</label>
+                <input type="text" id="userIdCard" placeholder="用于保险购买">
+            </div>
+            
+            <div class="order-summary">
+                <div class="row">
+                    <span>成人票 × <span id="summaryAdult">1</span></span>
+                    <span>¥<span id="summaryAdultPrice">0</span></span>
+                </div>
+                <div class="row">
+                    <span>儿童票 × <span id="summaryChild">0</span></span>
+                    <span>¥<span id="summaryChildPrice">0</span></span>
+                </div>
+                <div class="row">
+                    <span>合计</span>
+                    <span>¥<span id="summaryTotal">0</span></span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>支付方式</label>
+                <div class="payment-methods">
+                    <div class="payment-method active" onclick="selectPayment(this)">
+                        <span class="icon">💳</span>
+                        <span class="label">微信支付</span>
+                    </div>
+                    <div class="payment-method" onclick="selectPayment(this)">
+                        <span class="icon">🔵</span>
+                        <span class="label">支付宝</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">确认支付 ¥<span id="payAmount">0</span></button>
+        </form>
+    </div>
+</div>
+
+<!-- 订单成功弹窗 -->
+<div class="success-modal" id="successModal">
+    <div class="success-content">
+        <span class="success-icon">✅</span>
+        <h2>购买成功！</h2>
+        <p class="desc">电子票已发送到您的手机</p>
+        
+        <div class="ticket-qr">
+            <div class="qr-placeholder">
+                📱<br>
+                <span style="font-size:0.8rem">电子票二维码</span>
+            </div>
+        </div>
+        
+        <div class="ticket-info">
+            <div class="row">
+                <span class="label">订单号</span>
+                <span class="value" id="orderNo">MM202604240001</span>
+            </div>
+            <div class="row">
+                <span class="label">门票名称</span>
+                <span class="value" id="successTicketName">龙华寺门票</span>
+            </div>
+            <div class="row">
+                <span class="label">参观日期</span>
+                <span class="value" id="successDate">2026-04-25</span>
+            </div>
+            <div class="row">
+                <span class="label">总数量</span>
+                <span class="value" id="successCount">1 张</span>
+            </div>
+            <div class="row">
+                <span class="label">实付金额</span>
+                <span class="value" id="successAmount">¥10</span>
+            </div>
+        </div>
+        
+        <button class="success-btn" onclick="downloadTicket()">📥 保存电子票</button>
+        <button class="secondary-btn" onclick="closeSuccess()">返回继续浏览</button>
+    </div>
+</div>
+
+<!-- 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// 打开预订弹窗
+function openBooking(name, price, originalPrice) {
+    document.getElementById('ticketName').value = name;
+    document.getElementById('ticketPrice').value = price;
+    document.getElementById('ticketInfo').textContent = `${name} - ${price}元`;
+    
+    // 设置默认日期为今天
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('visitDate').min = today;
+    document.getElementById('visitDate').value = today;
+    
+    // 更新价格
+    updatePrice();
+    
+    // 显示弹窗
+    document.getElementById('bookingModal').classList.add('active');
+}
+
+// 关闭弹窗
+function closeModal() {
+    document.getElementById('bookingModal').classList.remove('active');
+}
+
+// 选择支付方式
+function selectPayment(element) {
+    document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+}
+
+// 更新价格
+function updatePrice() {
+    const price = parseInt(document.getElementById('ticketPrice').value);
+    const adultCount = parseInt(document.getElementById('adultCount').value);
+    const childCount = parseInt(document.getElementById('childCount').value);
+    
+    const adultPrice = price * adultCount;
+    const childPrice = Math.floor(price * 0.5) * childCount; // 儿童票半价
+    const total = adultPrice + childPrice;
+    
+    document.getElementById('summaryAdult').textContent = adultCount;
+    document.getElementById('summaryAdultPrice').textContent = adultPrice;
+    document.getElementById('summaryChild').textContent = childCount;
+    document.getElementById('summaryChildPrice').textContent = childPrice;
+    document.getElementById('summaryTotal').textContent = total;
+    document.getElementById('payAmount').textContent = total;
+}
+
+// 表单提交
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // 获取表单数据
+    const name = document.getElementById('userName').value;
+    const phone = document.getElementById('userPhone').value;
+    const date = document.getElementById('visitDate').value;
+    const adultCount = parseInt(document.getElementById('adultCount').value);
+    const childCount = parseInt(document.getElementById('childCount').value);
+    const total = parseInt(document.getElementById('summaryTotal').textContent);
+    const ticketName = document.getElementById('ticketName').value;
+    
+    // 生成订单号
+    const orderNo = 'MM' + new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14) + Math.floor(Math.random() * 1000).toString().padStart(4, '0');
+    
+    // 显示成功弹窗
+    document.getElementById('orderNo').textContent = orderNo;
+    document.getElementById('successTicketName').textContent = ticketName;
+    document.getElementById('successDate').textContent = date;
+    document.getElementById('successCount').textContent = (adultCount + childCount) + '张';
+    document.getElementById('successAmount').textContent = '¥' + total;
+    
+    // 保存订单到 localStorage
+    saveOrder({
+        orderNo: orderNo,
+        ticketName: ticketName,
+        date: date,
+        adultCount: adultCount,
+        childCount: childCount,
+        total: total,
+        name: name,
+        phone: phone,
+        createdAt: new Date().toISOString()
+    });
+    
+    // 关闭预订弹窗，显示成功弹窗
+    closeModal();
+    document.getElementById('successModal').classList.add('active');
+});
+
+// 保存订单
+function saveOrder(order) {
+    const orders = JSON.parse(localStorage.getItem('moodmap_orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('moodmap_orders', JSON.stringify(orders));
+}
+
+// 下载电子票
+function downloadTicket() {
+    showToast('📥 电子票已保存到相册');
+}
+
+// 关闭成功弹窗
+function closeSuccess() {
+    document.getElementById('successModal').classList.remove('active');
+    // 滚动到顶部
+    window.scrollTo(0, 0);
+}
+
+// 提示
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// 监听数量变化
+document.getElementById('adultCount').addEventListener('change', updatePrice);
+document.getElementById('childCount').addEventListener('change', updatePrice);
+
+// 点击遮罩关闭
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSuccess();
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>年轻语音测试 - 少女音/正太音</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        
+        .container{max-width:800px;margin:0 auto}
+        
+        .header{background:white;border-radius:24px;padding:30px;margin-bottom:20px;box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+        .header h1{font-size:1.8rem;color:#333;margin-bottom:8px}
+        .header p{color:#666;font-size:0.95rem}
+        
+        .card{background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+        .card-title{font-size:1.2rem;font-weight:600;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        
+        /* 声音对比 */
+        .voice-compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+        .voice-card{background:#f8f9fa;border-radius:16px;padding:20px;cursor:pointer;transition:all 0.2s;border:2px solid transparent}
+        .voice-card:hover{border-color:#667eea;background:white}
+        .voice-card.selected{border-color:#667eea;background:white;box-shadow:0 4px 12px rgba(102,126,234,0.2)}
+        .voice-card .icon{font-size:3rem;margin-bottom:12px;display:block}
+        .voice-card .name{font-size:1.1rem;font-weight:600;color:#333;margin-bottom:4px}
+        .voice-card .desc{font-size:0.85rem;color:#666;margin-bottom:8px}
+        .voice-card .params{font-size:0.75rem;color:#999;background:#f0f0f0;padding:8px;border-radius:8px}
+        .voice-card .btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:10px 20px;border-radius:12px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:12px;width:100%}
+        
+        /* 参数调节 */
+        .params{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:20px}
+        .param-group{background:#f8f9fa;padding:16px;border-radius:16px}
+        .param-group label{display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:12px}
+        .param-group input[type=range]{width:100%;height:6px;background:#e9ecef;border-radius:3px;appearance:none}
+        .param-group input[type=range]::-webkit-slider-thumb{appearance:none;width:20px;height:20px;background:#667eea;border-radius:50%;cursor:pointer}
+        .param-value{font-size:0.8rem;color:#667eea;font-weight:600;margin-top:8px}
+        
+        /* 文本输入 */
+        textarea{width:100%;min-height:120px;border:2px solid #e9ecef;border-radius:16px;padding:16px;font-size:1rem;font-family:inherit;resize:vertical;margin-bottom:16px}
+        textarea:focus{outline:none;border-color:#667eea}
+        
+        /* 播放控制 */
+        .controls{display:flex;gap:12px;flex-wrap:wrap}
+        .btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:14px 28px;border-radius:16px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,0.4)}
+        .btn.stop{background:linear-gradient(135deg,#ef4444,#dc2626)}
+        .btn:disabled{background:#d1d5db;cursor:not-allowed;transform:none}
+        
+        .status{background:#f8f9fa;padding:16px;border-radius:16px;margin-bottom:20px;display:none}
+        .status.active{display:block}
+        .status .text{font-size:0.9rem;color:#667eea}
+        
+        /* 年轻声音参数推荐 */
+        .tips{background:linear-gradient(135deg,#fef3e4,#fee6d6);padding:20px;border-radius:16px;margin-bottom:20px}
+        .tips h3{font-size:1rem;font-weight:600;color:#E87A5D;margin-bottom:12px}
+        .tips ul{padding-left:20px}
+        .tips li{margin-bottom:6px;font-size:0.85rem;color:#555}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🎤 年轻语音测试</h1>
+        <p>少女音、正太音、青年音 - 专为年轻人设计</p>
+    </div>
+    
+    <!-- 年轻声音推荐 -->
+    <div class="card">
+        <div class="card-title">🎯 年轻声音推荐</div>
+        
+        <div class="voice-compare">
+            <!-- 少女音 -->
+            <div class="voice-card selected" onclick="selectVoice('shonjo')">
+                <span class="icon">👧</span>
+                <div class="name">少女音（14-18 岁）</div>
+                <div class="desc">清脆、活泼、可爱，适合福来猫</div>
+                <div class="params">
+                    语速：1.3 | 音调：1.5 | 音量：100%
+                </div>
+                <button class="btn" onclick="event.stopPropagation(); playDemo('shonjo')">▶ 试听</button>
+            </div>
+            
+            <!-- 正太音 -->
+            <div class="voice-card" onclick="selectVoice('shot')">
+                <span class="icon">👦</span>
+                <div class="name">正太音（12-16 岁）</div>
+                <div class="desc">阳光、活力、清澈，适合少年导游</div>
+                <div class="params">
+                    语速：1.2 | 音调：1.3 | 音量：100%
+                </div>
+                <button class="btn" onclick="event.stopPropagation(); playDemo('shot')">▶ 试听</button>
+            </div>
+            
+            <!-- 青年女 -->
+            <div class="voice-card" onclick="selectVoice('young_f')">
+                <span class="icon">👩‍🎓</span>
+                <div class="name">青年女（20-25 岁）</div>
+                <div class="desc">清新、自然、亲切，适合大学生</div>
+                <div class="params">
+                    语速：1.1 | 音调：1.2 | 音量：100%
+                </div>
+                <button class="btn" onclick="event.stopPropagation(); playDemo('young_f')">▶ 试听</button>
+            </div>
+            
+            <!-- 青年男 -->
+            <div class="voice-card" onclick="selectVoice('young_m')">
+                <span class="icon">👨‍🎓</span>
+                <div class="name">青年男（20-25 岁）</div>
+                <div class="desc">阳光、爽朗、有活力，适合学长</div>
+                <div class="params">
+                    语速：1.1 | 音调：1.1 | 音量：100%
+                </div>
+                <button class="btn" onclick="event.stopPropagation(); playDemo('young_m')">▶ 试听</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 年轻声音参数技巧 -->
+    <div class="tips">
+        <h3>💡 如何调出年轻声音？</h3>
+        <ul>
+            <li><strong>语速要快</strong>：1.2-1.4（年轻人说话快）</li>
+            <li><strong>音调要高</strong>：1.3-1.5（年轻人声调高）</li>
+            <li><strong>音量要大</strong>：0.9-1.0（年轻人有活力）</li>
+            <li><strong>对比</strong>：阿姨音 语速 0.9 + 音调 0.9 = 成熟稳重</li>
+        </ul>
+    </div>
+    
+    <!-- 自定义配置 -->
+    <div class="card">
+        <div class="card-title">⚙️ 自定义调节</div>
+        
+        <div class="params">
+            <div class="param-group">
+                <label>🐌 语速 (Speed)</label>
+                <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.3">
+                <div class="param-value">当前：<span id="speedValue">1.3</span> (1.3=年轻)</div>
+            </div>
+            
+            <div class="param-group">
+                <label>🎵 音调 (Pitch)</label>
+                <input type="range" id="pitch" min="0.5" max="2.0" step="0.1" value="1.5">
+                <div class="param-value">当前：<span id="pitchValue">1.5</span> (1.5=少女)</div>
+            </div>
+            
+            <div class="param-group">
+                <label>📢 音量 (Volume)</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="1">
+                <div class="param-value">当前：<span id="volumeValue">100</span>%</div>
+            </div>
+        </div>
+        
+        <textarea id="testText">我是福来，龙华寺的守护猫！这里超级好玩的，跟我一起来探索吧～(｡♥‿♥｡)</textarea>
+        
+        <div class="status" id="status">
+            <div class="text">🔊 正在播放...</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="playBtn" onclick="play()">
+                <span>▶</span> 播放
+            </button>
+            <button class="btn stop" id="stopBtn" onclick="stop()" disabled>
+                <span>⏹</span> 停止
+            </button>
+        </div>
+    </div>
+    
+    <!-- 对比测试 -->
+    <div class="card">
+        <div class="card-title">🔄 对比测试（阿姨音 vs 少女音）</div>
+        
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <button class="btn" onclick="compare('auntie')">👩 阿姨音（成熟）</button>
+            <button class="btn" onclick="compare('shonjo')">👧 少女音（年轻）</button>
+        </div>
+        
+        <div style="background:#f8f9fa;padding:16px;border-radius:12px;font-size:0.9rem;color:#555">
+            <strong>同一句话：</strong>"欢迎来到龙华寺"<br><br>
+            <strong>阿姨音</strong>：语速 0.9 + 音调 0.9 = 成熟稳重<br>
+            <strong>少女音</strong>：语速 1.3 + 音调 1.5 = 年轻活泼
+        </div>
+    </div>
+</div>
+
+<script>
+let currentVoice = 'shonjo';
+
+// 声音预设
+const VOICE_PRESETS = {
+    shonjo: { speed: 1.3, pitch: 1.5, text: '我是福来，龙华寺的守护猫！这里超级好玩的，跟我一起来探索吧～(｡♥‿♥｡)' },
+    shot: { speed: 1.2, pitch: 1.3, text: '嘿！我是小龙，带你玩转龙华寺！这里的景点超酷的，走起！' },
+    young_f: { speed: 1.1, pitch: 1.2, text: '大家好，我是大学生志愿者。欢迎来到龙华寺，让我为大家介绍这里的历史文化。' },
+    young_m: { speed: 1.1, pitch: 1.1, text: '嘿，欢迎来到龙华寺！我是这里的青年志愿者，有什么好玩的问我准没错！' }
+};
+
+// 选择声音
+function selectVoice(voice) {
+    currentVoice = voice;
+    document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    
+    const preset = VOICE_PRESETS[voice];
+    document.getElementById('speed').value = preset.speed;
+    document.getElementById('pitch').value = preset.pitch;
+    document.getElementById('volume').value = 1;
+    document.getElementById('speedValue').textContent = preset.speed;
+    document.getElementById('pitchValue').textContent = preset.pitch;
+    document.getElementById('volumeValue').textContent = '100';
+    document.getElementById('testText').value = preset.text;
+}
+
+// 播放 demo
+function playDemo(voice) {
+    selectVoice(voice);
+    setTimeout(() => play(), 200);
+}
+
+// 对比测试
+function compare(type) {
+    if (type === 'auntie') {
+        document.getElementById('speed').value = 0.9;
+        document.getElementById('pitch').value = 0.9;
+        document.getElementById('speedValue').textContent = '0.9';
+        document.getElementById('pitchValue').textContent = '0.9';
+        document.getElementById('testText').value = '欢迎来到龙华寺';
+    } else {
+        document.getElementById('speed').value = 1.3;
+        document.getElementById('pitch').value = 1.5;
+        document.getElementById('speedValue').textContent = '1.3';
+        document.getElementById('pitchValue').textContent = '1.5';
+        document.getElementById('testText').value = '欢迎来到龙华寺';
+    }
+    setTimeout(() => play(), 200);
+}
+
+// 播放
+function play() {
+    const text = document.getElementById('testText').value;
+    const speed = parseFloat(document.getElementById('speed').value);
+    const pitch = parseFloat(document.getElementById('pitch').value);
+    const volume = parseFloat(document.getElementById('volume').value);
+    
+    stop();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-CN';
+    utterance.rate = speed;
+    utterance.pitch = pitch;
+    utterance.volume = volume;
+    
+    utterance.onstart = () => {
+        document.getElementById('status').classList.add('active');
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+    };
+    
+    utterance.onend = () => {
+        document.getElementById('status').classList.remove('active');
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+    };
+    
+    speechSynthesis.speak(utterance);
+}
+
+// 停止
+function stop() {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+    }
+    document.getElementById('status').classList.remove('active');
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+}
+
+// 参数联动
+document.getElementById('speed').addEventListener('input', function() {
+    document.getElementById('speedValue').textContent = this.value;
+});
+
+document.getElementById('pitch').addEventListener('input', function() {
+    document.getElementById('pitchValue').textContent = this.value;
+});
+
+document.getElementById('volume').addEventListener('input', function() {
+    document.getElementById('volumeValue').textContent = Math.round(this.value * 100);
+});
+
+// 初始化
+selectVoice('shonjo');
+</script>
+</body>
+</html>

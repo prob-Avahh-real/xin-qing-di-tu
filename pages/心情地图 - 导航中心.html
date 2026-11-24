@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺️ 心情地图 - 统一导航中心</title>
+    
+    <!-- PWA 配置 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F9B572">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="心情地图">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 50%, #4a1c40 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+        .logo { font-size: 4rem; margin-bottom: 10px; }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #F9B572, #E87A5D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .subtitle { font-size: 1.1rem; opacity: 0.8; margin-bottom: 20px; }
+        
+        /* 状态栏 */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 主要功能区 */
+        .main-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a1a2e, #2d1b4e);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        }
+        .nav-btn {
+            background: rgba(249,181,114,0.15);
+            border: 2px solid rgba(249,181,114,0.3);
+            border-radius: 16px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 80px;
+        }
+        .nav-btn:hover {
+            background: rgba(249,181,114,0.25);
+            border-color: #F9B572;
+            transform: translateY(-2px);
+        }
+        .nav-btn .icon { font-size: 1.5rem; }
+        
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 卡片 */
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-4px);
+            border-color: rgba(249,181,114,0.5);
+            box-shadow: 0 8px 24px rgba(249,181,114,0.2);
+        }
+        .card.featured {
+            background: linear-gradient(135deg, rgba(249,181,114,0.2), rgba(232,122,93,0.15));
+            border-color: rgba(249,181,114,0.3);
+        }
+        .card.featured::before {
+            content: '⭐ 推荐';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #F9B572;
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .card .icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+        .card .title { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; }
+        .card .desc { opacity: 0.75; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px; }
+        .card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .card .tag {
+            background: rgba(249,181,114,0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        /* 快速返回按钮 */
+        .back-to-home {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #F9B572;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(249,181,114,0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .back-to-home:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(249,181,114,0.6);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .logo { font-size: 3rem; }
+            .grid { grid-template-columns: 1fr; }
+            .bottom-nav {
+                padding: 8px 10px;
+                gap: 10px;
+            }
+            .nav-btn {
+                min-width: 60px;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            .nav-btn .icon { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-to-home" onclick="goHome()">🏠 返回首页</button>
+    
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="logo">🗺️</div>
+            <h1>心情地图</h1>
+            <p class="subtitle">今天是什么心情，就去哪里玩</p>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span>系统运行中</span>
+                </div>
+                <div class="status-item">
+                    <span>📅</span>
+                    <span id="currentDate">--</span>
+                </div>
+                <div class="status-item">
+                    <span>🕐</span>
+                    <span id="currentTime">--</span>
+                </div>
+                <div class="status-item">
+                    <span>📱</span>
+                    <span id="deviceType">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 核心功能区 -->
+        <div class="main-section">
+            <div class="section-title">
+                <span>🎯</span>
+                <span>核心功能</span>
+            </div>
+            <div class="grid">
+                <!-- 主 APP -->
+                <div class="card featured" onclick="openPage('business-pro-rich-routes.html')">
+                    <span class="icon">🗺️</span>
+                    <div class="title">主 APP - 心情路线</div>
+                    <div class="desc">12 种情感路线，AI 个性化推荐，语音导览，AR 打卡，积分系统完整体验</div>
+                    <div class="tags">
+                        <span class="tag">⭐ 主推</span>
+                        <span class="tag">移动端</span>
+                        <span class="tag">完整功能</span>
+                    </div>
+                </div>
+
+                <!-- 统一导航 -->
+                <div class="card featured" onclick="openPage('心情地图 - 统一导航.html')">
+                    <span class="icon">🧭</span>
+                    <div class="title">统一导航 (5 合 1)</div>
+                    <div class="desc">首页、路线、门票、商城、我的 - 5 个底部 Tab，一站式体验所有功能</div>
+                    <div class="tags">
+                        <span class="tag">🆕 新版</span>
+                        <span class="tag">5 合 1</span>
+                        <span class="tag">推荐</span>
+                    </div>
+                </div>
+                
+                <!-- 门票预订 -->
+                <div class="card" onclick="openPage('门票预订 - 完整版.html')">
+                    <span class="icon">🎫</span>
+                    <div class="title">门票预订系统</div>
+                    <div class="desc">龙华寺¥10、龙华塔¥20、套票¥25、庙会¥50，完整购票流程</div>
+                    <div class="tags">
+                        <span class="tag">购票</span>
+                        <span class="tag">支付</span>
+                    </div>
+                </div>
+                
+                <!-- 积分商城 -->
+                <div class="card" onclick="openPage('points-mall-app.html')">
+                    <span class="icon">🎁</span>
+                    <div class="title">积分商城</div>
+                    <div class="desc">完成任务赚积分，兑换文创周边、优惠券、活动抽奖，2026-05-01 截止</div>
+                    <div class="tags">
+                        <span class="tag">积分</span>
+                        <span class="tag">兑换</span>
+                    </div>
+                </div>
+                
+                <!-- 许愿池 -->
+                <div class="card" onclick="openPage('wishing-pool.html')">
+                    <span class="icon">🌟</span>
+                    <div class="title">许愿池 - 时间胶囊</div>
+                    <div class="desc">把心愿装进漂流瓶，设置开启时间，到期邮箱提醒，5 种瓶身可选</div>
+                    <div class="tags">
+                        <span class="tag">许愿</span>
+                        <span class="tag">时间胶囊</span>
+                    </div>
+                </div>
+                
+                <!-- 知识库 -->
+                <div class="card" onclick="openPage('knowledge-base.html')">
+                    <span class="icon">📚</span>
+                    <div class="title">龙华知识库</div>
+                    <div class="desc">历史、人文、美食、拍照、彩蛋、活动 - 6 大分类，18 张实拍图</div>
+                    <div class="tags">
+                        <span class="tag">文化</span>
+                        <span class="tag">百科</span>
+                    </div>
+                </div>
+                
+                <!-- POI 详情 -->
+                <div class="card" onclick="openPage('poi-detail.html')">
+                    <span class="icon">📍</span>
+                    <div class="title">景点详情页</div>
+                    <div class="desc">龙龙讲故事、拍照攻略、弹幕墙、挑战任务、隐藏彩蛋，完整互动体验</div>
+                    <div class="tags">
+                        <span class="tag">POI</span>
+                        <span class="tag">互动</span>
+                    </div>
+                </div>
+                
+                <!-- 游玩指引 -->
+                <div class="card" onclick="openPage('游玩指引 - 用户留存系统.html')">
+                    <span class="icon">🎯</span>
+                    <div class="title">用户留存系统</div>
+                    <div class="desc">怎么来→怎么玩→怎么去，每个页面都有引导，把用户留在 APP 里</div>
+                    <div class="tags">
+                        <span class="tag">留存</span>
+                        <span class="tag">引导</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 商户与管理 -->
+        <div class="main-section">
+            <div class="section-title">
+                <span>💼</span>
+                <span>商户端与管理后台</span>
+            </div>
+            <div class="grid">
+                <!-- 商户合作 -->
+                <div class="card" onclick="openPage('merchant-partnership.html')">
+                    <span class="icon">🏪</span>
+                    <div class="title">商户合作平台</div>
+                    <div class="desc">商家入驻、提交资质、管理优惠、查看数据 (收益数据对商家隐藏)</div>
+                    <div class="tags">
+                        <span class="tag">商家</span>
+                        <span class="tag">入驻</span>
+                    </div>
+                </div>
+                
+                <!-- 管理后台 -->
+                <div class="card" onclick="openPage('admin-dashboard.html')">
+                    <span class="icon">⚙️</span>
+                    <div class="title">管理后台</div>
+                    <div class="desc">审核商家入驻、路线发布、活动申请，查看完整数据和收益信息</div>
+                    <div class="tags">
+                        <span class="tag">管理</span>
+                        <span class="tag">审批</span>
+                    </div>
+                </div>
+                
+                <!-- 小红书搜索 -->
+                <div class="card" onclick="openPage('小红书网红店搜索.html')">
+                    <span class="icon">📕</span>
+                    <div class="title">小红书网红店搜索</div>
+                    <div class="desc">Tavily API 搜索上海网红店，自动获取地址、评分、人均消费</div>
+                    <div class="tags">
+                        <span class="tag">API</span>
+                        <span class="tag">搜索</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 开发与测试工具 -->
+        <div class="main-section">
+            <div class="section-title">
+                <span>🧪</span>
+                <span>开发与测试工具</span>
+            </div>
+            <div class="grid">
+                <!-- 评委演示 -->
+                <div class="card" onclick="openPage('demo-judge-fixed.html')">
+                    <span class="icon">🎬</span>
+                    <div class="title">评委演示页面</div>
+                    <div class="desc">12 种情感按钮、AI 聊天 (福来猫)、路线展示、API 日志，带内嵌二维码</div>
+                    <div class="tags">
+                        <span class="tag">演示</span>
+                        <span class="tag">评委</span>
+                    </div>
+                </div>
+                
+                <!-- 高德诊断 -->
+                <div class="card" onclick="openPage('高德地图能力诊断.html')">
+                    <span class="icon">🗺️</span>
+                    <div class="title">高德地图能力诊断</div>
+                    <div class="desc">测试 AMap API 能力 (地图、标记、路径规划、搜索等)</div>
+                    <div class="tags">
+                        <span class="tag">地图</span>
+                        <span class="tag">诊断</span>
+                    </div>
+                </div>
+                
+                <!-- 停车引导 -->
+                <div class="card" onclick="openPage('停车引导 - 极简版.html')">
+                    <span class="icon">🅿️</span>
+                    <div class="title">停车引导 (极简)</div>
+                    <div class="desc">直接显示最近停车场：距离、车位、一键导航，3 秒决策</div>
+                    <div class="tags">
+                        <span class="tag">停车</span>
+                        <span class="tag">导航</span>
+                    </div>
+                </div>
+                
+                <!-- 轻量版 -->
+                <div class="card" onclick="openPage('mobile-lite.html')">
+                    <span class="icon">📱</span>
+                    <div class="title">手机轻量版</div>
+                    <div class="desc">16KB 单文件，无需安装，适合手机快速访问和演示</div>
+                    <div class="tags">
+                        <span class="tag">16KB</span>
+                        <span class="tag">轻量</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 文档 -->
+        <div class="main-section">
+            <div class="section-title">
+                <span>📄</span>
+                <span>文档与指南</span>
+            </div>
+            <div class="grid">
+                <div class="card" onclick="openPage('推广策略.md')">
+                    <span class="icon">📢</span>
+                    <div class="title">推广策略</div>
+                    <div class="desc">小红书、朋友圈、地推、高校合作完整方案</div>
+                </div>
+                <div class="card" onclick="openPage('青年用户体验地图.md')">
+                    <span class="icon">🎯</span>
+                    <div class="title">青年用户体验地图</div>
+                    <div class="desc">5 类用户画像、消费心理、触达渠道、产品设计原则</div>
+                </div>
+                <div class="card" onclick="openPage('PWA-APP 安装指南.md')">
+                    <span class="icon">📱</span>
+                    <div class="title">PWA 安装指南</div>
+                    <div class="desc">如何添加心情地图到手机桌面，iOS/Android 安装步骤</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="openPage('business-pro-rich-routes.html')">
+            <span class="icon">🗺️</span>
+            <span>主 APP</span>
+        </button>
+
+        <button class="nav-btn" onclick="openPage('心情地图 - 统一导航.html')">
+            <span class="icon">🧭</span>
+            <span>导航</span>
+        </button>
+        <button class="nav-btn" onclick="openPage('门票预订 - 完整版.html')">
+            <span class="icon">🎫</span>
+            <span>门票</span>
+        </button>
+        <button class="nav-btn" onclick="openPage('points-mall-app.html')">
+            <span class="icon">🎁</span>
+            <span>商城</span>
+        </button>
+        <button class="nav-btn" onclick="openPage('merchant-partnership.html')">
+            <span class="icon">🏪</span>
+            <span>商户</span>
+        </button>
+    </div>
+    
+    <script>
+        // 更新日期时间
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('currentDate').textContent = dateStr;
+            document.getElementById('currentTime').textContent = timeStr;
+            
+            // 检测设备类型
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            document.getElementById('deviceType').textContent = isMobile ? '移动端' : '桌面端';
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // 打开页面
+        function openPage(filename) {
+            console.log('打开页面:', filename);
+            window.location.href = filename;
+        }
+        
+        // 返回首页
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === '1') openPage('business-pro-rich-routes.html');
+            if (e.ctrlKey && e.key === '2') openPage('心情地图 - 统一导航.html');
+            if (e.ctrlKey && e.key === '3') openPage('merchant-partnership.html');
+            if (e.ctrlKey && e.key === '4') openPage('admin-dashboard.html');
+            if (e.key === 'h' || e.key === 'H') goHome();
+        });
+        
+        // Service Worker 注册
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('✅ Service Worker 注册成功:', reg))
+                .catch(err => console.log('❌ Service Worker 注册失败:', err));
+        }
+        
+        console.log('🗺️ 心情地图 - 统一导航中心已就绪');
+        console.log('快捷键：Ctrl+1 主 APP | Ctrl+2 统一导航 | Ctrl+3 商户端 | Ctrl+4 管理后台 | H 返回');
+    </script>
+</body>
+</html>

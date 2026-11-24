@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 用户留存系统</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,sans-serif;background:#f5f5f5;min-height:100vh;padding-bottom:80px}
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px;text-align:center;position:sticky;top:0;z-index:100}
+        .header h1{font-size:1.3rem;font-weight:600}
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e0e0e0;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom));z-index:200}
+        .tabs-inner{display:flex;gap:8px;max-width:600px;margin:0 auto;overflow-x:auto;padding:0 8px}
+        .tab-btn{flex-shrink:0;background:#f5f5f5;border:none;padding:8px 16px;border-radius:20px;font-size:0.85rem;color:#666;cursor:pointer;transition:all 0.3s;white-space:nowrap}
+        .tab-btn.active{background:linear-gradient(135deg,#F9B572,#E87A5D);color:white}
+        main{max-width:600px;margin:0 auto;padding:16px}
+        .section{display:none}
+        .section.active{display:block}
+        .card{background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .card h3{font-size:1.1rem;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        
+        /* 引导卡片 - 核心功能 */
+        .guide-card{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:16px;padding:20px;margin-bottom:16px}
+        .guide-card h3{font-size:1.2rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .guide-item{background:rgba(255,255,255,0.15);border-radius:12px;padding:16px;margin-bottom:12px}
+        .guide-item:last-child{margin-bottom:0}
+        .guide-item h4{font-size:1rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+        .guide-item p{font-size:0.9rem;opacity:0.95;line-height:1.6}
+        .guide-item .action-btn{background:white;color:#667eea;border:none;padding:8px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:12px;display:inline-flex;align-items:center;gap:6px}
+        
+        /* 故事卡片 */
+        .story-card{text-align:center}
+        .longlong-avatar{font-size:4rem;margin-bottom:16px;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .story-text{background:#f9f5f0;border-radius:12px;padding:20px;font-size:0.95rem;line-height:1.8;color:#333;margin-bottom:16px;text-align:left}
+        .voice-btn{background:#f5eee9;border:none;padding:12px 32px;border-radius:36px;font-size:0.95rem;color:#E87A5D;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.3s;margin:8px 0}
+        .voice-btn:hover{background:#E87A5D;color:white}
+        .voice-btn.playing{background:#E87A5D;color:white;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        
+        /* 推荐卡片 */
+        .recommend-card{border-left:4px solid #F9B572;padding-left:16px;margin-top:16px}
+        .recommend-card h4{font-size:1rem;color:#333;margin-bottom:12px}
+        .recommend-item{display:flex;gap:12px;padding:12px;background:#f9f5f0;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all 0.3s}
+        .recommend-item:hover{background:#f0e6dc;transform:translateX(4px)}
+        .recommend-item .icon{font-size:2rem;min-width:40px}
+        .recommend-item .content{flex:1}
+        .recommend-item .title{font-weight:600;color:#333;margin-bottom:4px}
+        .recommend-item .desc{font-size:0.85rem;color:#666}
+        .recommend-item .tag{background:#F9B572;color:white;padding:2px 8px;border-radius:10px;font-size:0.75rem;display:inline-block;margin-top:4px}
+        
+        /* 底部 Tab */
+        .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:24px;font-size:0.9rem;display:none;z-index:1000}
+        .status{background:#f0f0f0;border-radius:8px;padding:12px;margin-top:16px;font-size:0.85rem;color:#666}
+        .status.error{background:#f8d7da;color:#721c24}
+        .status.success{background:#d4edda;color:#155724}
+        .status.info{background:#d1ecf1;color:#0c5460}
+        
+        /* 进度提示 */
+        .progress-bar{height:4px;background:#e0e0e0;border-radius:2px;overflow:hidden;margin-top:12px}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#F9B572,#E87A5D);width:0;transition:width 0.3s}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1 id="pageTitle">🗺️ 景点详情</h1>
+</header>
+
+<nav class="tabs">
+    <div class="tabs-inner">
+        <button class="tab-btn active" onclick="switchTab('guide')"><span class="icon">🧭</span> 游玩指引</button>
+        <button class="tab-btn" onclick="switchTab('story')"><span class="icon">📖</span> 龙龙讲故事</button>
+        <button class="tab-btn" onclick="switchTab('photo')"><span class="icon">📸</span> 拍照点</button>
+        <button class="tab-btn" onclick="switchTab('danmu')"><span class="icon">💬</span> 弹幕</button>
+    </div>
+</nav>
+
+<main>
+    <!-- 游玩指引 Tab - 核心留存功能 -->
+    <section id="guide" class="section active">
+        <!-- 怎么来 -->
+        <div class="guide-card">
+            <h3>🚇 怎么来</h3>
+            <div class="guide-item">
+                <h4>📍 当前位置</h4>
+                <p id="currentLocation">加载中...</p>
+            </div>
+            <div class="guide-item">
+                <h4>🚇 地铁</h4>
+                <p id="subwayGuide">加载中...</p>
+                <button class="action-btn" onclick="navigate('subway')">
+                    <span>🗺️</span> 地铁导航
+                </button>
+            </div>
+            <div class="guide-item">
+                <h4>🚌 公交</h4>
+                <p id="busGuide">加载中...</p>
+                <button class="action-btn" onclick="navigate('bus')">
+                    <span>🗺️</span> 公交导航
+                </button>
+            </div>
+            <div class="guide-item">
+                <h4>🚗 自驾/停车</h4>
+                <p id="parkingGuide">加载中...</p>
+                <button class="action-btn" onclick="navigate('parking')">
+                    <span>🅿️</span> 查看停车场
+                </button>
+            </div>
+        </div>
+        
+        <!-- 怎么玩 -->
+        <div class="guide-card" style="background:linear-gradient(135deg,#F9B572,#E87A5D)">
+            <h3>🎮 怎么玩</h3>
+            <div class="guide-item">
+                <h4>⏱️ 建议游玩时长</h4>
+                <p id="playTime">加载中...</p>
+            </div>
+            <div class="guide-item">
+                <h4>🎯 必体验</h4>
+                <p id="mustDo">加载中...</p>
+            </div>
+            <div class="guide-item">
+                <h4>📸 最佳拍照点</h4>
+                <p id="bestPhoto">加载中...</p>
+                <button class="action-btn" onclick="switchTab('photo')">
+                    <span>📸</span> 查看拍照攻略
+                </button>
+            </div>
+        </div>
+        
+        <!-- 怎么去 (下一站) -->
+        <div class="guide-card" style="background:linear-gradient(135deg,#11998e,#38ef7d)">
+            <h3>🧭 怎么去下一站</h3>
+            <div class="guide-item">
+                <h4>📍 推荐下一站</h4>
+                <p id="nextStation">加载中...</p>
+            </div>
+            <div id="nextStationsList">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 进度提示 -->
+        <div class="card">
+            <h3>📊 你的游玩进度</h3>
+            <div style="margin-top:12px">
+                <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#666;margin-bottom:8px">
+                    <span>已游览：<span id="visitedCount">0</span>/18 个景点</span>
+                    <span>完成率：<span id="completionRate">0</span>%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                </div>
+                <div style="margin-top:12px;text-align:center">
+                    <button class="action-btn" style="background:#667eea;color:white" onclick="goToRoute()">
+                        <span>🗺️</span> 查看完整路线
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 龙龙讲故事 -->
+    <section id="story" class="section">
+        <div class="card">
+            <h3><span class="icon">📖</span> 龙龙讲故事</h3>
+            <div class="story-card">
+                <div class="longlong-avatar">🐉</div>
+                <div class="story-text" id="storyText">加载中...</div>
+                <button class="voice-btn" id="playBtn" onclick="togglePlay()">
+                    <span>🔊</span> <span id="playBtnText">听龙龙讲</span>
+                </button>
+                <div id="status" class="status" style="display:none"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 拍照点 -->
+    <section id="photo" class="section">
+        <div class="card">
+            <h3><span class="icon">📸</span> 最佳拍照点</h3>
+            <div id="photoGrid"></div>
+            <div style="margin-top:16px;text-align:center">
+                <button class="action-btn" style="background:#667eea;color:white" onclick="switchTab('guide')">
+                    <span>🧭</span> 返回游玩指引
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 弹幕 -->
+    <section id="danmu" class="section">
+        <div class="card">
+            <h3><span class="icon">💬</span> 年轻人都在说什么</h3>
+            <div id="danmuContainer"></div>
+            <div style="margin-top:16px;text-align:center">
+                <button class="action-btn" style="background:#667eea;color:white" onclick="postDanmu()">
+                    <span>✏️</span> 我也要说
+                </button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 完整的 POI 数据配置
+const POI_DATA = {
+    longhua_temple: {
+        name: '龙华寺',
+        story: "我是龙龙，让我给你讲讲龙华寺的故事。龙华寺是上海最古老的寺庙，距今已经有 1700 多年历史啦。相传在三国时期，孙权为孝敬他的母亲，特地建造了这座寺庙。寺名龙华来源于佛经中的弥勒下生龙华三会。龙华寺的建筑布局非常讲究。沿中轴线依次是山门、弥勒殿、天王殿、大雄宝殿、三圣殿和方丈室。每当除夕之夜，寺里的钟声会敲响 108 下。寓意消除 108 种烦恼。现在的龙华寺里住着好几只可爱的猫咪。它们可是寺庙的守护神哦。",
+        guide: {
+            location: '上海市徐汇区龙华路 2853 号',
+            subway: '地铁 11 号线/12 号线 龙华站 2 号口出，步行 300 米',
+            bus: '公交 73 路/87 路/104 路 龙华路站下车',
+            parking: '龙华寺停车场 5 元/小时，周末建议 9 点前到达',
+            playTime: '建议游玩 1-2 小时',
+            mustDo: '① 听龙龙讲故事 ② 找猫咪福来 ③ 除夕敲钟 ④ 春天赏桃花',
+            bestPhoto: '山门广场拍全景，下午 3 点光线最佳',
+            nextStations: [
+                {id: 'longhua_pagoda', name: '龙华塔', desc: '登塔俯瞰，距离 200 米', time: '步行 3 分钟', tag: '必去'},
+                {id: 'cat_fulai', name: '猫咪福来', desc: '网红猫咪，大雄宝殿附近', time: '步行 2 分钟', tag: '热门'},
+                {id: 'ta_ying_space', name: '塔影空间', desc: '网红咖啡馆，拍照圣地', time: '步行 5 分钟', tag: '推荐'}
+            ]
+        },
+        photos: ['山门广场 - 拍全景最佳位置', '大雄宝殿 - 拍建筑细节', '猫咪福来 - 下午 3 点最活跃'],
+        danmu: ['下午 3 点光线最好！', '穿白色衣服更出片！', '免费领香，不用自己买', '猫咪福来在殿后，带猫条！']
+    },
+    longhua_pagoda: {
+        name: '龙华塔',
+        story: "我是龙龙，让我带你了解龙华塔。龙华塔是上海地区保存最完好的宋代古塔。距今已有近千年历史。龙华塔始建于北宋太平兴国二年。也就是公元 977 年。是吴越王钱俶为供奉佛舍利而建。塔高 40.64 米。七层八角。砖木结构。飞檐翘角。每层都有平座。可以凭栏远眺。登上龙华塔，可以俯瞰整个龙华地区的美景。",
+        guide: {
+            location: '上海市徐汇区龙华路 2853 号 (龙华寺内)',
+            subway: '地铁 11 号线/12 号线 龙华站 2 号口出，步行 400 米',
+            bus: '公交 73 路/87 路/104 路 龙华路站下车',
+            parking: '龙华寺停车场 5 元/小时，或塔影空间停车场',
+            playTime: '建议游玩 30-60 分钟 (登塔)',
+            mustDo: '① 登塔俯瞰 ② 拍飞檐细节 ③ 看舍利展览',
+            bestPhoto: '塔顶拍全景，塔内拍楼梯历史感',
+            nextStations: [
+                {id: 'ta_ying_space', name: '塔影空间', desc: '网红咖啡馆，距离 100 米', time: '步行 2 分钟', tag: '必去'},
+                {id: 'longhua_old_street', name: '龙华老街', desc: '百年老街，买特产', time: '步行 5 分钟', tag: '推荐'},
+                {id: 'longhua_temple', name: '龙华寺', desc: '千年古刹', time: '步行 3 分钟', tag: '热门'}
+            ]
+        },
+        photos: ['塔顶全景 - 最佳机位', '飞檐细节 - 拍建筑', '塔内楼梯 - 历史感'],
+        danmu: ['早上 9 点人最少！', '门票 20 元，值得！', '爬 7 层有点累，但风景超好']
+    },
+    cat_fulai: {
+        name: '猫咪福来',
+        story: "我是龙龙，让我给你介绍我们的网红猫咪福来。福来是一只橘猫，今年三岁了。它住在龙华寺的大雄宝殿附近。每天的工作就是接待游客和晒太阳。福来最喜欢的事情是被摸头和吃猫条。它性格温顺，从不抓人。很多游客专程来看它。福来已经成了龙华寺的小明星。",
+        guide: {
+            location: '龙华寺大雄宝殿后院',
+            subway: '地铁 11 号线/12 号线 龙华站 2 号口出，步行 350 米',
+            bus: '公交 73 路/87 路/104 路 龙华路站下车',
+            parking: '龙华寺停车场 5 元/小时',
+            playTime: '建议游玩 15-30 分钟 (互动时间)',
+            mustDo: '① 带猫条 ② 轻轻摸头 ③ 拍照打卡',
+            bestPhoto: '下午 3 点晒太阳时最配合',
+            nextStations: [
+                {id: 'longhua_temple', name: '龙华寺', desc: '千年古刹，距离 50 米', time: '步行 1 分钟', tag: '必去'},
+                {id: 'longhua_pagoda', name: '龙华塔', desc: '宋代古塔', time: '步行 5 分钟', tag: '推荐'},
+                {id: 'ta_ying_space', name: '塔影空间', desc: '网红咖啡馆', time: '步行 6 分钟', tag: '休息'}
+            ]
+        },
+        photos: ['福来晒太阳 - 殿后台阶', '福来吃猫条 - 互动时刻', '福来卖萌 - 正脸特写'],
+        danmu: ['带猫条！带猫条！带猫条！', '下午 3 点最活跃', '超级温顺，随便摸']
+    }
+};
+
+let isPlaying = false;
+let currentUtterance = null;
+let currentPOI = 'longhua_temple';
+
+// 切换标签
+function switchTab(tabId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+// 初始化
+function init(poiId) {
+    console.log('初始化 POI:', poiId);
+    currentPOI = poiId || 'longhua_temple';
+    
+    const data = POI_DATA[currentPOI];
+    if (!data) {
+        console.error('未找到 POI 数据:', currentPOI);
+        return;
+    }
+    
+    // 设置标题
+    document.getElementById('pageTitle').textContent = '🗺️ ' + data.name;
+    document.getElementById('storyText').textContent = data.story;
+    
+    // 填充引导信息
+    fillGuideInfo(data.guide);
+    
+    // 生成照片
+    generatePhotos(data.photos);
+    
+    // 生成弹幕
+    generateDanmu(data.danmu);
+    
+    // 更新进度
+    updateProgress();
+    
+    // 预加载语音
+    if ('speechSynthesis' in window) {
+        setTimeout(() => {
+            const voices = speechSynthesis.getVoices();
+            console.log('语音列表加载完成，共', voices.length, '个语音');
+            showStatus('语音已就绪', 'info');
+        }, 500);
+    }
+}
+
+// 填充引导信息
+function fillGuideInfo(guide) {
+    if (!guide) return;
+    
+    // 怎么来
+    document.getElementById('currentLocation').textContent = guide.location;
+    document.getElementById('subwayGuide').textContent = guide.subway;
+    document.getElementById('busGuide').textContent = guide.bus;
+    document.getElementById('parkingGuide').textContent = guide.parking;
+    
+    // 怎么玩
+    document.getElementById('playTime').textContent = guide.playTime;
+    document.getElementById('mustDo').textContent = guide.mustDo;
+    document.getElementById('bestPhoto').textContent = guide.bestPhoto;
+    
+    // 怎么去
+    document.getElementById('nextStation').textContent = guide.nextStations[0].name + ' - ' + guide.nextStations[0].desc;
+    
+    // 生成下一站列表
+    const container = document.getElementById('nextStationsList');
+    container.innerHTML = guide.nextStations.map((station, index) => `
+        <div class="guide-item" style="cursor:pointer" onclick="goToPOI('${station.id}')">
+            <h4>${index === 0 ? '🌟' : '📍'} ${station.name}</h4>
+            <p>${station.desc}</p>
+            <p style="font-size:0.85rem;opacity:0.8;margin-top:4px">⏱️ ${station.time}</p>
+            ${station.tag ? `<span class="tag">${station.tag}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+// 生成照片
+function generatePhotos(photos) {
+    const container = document.getElementById('photoGrid');
+    container.innerHTML = photos.map((photo, i) => `
+        <div style="margin-bottom:12px">
+            <div style="background:linear-gradient(135deg,#f5f7fa,#c3cfe2);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#666;font-size:2rem">📸</div>
+            <div style="margin-top:8px;font-size:0.9rem;color:#666">${i + 1}. ${photo}</div>
+        </div>
+    `).join('');
+}
+
+// 生成弹幕
+function generateDanmu(danmu) {
+    const container = document.getElementById('danmuContainer');
+    container.innerHTML = danmu.map(text => `
+        <div style="background:#f5f5f5;border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="font-size:0.9rem;color:#333">${text}</div>
+            <div style="font-size:0.8rem;color:#999;margin-top:4px;display:flex;justify-content:space-between">
+                <span>刚刚</span>
+                <span>👍 ${Math.floor(Math.random() * 300) + 50}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 更新进度
+function updateProgress() {
+    const visited = Math.floor(Math.random() * 10) + 3; // 模拟数据
+    const total = 18;
+    const rate = Math.round((visited / total) * 100);
+    
+    document.getElementById('visitedCount').textContent = visited;
+    document.getElementById('completionRate').textContent = rate;
+    document.getElementById('progressFill').style.width = rate + '%';
+}
+
+// 播放/暂停切换
+function togglePlay() {
+    if (isPlaying) {
+        stopStory();
+    } else {
+        startStory();
+    }
+}
+
+// 开始播放
+function startStory() {
+    if (!('speechSynthesis' in window)) {
+        showStatus('您的浏览器不支持语音播放', 'error');
+        return;
+    }
+    
+    speechSynthesis.cancel();
+    
+    const storyText = document.getElementById('storyText').textContent;
+    if (!storyText || storyText.length < 10) {
+        showStatus('故事内容尚未加载', 'error');
+        return;
+    }
+    
+    currentUtterance = new SpeechSynthesisUtterance(storyText);
+    currentUtterance.rate = 0.9;
+    currentUtterance.pitch = 1.1;
+    currentUtterance.volume = 1.0;
+    currentUtterance.lang = 'zh-CN';
+    
+    const voices = speechSynthesis.getVoices();
+    const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+    if (zhVoice) {
+        currentUtterance.voice = zhVoice;
+    }
+    
+    currentUtterance.onstart = function() {
+        isPlaying = true;
+        document.getElementById('playBtn').classList.add('playing');
+        document.getElementById('playBtnText').textContent = '播放中...';
+        showStatus('龙龙正在讲故事...', 'success');
+    };
+    
+    currentUtterance.onend = function() {
+        isPlaying = false;
+        document.getElementById('playBtn').classList.remove('playing');
+        document.getElementById('playBtnText').textContent = '听龙龙讲';
+        showStatus('故事讲完啦！', 'success');
+    };
+    
+    currentUtterance.onerror = function(event) {
+        isPlaying = false;
+        document.getElementById('playBtn').classList.remove('playing');
+        document.getElementById('playBtnText').textContent = '听龙龙讲';
+        showStatus('播放出错', 'error');
+    };
+    
+    speechSynthesis.speak(currentUtterance);
+}
+
+// 停止播放
+function stopStory() {
+    speechSynthesis.cancel();
+    isPlaying = false;
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('playBtnText').textContent = '听龙龙讲';
+    showStatus('已停止播放', 'info');
+}
+
+// 导航功能
+function navigate(type) {
+    const data = POI_DATA[currentPOI];
+    let destination = '';
+    let mode = '';
+    
+    switch(type) {
+        case 'subway':
+            destination = data.guide.subway;
+            mode = '地铁';
+            break;
+        case 'bus':
+            destination = data.guide.bus;
+            mode = '公交';
+            break;
+        case 'parking':
+            destination = data.guide.parking;
+            mode = '停车';
+            break;
+    }
+    
+    showToast('🗺️ 打开' + mode + '导航...');
+}
+
+function goToPOI(poiId) {
+    const data = POI_DATA[poiId];
+    showToast('📍 前往' + data.name);
+    setTimeout(() => {
+        init(poiId);
+        switchTab('guide');
+    }, 500);
+}
+
+function goToRoute() {
+    showToast('🗺️ 生成完整路线...');
+}
+
+function postDanmu() {
+    const text = prompt('请输入弹幕内容：');
+    if (text) {
+        showToast('✅ 发布成功');
+    }
+}
+
+// Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
+// 状态显示
+function showStatus(message, type) {
+    const status = document.getElementById('status');
+    status.textContent = message;
+    status.className = 'status ' + (type || '');
+    status.style.display = 'block';
+}
+
+// 页面加载
+window.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const poiId = params.get('poi') || 'longhua_temple';
+    init(poiId);
+    
+    if ('speechSynthesis' in window) {
+        speechSynthesis.onvoiceschanged = function() {};
+    }
+});
+</script>
+
+</body>
+</html>

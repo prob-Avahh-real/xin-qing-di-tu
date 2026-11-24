@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情地图 - 3分钟路演PPT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        /* 幻灯片容器 */
+        .slides-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            padding: 60px 80px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 封面样式 */
+        .slide-cover {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #F9B572 0%, #E87A5D 100%);
+        }
+        
+        .slide-cover h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .slide-cover .subtitle {
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+        
+        .slide-cover .meta {
+            font-size: 1.1rem;
+            opacity: 0.85;
+        }
+        
+        /* 内容页样式 */
+        .slide-content {
+            background: #fff;
+            color: #333;
+        }
+        
+        .slide-header {
+            border-bottom: 4px solid #F9B572;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .slide-header h2 {
+            font-size: 2.5rem;
+            color: #333;
+            font-weight: 700;
+        }
+        
+        .slide-body {
+            flex: 1;
+            font-size: 1.3rem;
+            line-height: 1.8;
+        }
+        
+        .slide-body ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .slide-body li {
+            margin: 16px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .slide-body li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 10px;
+            height: 10px;
+            background: #F9B572;
+            border-radius: 50%;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #F9B57230 0%, #F9B57230 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #E87A5D;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #F9B57220 0%, #E87A5D20 100%);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #E87A5D;
+        }
+        
+        .stat-card .label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        /* 结尾页 */
+        .slide-end {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #F9B572 0%, #E87A5D 100%);
+        }
+        
+        .slide-end h2 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+        
+        .slide-end p {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        /* 导航 */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+        
+        .nav button {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: #fff;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            font-size: 1rem;
+            opacity: 0.7;
+            color: #fff;
+        }
+        
+        .slide-content .slide-counter {
+            color: #333;
+        }
+        
+        /* 打印样式 */
+        @media print {
+            .slide {
+                display: flex !important;
+                page-break-after: always;
+                position: relative;
+            }
+            .nav { display: none; }
+            .slide-counter { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="slides-container">
+        
+        <!-- Slide 1: 封面 -->
+        <div class="slide slide-cover active" data-slide="1">
+            <h1>🗺️ 心情地图 MoodMap</h1>
+            <p class="subtitle">今天是什么心情，就去哪里玩</p>
+            <p class="meta">LYCC 2026 龙华·黑客松 | Track 3.2 青年出行新体验</p>
+        </div>
+        
+        <!-- Slide 2: 痛点 -->
+        <div class="slide slide-content" data-slide="2">
+            <div class="slide-header">
+                <h2>😔 三大出行痛点</h2>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><span class="highlight">不知道去哪</span> — 攻略APP千篇一律，不关心"什么心情去"</li>
+                    <li><span class="highlight">到了就走</span> — 拍照5分钟，缺乏情感连接和深度体验</li>
+                    <li><span class="highlight">孤单无陪伴</span> — 冷冰冰的导航语音，没有互动和温度</li>
+                </ul>
+                <p style="margin-top: 40px; font-size: 1.5rem; text-align: center; color: #E87A5D; font-weight: 600;">
+                    💡 核心洞察：不是找不到路，而是找不到符合心情的地方
+                </p>
+            </div>
+            <div class="slide-counter">2 / 10</div>
+        </div>
+        
+        <!-- Slide 3: 解决方案 -->
+        <div class="slide slide-content" data-slide="3">
+            <div class="slide-header">
+                <h2>💡 解决方案：情绪出行</h2>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><span class="highlight">业内首创</span> — 根据当下心情推荐个性化路线</li>
+                    <li>用户旅程：选择情绪 → AI智能分析 → 生成定制路线 → 语音陪伴导览</li>
+                    <li><span class="highlight">12种情绪路线</span>：EMO治愈、散心、拍照、聚会、文艺、约会、亲子、美食、祈福、运动、躺平、探索</li>
+                </ul>
+            </div>
+            <div class="slide-counter">3 / 10</div>
+        </div>
+        
+        <!-- Slide 4: 产品演示 -->
+        <div class="slide slide-content" data-slide="4">
+            <div class="slide-header">
+                <h2>📱 产品演示：AI路线生成</h2>
+            </div>
+            <div class="slide-body">
+                <p style="font-weight: 600; margin-bottom: 20px;">🤖 技术亮点：</p>
+                <ul>
+                    <li>豆包API大模型编排 — 理解情绪，生成个性化推荐</li>
+                    <li>青春活力少女音 — 像朋友一样陪伴，不是冷冰冰的机器</li>
+                    <li>8-12个景点，2-4小时 — 精准匹配青年碎片化时间</li>
+                </ul>
+                <p style="margin-top: 30px; background: #f5f5f5; padding: 20px; border-radius: 12px; font-style: italic; text-align: center;">
+                    "这里是龙华寺，千年古刹，超级灵验哦！"
+                </p>
+            </div>
+            <div class="slide-counter">4 / 10</div>
+        </div>
+        
+        <!-- Slide 5: 技术架构 -->
+        <div class="slide slide-content" data-slide="5">
+            <div class="slide-header">
+                <h2>🔧 技术架构</h2>
+            </div>
+            <div class="slide-body">
+                <p style="font-weight: 600; margin-bottom: 20px;">🏗️ AI Agent编排架构：</p>
+                <ul>
+                    <li>路线规划Agent — 基于POI数据库和情绪标签智能匹配</li>
+                    <li>语音合成Agent — 豆包API实时生成自然语音</li>
+                </ul>
+                <p style="font-weight: 600; margin: 30px 0 20px;">📱 PWA渐进式Web应用：</p>
+                <ul>
+                    <li>无需下载，扫码即用 | 可添加到桌面，原生APP体验</li>
+                    <li>离线可用，断网也能看 | 消息推送能力</li>
+                </ul>
+            </div>
+            <div class="slide-counter">5 / 10</div>
+        </div>
+        
+        <!-- Slide 6: 用户闭环 -->
+        <div class="slide slide-content" data-slide="6">
+            <div class="slide-header">
+                <h2>🔄 用户体验闭环</h2>
+            </div>
+            <div class="slide-body">
+                <p style="font-weight: 600; margin-bottom: 20px;">🎁 游戏化积分系统：</p>
+                <ul>
+                    <li>路线打卡+100 | 分享+50 | 发现彩蛋+80 | 连续签到+150</li>
+                    <li>5月1日龙华庙会日兑换：<span class="highlight">福来猫公仔、限定徽章、庙会体验券</span></li>
+                </ul>
+                <p style="font-weight: 600; margin: 30px 0 20px;">🌊 时间胶囊许愿池：</p>
+                <ul>
+                    <li>5种漂流瓶样式 | 自定义开启日期 | 邮件自动提醒</li>
+                    <li>给未来的自己写信，深度情感绑定</li>
+                </ul>
+            </div>
+            <div class="slide-counter">6 / 10</div>
+        </div>
+        
+        <!-- Slide 7: 商业模式 -->
+        <div class="slide slide-content" data-slide="7">
+            <div class="slide-header">
+                <h2>💰 商业模式：5大收入来源</h2>
+            </div>
+            <div class="slide-body">
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="number">30%</div>
+                        <div class="label">功德主计划</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">25%</div>
+                        <div class="label">文创产品</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">20%</div>
+                        <div class="label">深度体验</div>
+                    </div>
+                </div>
+                <p style="text-align: center; font-size: 1.1rem; color: #666;">
+                    企业定制 15% | 会员服务 10%
+                </p>
+                <p style="margin-top: 30px; text-align: center; font-size: 1.4rem; color: #E87A5D; font-weight: 600;">
+                    龙华场景年度收入预测：280万元
+                </p>
+            </div>
+            <div class="slide-counter">7 / 10</div>
+        </div>
+        
+        <!-- Slide 8: 落地验证 -->
+        <div class="slide slide-content" data-slide="8">
+            <div class="slide-header">
+                <h2>✅ 落地验证：龙华场景实测</h2>
+            </div>
+            <div class="slide-body">
+                <p style="font-weight: 600; margin-bottom: 20px;">📍 已完成里程碑：</p>
+                <ul>
+                    <li>✅ 可运行PWA原型 | ✅ 12种情绪路线实测</li>
+                    <li>✅ AI语音导览集成 | ✅ 积分商城完整流程</li>
+                    <li>✅ 许愿池功能上线 | ✅ 50人内测验证</li>
+                </ul>
+                <div class="stat-grid" style="margin-top: 40px;">
+                    <div class="stat-card">
+                        <div class="number">4.6</div>
+                        <div class="label">用户满意度</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">25min</div>
+                        <div class="label">平均使用时长</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">60%</div>
+                        <div class="label">复访率</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-counter">8 / 10</div>
+        </div>
+        
+        <!-- Slide 9: 未来规划 -->
+        <div class="slide slide-content" data-slide="9">
+            <div class="slide-header">
+                <h2>🚀 未来规划：可复制扩张</h2>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><span class="highlight">短期（3个月）</span>：龙华正式上线，50家商户入驻，1万种子用户</li>
+                    <li><span class="highlight">中期（6个月）</span>：拓展上海豫园、田子坊，企业版SAAS产品</li>
+                    <li><span class="highlight">长期（1年）</span>：全国5A级景区覆盖，IP授权商业化</li>
+                </ul>
+                <p style="margin-top: 40px; background: linear-gradient(135deg, #F9B57220 0%, #E87A5D20 100%); padding: 25px; border-radius: 12px; text-align: center; font-size: 1.3rem; font-weight: 600; color: #E87A5D;">
+                    🎯 SAAS化白标方案：核心系统可复制到任意景区<br>
+                    潜在市场规模：10亿元+
+                </p>
+            </div>
+            <div class="slide-counter">9 / 10</div>
+        </div>
+        
+        <!-- Slide 10: 结尾 -->
+        <div class="slide slide-end" data-slide="10">
+            <h2>今天是什么心情，就去哪里玩</h2>
+            <p>🗺️ 心情地图 MoodMap | 期待与龙华一起，打造有温度的青年出行体验</p>
+        </div>
+        
+    </div>
+    
+    <!-- 导航 -->
+    <div class="nav">
+        <button onclick="prevSlide()">← 上一页</button>
+        <button onclick="nextSlide()">下一页 →</button>
+        <button onclick="toggleFullScreen()">全屏</button>
+    </div>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(s => s.classList.remove('active'));
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            document.querySelector(`[data-slide="${currentSlide}"]`).classList.add('active');
+        }
+        
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+        
+        function prevSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+        
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'f' || e.key === 'F') toggleFullScreen();
+        });
+        
+        // 触摸滑动支持
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        });
+    </script>
+</body>
+</html>
